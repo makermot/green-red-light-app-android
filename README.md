@@ -6,3 +6,4 @@ Android application for playing the 1-2-3 soleil game
 - Week 2
 - Week 3
 - Week 4
+- Week 5
