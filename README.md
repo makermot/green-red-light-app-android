@@ -19,7 +19,7 @@ Android application for playing the 1-2-3 soleil game
 #### Main activity : Wear
 - StartFragment
 - RaceFragment
-- ResultFragment
+- EndFragment
 
 #### navigation
 - NavigationHostFragment hosted by activity_main.xml
