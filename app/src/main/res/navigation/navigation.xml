@@ -1,6 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/navigation">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/statFragment">
 
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.epfl.esl.a1_c_green_red_light.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_mySpaceFragment"
+            app:destination="@id/mySpaceFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/loungeFragment"
+        android:name="com.epfl.esl.a1_c_green_red_light.LoungeFragment"
+        android:label="fragment_lounge"
+        tools:layout="@layout/fragment_lounge" >
+        <action
+            android:id="@+id/action_loungeFragment_to_resultFragment"
+            app:destination="@id/resultFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/statFragment"
+        android:name="com.epfl.esl.a1_c_green_red_light.StatFragment"
+        android:label="fragment_stat"
+        tools:layout="@layout/fragment_stat" />
+    <fragment
+        android:id="@+id/resultFragment"
+        android:name="com.epfl.esl.a1_c_green_red_light.ResultFragment"
+        android:label="fragment_result"
+        tools:layout="@layout/fragment_result" >
+        <action
+            android:id="@+id/action_resultFragment_to_mySpaceFragment"
+            app:destination="@id/mySpaceFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/mySpaceFragment"
+        android:name="com.epfl.esl.a1_c_green_red_light.MySpaceFragment"
+        android:label="fragment_my_space"
+        tools:layout="@layout/fragment_my_space" >
+        <action
+            android:id="@+id/action_mySpaceFragment_to_loungeFragment"
+            app:destination="@id/loungeFragment" />
+    </fragment>
 </navigation>
