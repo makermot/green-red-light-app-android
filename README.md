@@ -7,3 +7,19 @@ Android application for playing the 1-2-3 soleil game
 - Week 3
 - Week 4
 - Week 5
+
+## Structure
+#### Main activity : Mobile
+- LoginFragment
+- MySpaceFragment
+- LoungeFragment
+- ResultFragment
+- StatFragment
+
+#### Main activity : Wear
+- StartFragment
+- RaceFragment
+- ResultFragment
+
+#### navigation
+- NavigationHostFragment hosted by activity_main.xml
