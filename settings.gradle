@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "1-C_green_red_light"
-include ':app'
+include ':mobile'
 include ':wear'
