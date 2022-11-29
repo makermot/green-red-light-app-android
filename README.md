@@ -22,4 +22,5 @@ Android application for playing the 1-2-3 soleil game
 - EndFragment
 
 #### navigation
-- NavigationHostFragment hosted by activity_main.xml
+- NavigationHostFragment (mobile) hosted by activity_main.xml (mobile)
+- NavigationHostFragment (wear) hosted by activity_main.xml (wear)
