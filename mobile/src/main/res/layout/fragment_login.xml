@@ -6,6 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
+        android:layout_margin="16dp"
         android:orientation="vertical">
 
         <LinearLayout
@@ -17,8 +18,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:textSize="24sp"
-                    android:text="Welcome user! Please sign up below:"
+                    android:textSize="22sp"
+                    android:text="@string/Greetings"
                     android:gravity="center" />
 
         </LinearLayout>
