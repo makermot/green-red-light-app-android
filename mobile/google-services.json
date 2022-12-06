@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "509214062732",
+    "firebase_url": "https://c-green-red-light-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "c-green-red-light",
+    "storage_bucket": "c-green-red-light.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:509214062732:android:719c7943013faf0bb7e3a9",
+        "android_client_info": {
+          "package_name": "com.epfl.esl.a1_c_green_red_light"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "509214062732-59ehtqks67dkhrgs95067fi6nbeg7rjh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAC_9AhzFtaJOtzvhQXRh_vWssACylDv9I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "509214062732-59ehtqks67dkhrgs95067fi6nbeg7rjh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
