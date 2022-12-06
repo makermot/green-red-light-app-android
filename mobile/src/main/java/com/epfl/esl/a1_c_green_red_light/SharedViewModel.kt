@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.database.*
-import com.google.firebase.storage.FirebaseStorage
 
 class SharedViewModel : ViewModel() {
 
@@ -23,7 +22,6 @@ class SharedViewModel : ViewModel() {
         get() = _profilePresent
 
     // FIREBASE
-    var storageRef = FirebaseStorage.getInstance().getReference()
     val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     val profileRef: DatabaseReference = database.getReference("Profiles")
 

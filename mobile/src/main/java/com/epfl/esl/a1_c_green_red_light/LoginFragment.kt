@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoginBinding
 
@@ -35,7 +36,7 @@ class LoginFragment : Fragment() {
 
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
 
-        binding.SignUp.setOnClickListener { view : View ->
+        binding.SignUp.setOnClickListener { view: View ->
 
             if (binding.Username.text.toString() == "") {
                 Toast.makeText(context,"Enter username", Toast.LENGTH_SHORT).show()
@@ -59,9 +60,12 @@ class LoginFragment : Fragment() {
                 Toast.makeText(context,"Incorrect password/username",
                     Toast.LENGTH_LONG).show()
             }
-            //else if (success == true){
-                //(activity as MainActivity).setBottomNavigationVisibility(View.VISIBLE)
-            //}
+            else if (success == true){
+                view?.let {
+                    Navigation.findNavController(it)
+                        .navigate(R.id.action_loginFragment_to_mySpaceFragment)
+                }
+            }
         })
 
         binding.SignIn.setOnClickListener { view : View ->
