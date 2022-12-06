@@ -9,20 +9,12 @@
         android:layout_margin="16dp"
         android:orientation="vertical">
 
-        <LinearLayout
-            android:id="@+id/Greetings"
+        <ImageButton
+            android:id="@+id/Userimage"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:textSize="22sp"
-                    android:text="@string/Greetings"
-                    android:gravity="center" />
-
-        </LinearLayout>
+            android:layout_height="400dp"
+            android:adjustViewBounds="true"
+            app:srcCompat="@drawable/no_image" />
 
         <View
             android:layout_width="match_parent"
