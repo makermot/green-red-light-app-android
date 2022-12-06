@@ -31,7 +31,7 @@ class SharedViewModel : ViewModel() {
         username = ""
     }
 
-    fun fetchProfile() {
+    fun fetchProfile() : Boolean {
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (user in dataSnapshot.children) {
@@ -51,5 +51,12 @@ class SharedViewModel : ViewModel() {
             }
             override fun onCancelled(databaseError: DatabaseError) {}
         })
+        return _profilePresent.value!!
+    }
+
+    fun createProfile(context: LoginFragment) {
+        key = username
+        profileRef.child(key).child("username").setValue(username)
+        profileRef.child(key).child("password").setValue(password)
     }
 }
