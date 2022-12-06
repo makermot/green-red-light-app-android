@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoginBinding
@@ -33,6 +34,48 @@ class LoginFragment : Fragment() {
         // viewModel.key = viewModel.profileRef.push().key.toString()
 
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
+
+        binding.SignUp.setOnClickListener { view : View ->
+
+            if (binding.Username.text.toString() == "") {
+                Toast.makeText(context,"Enter username", Toast.LENGTH_SHORT).show()
+            }
+            else if (viewModel.imageUri == null) {
+                Toast.makeText(context,"Pick an image", Toast.LENGTH_SHORT).show()
+            }
+            else {
+                viewModel.username = binding.Username.text.toString()
+                viewModel.password = binding.Password.text.toString()
+                // val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+                // viewModel.sendDataToWear(activity?.applicationContext, dataClient)
+                // viewModel.sendDataToFireBase(activity?.applicationContext)
+
+                //(activity as MainActivity).setBottomNavigationVisibility(View.VISIBLE)
+            }
+        }
+
+        viewModel.profilePresent.observe(viewLifecycleOwner, Observer { success ->
+            if (success == false){
+                Toast.makeText(context,"Incorrect password/username",
+                    Toast.LENGTH_LONG).show()
+            }
+            //else if (success == true){
+                //(activity as MainActivity).setBottomNavigationVisibility(View.VISIBLE)
+            //}
+        })
+
+        binding.SignIn.setOnClickListener { view : View ->
+            if (binding.Username.text.toString() == "") {
+                Toast.makeText(context,"Enter username", Toast.LENGTH_SHORT).show()
+            }
+            else {
+                viewModel.username = binding.Username.text.toString()
+                viewModel.password = binding.Password.text.toString()
+
+                viewModel.fetchProfile()
+
+            }
+        }
 
         binding.Userimage.setOnClickListener {
             val imgIntent = Intent(Intent.ACTION_GET_CONTENT)

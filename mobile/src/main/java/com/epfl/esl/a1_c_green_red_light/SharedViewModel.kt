@@ -4,12 +4,14 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
 
 class SharedViewModel : ViewModel() {
 
     // User data
-    //var imageUri: Uri?
-    //var username: String
+    var imageUri: Uri?
+    var username: String
     var key: String = ""
     var password: String = ""
     private val _uploadSuccess = MutableLiveData<Boolean?>()
@@ -20,4 +22,36 @@ class SharedViewModel : ViewModel() {
     val profilePresent: LiveData<Boolean?>
         get() = _profilePresent
 
+    // FIREBASE
+    var storageRef = FirebaseStorage.getInstance().getReference()
+    val database: FirebaseDatabase = FirebaseDatabase.getInstance()
+    val profileRef: DatabaseReference = database.getReference("Profiles")
+
+
+    init {
+        imageUri = null
+        username = ""
+    }
+
+    fun fetchProfile() {
+        profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                for (user in dataSnapshot.children) {
+                    val usernameDatabase = user.child("username").getValue(String::class.java)!!
+                    if (username == usernameDatabase) {
+                        val passwordDatabase = user.child("password").getValue(String::class.java)!!
+                        if (password == passwordDatabase) {
+                            key = user.key.toString()
+                            _profilePresent.value = true
+                            break
+                        }
+                    }
+                }
+                if(_profilePresent.value != true){
+                    _profilePresent.value = false
+                }
+            }
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
+    }
 }
