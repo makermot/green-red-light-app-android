@@ -5,6 +5,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.wearable.*
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -37,6 +40,18 @@ class LoungeFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_lounge, container, false)
     }
 
+    private fun sendCommandToWear(command: String){ Thread(Runnable {
+        val connectedNodes: List<String> = Tasks
+            .await(Wearable
+                .getNodeClient(activity as MainActivity).connectedNodes)
+            .map { it.id }
+        connectedNodes.forEach {
+            val messageClient: MessageClient = Wearable
+                .getMessageClient(activity as AppCompatActivity)
+            messageClient.sendMessage(it, "/command", command.toByteArray())
+        } }).start()
+    }
+
     companion object {
         /**
          * Use this factory method to create a new instance of
@@ -56,4 +71,5 @@ class LoungeFragment : Fragment() {
                 }
             }
     }
+
 }

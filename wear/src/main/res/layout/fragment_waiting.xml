@@ -6,10 +6,10 @@
     tools:context=".StartFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <Button
-        android:layout_width="153dp"
-        android:layout_height="wrap_content"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/start" />
+        android:layout_height="wrap_content"
+        android:text="@string/waiting" />
 
 </FrameLayout>
