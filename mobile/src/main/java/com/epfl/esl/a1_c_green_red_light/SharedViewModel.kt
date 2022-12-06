@@ -29,6 +29,7 @@ class SharedViewModel : ViewModel() {
     init {
         imageUri = null
         username = ""
+        _profilePresent.value = false
     }
 
     fun fetchProfile() : Boolean {
