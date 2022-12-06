@@ -5,8 +5,28 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center"
         android:orientation="vertical">
 
+        <LinearLayout
+            android:id="@+id/Greetings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:textSize="24sp"
+                    android:text="Welcome user! Please sign up below:"
+                    android:gravity="center" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@color/white"/>
 
         <LinearLayout
             android:id="@+id/EditTexts"
