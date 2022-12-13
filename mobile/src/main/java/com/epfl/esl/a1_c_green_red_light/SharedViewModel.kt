@@ -1,9 +1,14 @@
 package com.epfl.esl.a1_c_green_red_light
 
+import android.content.Context
 import android.net.Uri
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.wearable.*
 import com.google.firebase.database.*
 
 class SharedViewModel : ViewModel() {
@@ -60,4 +65,16 @@ class SharedViewModel : ViewModel() {
         profileRef.child(key).child("username").setValue(username)
         profileRef.child(key).child("password").setValue(password)
     }
+
+    fun sendDataToWear(context: Context?, dataClient: DataClient)
+    {
+        val request: PutDataRequest = PutDataMapRequest.create("/userInfo").run {
+            dataMap.putString("username", username)
+            asPutDataRequest()
+        }
+        request.setUrgent()
+        val putTask: Task<DataItem> = dataClient.putDataItem(request)
+    }
+
+    
 }

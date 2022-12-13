@@ -17,31 +17,26 @@ class LoungeFragment : Fragment() {
 
     private lateinit var binding: FragmentLoungeBinding
     private lateinit var viewModel: SharedViewModel
+    private lateinit var dataClient: DataClient
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        //binding = DataBindingUtil.inflate(inflater, R.layout.fragment_lounge, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_lounge, container, false)
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+        dataClient = Wearable.getDataClient(activity as AppCompatActivity)
 
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
 
-        return inflater.inflate(R.layout.fragment_lounge, container, false)
+        binding.gotoWearButton.setOnClickListener{view: View ->
+            val dataClient: DataClient = Wearable
+                .getDataClient(activity as AppCompatActivity)
+            viewModel.sendDataToWear(activity?.applicationContext, dataClient)
+        }
+
+
+        return binding.root
     }
 
-    private fun sendCommandToWear(command: String){ Thread(Runnable {
-        val connectedNodes: List<String> = Tasks
-            .await(Wearable
-                .getNodeClient(activity as MainActivity).connectedNodes)
-            .map { it.id }
-        connectedNodes.forEach {
-            val messageClient: MessageClient = Wearable
-                .getMessageClient(activity as AppCompatActivity)
-            messageClient.sendMessage(it, "/command", command.toByteArray())
-        } }).start()
-    }
 
 }

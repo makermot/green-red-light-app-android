@@ -15,6 +15,8 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoginBinding
+import com.google.android.gms.wearable.DataClient
+import com.google.android.gms.wearable.Wearable
 
 class LoginFragment : Fragment() {
 
@@ -45,8 +47,8 @@ class LoginFragment : Fragment() {
             else {
                 viewModel.username = binding.Username.text.toString()
                 viewModel.password = binding.Password.text.toString()
-                // val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-                // viewModel.sendDataToWear(activity?.applicationContext, dataClient)
+                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+                viewModel.sendDataToWear(activity?.applicationContext, dataClient)
                 // viewModel.sendDataToFireBase(activity?.applicationContext)
 
                 //(activity as MainActivity).setBottomNavigationVisibility(View.VISIBLE)
