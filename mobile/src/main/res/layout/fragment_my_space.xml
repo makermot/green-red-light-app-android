@@ -38,24 +38,52 @@
             android:layout_height="5dp"
             android:background="@color/black"/>
 
-        <Button
-            android:id="@+id/statButton"
-            android:layout_width="180dp"
+        <LinearLayout
+            android:id="@+id/statLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="64dp"
-            android:adjustViewBounds="true"
-            android:text="@string/my_statistics"/>
+            android:orientation="vertical"
+            android:padding="16dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="16dp"
+                android:text="To access your profile statistics, click below :"/>
+            <Button
+                android:id="@+id/statButton"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="64dp"
+                android:adjustViewBounds="true"
+                android:text="@string/my_statistics"/>
 
-        <Button
-            android:id="@+id/loungeButton"
-            android:layout_width="180dp"
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/loungeLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="64dp"
-            android:adjustViewBounds="true"
-            android:text="@string/lounge"/>
+            android:orientation="vertical"
+            android:padding="16dp">
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="16dp"
+                android:text="To access the lounge and start a new run, click below :"/>
+
+            <Button
+                android:id="@+id/loungeButton"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="64dp"
+                android:adjustViewBounds="true"
+                android:text="@string/lounge"/>
+        </LinearLayout>
     </LinearLayout>
 
 </layout>
