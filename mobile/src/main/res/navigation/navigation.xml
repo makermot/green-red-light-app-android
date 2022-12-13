@@ -45,5 +45,8 @@
         <action
             android:id="@+id/action_mySpaceFragment_to_loungeFragment"
             app:destination="@id/loungeFragment" />
+        <action
+            android:id="@+id/action_mySpaceFragment_to_statFragment"
+            app:destination="@id/statFragment" />
     </fragment>
 </navigation>

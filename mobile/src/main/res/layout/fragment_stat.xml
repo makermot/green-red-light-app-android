@@ -9,6 +9,6 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:text="Here will appear the statistics of your profile, wait for patch 2.4.3 (coming in April)." />
 
 </FrameLayout>
