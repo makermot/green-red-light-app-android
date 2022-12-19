@@ -8,7 +8,9 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.ActivityMainBinding
@@ -27,9 +29,9 @@ class MainActivity : Activity(), DataClient.OnDataChangedListener, SensorEventLi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //binding = ActivityMainBinding.inflate(layoutInflater)
-        //setContentView(binding.root)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        //binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.myText.text = "hello_world"
 
     }
@@ -72,7 +74,7 @@ class MainActivity : Activity(), DataClient.OnDataChangedListener, SensorEventLi
         //binding.myText.setText(receivedUsername)
     }
 
-                override fun onSensorChanged(p0: SensorEvent?) {
+    override fun onSensorChanged(p0: SensorEvent?) {
         TODO("Not yet implemented")
     }
 
