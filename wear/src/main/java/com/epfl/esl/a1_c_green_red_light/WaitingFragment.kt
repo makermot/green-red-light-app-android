@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentWaitingBinding
@@ -22,7 +23,13 @@ class WaitingFragment : Fragment() {
         // Inflate the layout for this fragment
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
         // Inflate the layout for this fragment
-        binding.waitingText.text = viewModel.receivedUsername
+        //binding.waitingText.text = viewModel.receivedUsername.value
+
+        // add Observer to the MESSAGE received from mobile
+        viewModel.receivedGameStatus.observe(viewLifecycleOwner, Observer {newStatus -> binding.stillText.text = newStatus})
+
+        // add Observer to the DATA received from mobile
+        viewModel.receivedGameStatus.observe(viewLifecycleOwner, Observer {newStatus -> binding.stillText.text = newStatus})
 
         return binding.root
     }

@@ -47,9 +47,6 @@ class LoginFragment : Fragment() {
             else {
                 viewModel.username = binding.Username.text.toString()
                 viewModel.password = binding.Password.text.toString()
-                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-                viewModel.sendDataToWear(activity?.applicationContext, dataClient)
-                // viewModel.sendDataToFireBase(activity?.applicationContext)
 
                 //(activity as MainActivity).setBottomNavigationVisibility(View.VISIBLE)
 

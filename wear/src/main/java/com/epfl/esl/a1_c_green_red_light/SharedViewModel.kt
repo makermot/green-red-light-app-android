@@ -3,6 +3,8 @@ package com.epfl.esl.a1_c_green_red_light
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.wearable.*
 import java.util.*
@@ -12,21 +14,39 @@ import com.google.android.gms.wearable.MessageEvent as MessageEvent
 class SharedViewModel: ViewModel(), DataClient.OnDataChangedListener, SensorEventListener,
 MessageClient.OnMessageReceivedListener {
 
-    var receivedUsername: String = ""
-    var receivedGameStatus: String = "Wait"
+    // User Data
+    //var receivedUsername: String = ""
+
+    private val _receivedUsername = MutableLiveData<String>()
+    val receivedUsername: LiveData<String>
+        get() = _receivedUsername
+
+    private val _receivedGameStatus = MutableLiveData<String>()
+    val receivedGameStatus: LiveData<String>
+        get() = _receivedGameStatus
+
     // Wearable.getDataClient(this).addListener(this)
 
+    // Init variable
+    init {
+        _receivedGameStatus.value = "Wait"
+    }
+
+
+    // Message send to the watch
     override fun onMessageReceived(messageEvent: MessageEvent) {
         if(messageEvent.path == "/command") {
             val receivedCommand: String = String(messageEvent.data)
             if (receivedCommand == "Start") {
-                receivedGameStatus = "Start"
+                _receivedGameStatus.value = "Start"
             } else if (receivedCommand == "Stop") {
-                receivedGameStatus = "Stop"
+                _receivedGameStatus.value = "Stop"
             }
         }
+        println("we received Command")
     }
-    
+
+    // Data send to the watch
     override fun onDataChanged(dataEvents: DataEventBuffer) {
         dataEvents
             .filter {
@@ -34,11 +54,9 @@ MessageClient.OnMessageReceivedListener {
                         it.dataItem.uri.path == "/userInfo"
             }
             .forEach { event ->
-                receivedUsername = DataMapItem.fromDataItem(
-                    event.dataItem
-                ).dataMap.getString("username")!!
+                _receivedUsername.value = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("username")!!
             }
-        println(receivedUsername)
+        println("we received Username")
         //binding.myText.setText(receivedUsername)
     }
 

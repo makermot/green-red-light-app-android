@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
 import java.io.IOException
 import java.util.*
@@ -53,12 +54,34 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
             val dataClient: DataClient = Wearable
                 .getDataClient(activity as AppCompatActivity)
             viewModel.sendDataToWear(activity?.applicationContext, dataClient)
-            Navigation.findNavController(view)
-                .navigate(R.id.action_loungeFragment_to_inProgressFragment)
+            sendCommandToWear("Start")
+            println("Alo")
+            Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
         }
 
         return binding.root
     }
+
+
+    // Send Start and Stop command to the watch
+    private fun sendCommandToWear(command: String) {
+        Thread(Runnable {
+            println("Started the Thread")
+            val connectedNodes: List<String> = Tasks
+                .await(
+                    Wearable
+                        .getNodeClient(activity as MainActivity).connectedNodes
+                )
+                .map { it.id }
+            connectedNodes.forEach {
+                val messageClient: MessageClient = Wearable
+                    .getMessageClient(activity as AppCompatActivity)
+                messageClient.sendMessage(it, "/command", command.toByteArray())
+            }
+            println("Finnished the Thread")
+        }).start()
+    }
+
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap

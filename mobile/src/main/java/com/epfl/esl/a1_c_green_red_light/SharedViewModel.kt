@@ -27,19 +27,21 @@ class SharedViewModel : ViewModel() {
     val profilePresent: LiveData<Boolean?>
         get() = _profilePresent
 
+
     // FIREBASE
     val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     val profileRef: DatabaseReference = database.getReference("Profiles")
 
 
-
-
+    // Init variable
     init {
         imageUri = null
         username = ""
         _profilePresent.value = false
     }
 
+
+    // Fetch profile in the FireBase
     fun fetchProfile() : Boolean {
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -63,14 +65,19 @@ class SharedViewModel : ViewModel() {
         return _profilePresent.value!!
     }
 
+
+    // Create Profile in the FireBase
     fun createProfile(context: LoginFragment) {
         key = username
         profileRef.child(key).child("username").setValue(username)
         profileRef.child(key).child("password").setValue(password)
     }
 
+
+    // Send username to the watch
     fun sendDataToWear(context: Context?, dataClient: DataClient)
     {
+        println("Sending Data to wear")
         val request: PutDataRequest = PutDataMapRequest.create("/userInfo").run {
             dataMap.putString("username", username)
             asPutDataRequest()
@@ -80,5 +87,21 @@ class SharedViewModel : ViewModel() {
         println(username)
     }
 
+
+    // Send Start and Stop command to the watch
+    /*private fun sendCommandToWear(command: String){
+        Thread(Runnable {
+            val connectedNodes: List<String> = Tasks
+                .await(
+                    Wearable
+                        .getNodeClient(activity as MainActivity).connectedNodes)
+                .map { it.id }
+            connectedNodes.forEach {
+                val messageClient: MessageClient = Wearable
+                    .getMessageClient(activity as AppCompatActivity)
+                messageClient.sendMessage(it, "/command", command.toByteArray())
+            }
+        }).start()
+    }*/
     
 }

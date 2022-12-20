@@ -7,13 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoginBinding
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentMySpaceBinding
+import com.google.android.gms.wearable.DataClient
+import com.google.android.gms.wearable.Wearable
 
 class MySpaceFragment : Fragment() {
 
     private lateinit var binding: FragmentMySpaceBinding
+    private lateinit var viewModel: SharedViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,6 +41,10 @@ class MySpaceFragment : Fragment() {
                     .navigate(R.id.action_mySpaceFragment_to_loungeFragment)
             }
         }
+
+        viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+        val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+        viewModel.sendDataToWear(activity?.applicationContext, dataClient)
 
         return binding.root
     }
