@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoungeBinding
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
@@ -32,8 +33,9 @@ class LoungeFragment : Fragment() {
             val dataClient: DataClient = Wearable
                 .getDataClient(activity as AppCompatActivity)
             viewModel.sendDataToWear(activity?.applicationContext, dataClient)
+            Navigation.findNavController(view)
+                .navigate(R.id.action_loungeFragment_to_inProgressFragment)
         }
-
 
         return binding.root
     }

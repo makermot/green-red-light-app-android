@@ -20,8 +20,8 @@
         android:label="fragment_lounge"
         tools:layout="@layout/fragment_lounge" >
         <action
-            android:id="@+id/action_loungeFragment_to_resultFragment"
-            app:destination="@id/resultFragment" />
+            android:id="@+id/action_loungeFragment_to_inProgressFragment"
+            app:destination="@id/inProgressFragment" />
     </fragment>
     <fragment
         android:id="@+id/statFragment"
@@ -48,5 +48,13 @@
         <action
             android:id="@+id/action_mySpaceFragment_to_statFragment"
             app:destination="@id/statFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/inProgressFragment"
+        android:name="com.epfl.esl.a1_c_green_red_light.InProgressFragment"
+        android:label="InProgressFragment" >
+        <action
+            android:id="@+id/action_inProgressFragment_to_resultFragment"
+            app:destination="@id/resultFragment" />
     </fragment>
 </navigation>
