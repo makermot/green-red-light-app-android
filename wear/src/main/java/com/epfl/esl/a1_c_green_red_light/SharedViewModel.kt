@@ -12,20 +12,17 @@ import com.google.android.gms.wearable.MessageEvent as MessageEvent
 class SharedViewModel: ViewModel(), DataClient.OnDataChangedListener, SensorEventListener,
 MessageClient.OnMessageReceivedListener {
 
-    private var timer = Timer()
     var receivedUsername: String = ""
+    var receivedGameStatus: String = "Wait"
     // Wearable.getDataClient(this).addListener(this)
 
     override fun onMessageReceived(messageEvent: MessageEvent) {
         if(messageEvent.path == "/command") {
             val receivedCommand: String = String(messageEvent.data)
             if (receivedCommand == "Start") {
-                timer = Timer()
-                timer.schedule(timerTask {
-                    // sendDataToMobile(heartrate)
-                }, 0, 500)
+                receivedGameStatus = "Start"
             } else if (receivedCommand == "Stop") {
-                timer.cancel()
+                receivedGameStatus = "Stop"
             }
         }
     }
