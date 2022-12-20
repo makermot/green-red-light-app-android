@@ -11,7 +11,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.ActivityMainBinding
 import com.google.android.gms.wearable.*
@@ -19,7 +20,7 @@ import com.google.android.gms.wearable.R
 import java.util.*
 import kotlin.concurrent.timerTask
 
-class MainActivity : Activity(), DataClient.OnDataChangedListener, SensorEventListener,
+class MainActivity : FragmentActivity(), DataClient.OnDataChangedListener, SensorEventListener,
     MessageClient.OnMessageReceivedListener {
 
 
