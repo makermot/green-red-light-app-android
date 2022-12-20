@@ -77,6 +77,7 @@ class SharedViewModel : ViewModel() {
         }
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
+        println(username)
     }
 
     

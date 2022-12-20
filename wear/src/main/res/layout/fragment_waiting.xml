@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".StartWearFragment">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".StartWearFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_gravity="center"
-        android:layout_height="wrap_content"
-        android:text="@string/waiting" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="70dp"/>
+            <TextView
+                android:id="@+id/waitingText"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center"
+                android:layout_height="30dp"
+                android:text="@string/waiting" />
 
-</FrameLayout>
+            <TextView
+                android:id="@+id/stillText"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center"
+                android:layout_height="30dp"
+                android:text="Hello there !" />
+
+    </LinearLayout>
+</layout>
