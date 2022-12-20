@@ -60,7 +60,6 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
         return binding.root
     }
 
-    @SuppressLint("MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
