@@ -39,10 +39,9 @@ import java.util.*
 
 class InProgressFragment : Fragment(), OnMapReadyCallback {
 
-    private val LOCATION_REQUEST_CODE = 101
-
     private lateinit var binding: FragmentInProgressBinding
     private lateinit var mMap: GoogleMap
+    private val LOCATION_REQUEST_CODE = 101
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -135,12 +134,10 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                             R.drawable.ic_pickup
                         )
                     )
+                    val sat = LatLng(46.520444, 6.567717)
                     mMap.addMarker(
                         MarkerOptions()
-                            .position(
-                                LatLng(mLastLocation.latitude,
-                                    mLastLocation.longitude)
-                            )
+                            .position(sat)
                             .title("Current Location")
                             .snippet(address)
                             .icon(icon)
