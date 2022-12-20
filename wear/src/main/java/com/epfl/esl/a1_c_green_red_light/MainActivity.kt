@@ -20,11 +20,8 @@ import com.google.android.gms.wearable.R
 import java.util.*
 import kotlin.concurrent.timerTask
 
-class MainActivity : FragmentActivity(), DataClient.OnDataChangedListener, SensorEventListener,
-    MessageClient.OnMessageReceivedListener {
+class MainActivity : FragmentActivity() {
 
-
-    private var timer = Timer()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,49 +29,4 @@ class MainActivity : FragmentActivity(), DataClient.OnDataChangedListener, Senso
 
     }
 
-    override fun onMessageReceived(messageEvent: MessageEvent) {
-        if(messageEvent.path == "/command") {
-            val receivedCommand: String = String(messageEvent.data)
-            if (receivedCommand == "Start") {
-                timer = Timer()
-                timer.schedule(timerTask {
-                   // sendDataToMobile(heartrate)
-                }, 0, 500)
-            } else if (receivedCommand == "Stop") {
-            timer.cancel()
-            }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Wearable.getDataClient(this).addListener(this)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Wearable.getDataClient(this).removeListener(this)
-    }
-
-    override fun onDataChanged(dataEvents: DataEventBuffer) {
-        dataEvents
-            .filter {
-                it.type == DataEvent.TYPE_CHANGED &&
-                        it.dataItem.uri.path == "/userInfo"
-            }
-            .forEach { event ->
-                val receivedUsername: String = DataMapItem.fromDataItem(
-                    event.dataItem
-                ).dataMap.getString("username")!!
-            }
-        //binding.myText.setText(receivedUsername)
-    }
-
-    override fun onSensorChanged(p0: SensorEvent?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-        TODO("Not yet implemented")
-    }
 }

@@ -8,13 +8,15 @@
         <entry key="..\:/Users/Public/green-red-light-app-android/app/src/main/res/layout/fragment_result.xml" value="0.22826086956521738" />
         <entry key="..\:/Users/Public/green-red-light-app-android/app/src/main/res/layout/fragment_start.xml" value="0.22826086956521738" />
         <entry key="..\:/Users/Public/green-red-light-app-android/app/wear/src/main/res/layout/activity_main.xml" value="0.5271966527196653" />
+        <entry key="..\:/Users/Public/green-red-light-app-android/mobile/src/main/res/layout/activity_main.xml" value="0.22826086956521738" />
         <entry key="..\:/Users/Public/green-red-light-app-android/mobile/src/main/res/layout/fragment_login.xml" value="0.176" />
         <entry key="..\:/Users/Public/green-red-light-app-android/mobile/src/main/res/layout/fragment_lounge.xml" value="0.2" />
         <entry key="..\:/Users/Public/green-red-light-app-android/mobile/src/main/res/layout/fragment_my_space.xml" value="0.1" />
         <entry key="..\:/Users/Public/green-red-light-app-android/mobile/src/main/res/layout/fragment_stat.xml" value="0.1" />
-        <entry key="..\:/Users/Public/green-red-light-app-android/wear/src/main/res/layout/activity_main.xml" value="0.536" />
+        <entry key="..\:/Users/Public/green-red-light-app-android/wear/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/Users/Public/green-red-light-app-android/wear/src/main/res/layout/fragment_race.xml" value="0.5271966527196653" />
         <entry key="..\:/Users/Public/green-red-light-app-android/wear/src/main/res/layout/fragment_start.xml" value="0.5271966527196653" />
-        <entry key="..\:/Users/Public/green-red-light-app-android/wear/src/main/res/layout/fragment_waiting.xml" value="0.5271966527196653" />
+        <entry key="..\:/Users/Public/green-red-light-app-android/wear/src/main/res/layout/fragment_waiting.xml" value="0.536" />
       </map>
     </option>
   </component>
