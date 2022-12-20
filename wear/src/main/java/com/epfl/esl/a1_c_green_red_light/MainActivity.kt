@@ -22,17 +22,12 @@ import kotlin.concurrent.timerTask
 class MainActivity : Activity(), DataClient.OnDataChangedListener, SensorEventListener,
     MessageClient.OnMessageReceivedListener {
 
-    private lateinit var binding: ActivityMainBinding
 
     private var timer = Timer()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        //binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        binding.myText.text = "hello_world"
+        setContentView(com.epfl.esl.a1_c_green_red_light.R.layout.activity_main)
 
     }
 
