@@ -6,11 +6,5 @@
     tools:context=".StartWearFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <Button
-        android:id="@+id/StartRace"
-        android:layout_width="153dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/start" />
 
 </FrameLayout>

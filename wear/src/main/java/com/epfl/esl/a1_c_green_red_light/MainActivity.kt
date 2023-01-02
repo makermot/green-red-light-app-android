@@ -15,7 +15,6 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
         super.onCreate(savedInstanceState)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        binding.myText.setText("Test X")
     }
 
 
@@ -38,8 +37,8 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
 
                 val receivedUsernameBitmap = BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
 
-                binding.logoView.setImageBitmap(receivedUsernameBitmap)
-                binding.myText.setText(receivedUsername)
+                binding.userImage.setImageBitmap(receivedUsernameBitmap)
+                binding.userName.setText(receivedUsername)
             }
     }
 }

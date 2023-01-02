@@ -21,11 +21,11 @@ class SharedViewModel: ViewModel(),SensorEventListener{
     val receivedGameStatus: LiveData<String>
         get() = _receivedGameStatus
 
-    // Wearable.getDataClient(this).addListener(this)
 
     // Init variable
     init {
         _receivedGameStatus.value = "Wait"
+        _receivedUsername.value = "***"
     }
 
     override fun onSensorChanged(p0: SensorEvent?) {

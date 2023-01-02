@@ -1,7 +1,10 @@
 package com.epfl.esl.a1_c_green_red_light
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.net.Uri
+import android.provider.MediaStore
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,6 +14,8 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
+import java.io.ByteArrayOutputStream
 
 class SharedViewModel : ViewModel() {
 
@@ -23,12 +28,18 @@ class SharedViewModel : ViewModel() {
     val uploadSuccess: LiveData<Boolean?>
         get() = _uploadSuccess
 
+    // TODO add an observer to check for success
+    private val _imageUploadSuccsess = MutableLiveData<Boolean?>()
+    val imageUploadSuccsess: LiveData<Boolean?>
+        get() = _imageUploadSuccsess
+
     private val _profilePresent = MutableLiveData<Boolean?>()
     val profilePresent: LiveData<Boolean?>
         get() = _profilePresent
 
 
     // FIREBASE
+    var storageRef = FirebaseStorage.getInstance().reference
     val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     val profileRef: DatabaseReference = database.getReference("Profiles")
 
@@ -67,43 +78,49 @@ class SharedViewModel : ViewModel() {
 
 
     // Create Profile in the FireBase
-    fun createProfile(context: LoginFragment) {
+    fun createProfile(context: Context?) {
         key = username
         profileRef.child(key).child("username").setValue(username)
         profileRef.child(key).child("password").setValue(password)
-    }
+        //profileRef.child(key).child("image").setValue(context?.contentResolver?.openInputStream(imageUri!!)?.readBytes())
 
-    /*
-    // Send username to the watch
-    fun sendDataToWear(context: Context?, dataClient: DataClient)
-    {
-        println("Sending Data to wear")
-        val request: PutDataRequest = PutDataMapRequest.create("/userInfo").run {
-            dataMap.putString("username", username)
-            asPutDataRequest()
+
+        val profileImageRef = storageRef.child("ProfileImages/" + username + ".jpg")
+        val matrix = Matrix()
+        matrix.postRotate(90F)
+        var imageBitmap = MediaStore.Images.Media.getBitmap(context?.contentResolver, imageUri)
+        val ratio: Float = 13F
+        val imageBitmapScaled = Bitmap.createScaledBitmap(
+            imageBitmap,
+            (imageBitmap.width / ratio).toInt(), (imageBitmap.height / ratio).toInt(), false
+        )
+        imageBitmap = Bitmap.createBitmap(
+            imageBitmapScaled, 0, 0,
+            (imageBitmap.width / ratio).toInt(), (imageBitmap.height / ratio).toInt(),
+            matrix, true
+        )
+        val stream = ByteArrayOutputStream()
+        imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        val imageByteArray = stream.toByteArray()
+        val uploadProfileImage = profileImageRef.putBytes(imageByteArray)
+
+        uploadProfileImage.addOnFailureListener {
+            _imageUploadSuccsess.value = false
+        }.addOnSuccessListener { taskSnapshot ->
+            profileRef.child(key).child("photo URL").setValue(
+                (FirebaseStorage.getInstance()
+                    .getReference()).toString() + "ProfileImages/" + username + ".jpg"
+            )
+            _imageUploadSuccsess.value = true
         }
-        request.setUrgent()
-        val putTask: Task<DataItem> = dataClient.putDataItem(request)
-        println(username)
     }
-     */
 
-    /*
-    // Send Start and Stop command to the watch
-    private fun sendCommandToWear(command: String){
-        Thread(Runnable {
-            val connectedNodes: List<String> = Tasks
-                .await(
-                    Wearable
-                        .getNodeClient(activity as MainActivity).connectedNodes)
-                .map { it.id }
-            connectedNodes.forEach {
-                val messageClient: MessageClient = Wearable
-                    .getMessageClient(activity as AppCompatActivity)
-                messageClient.sendMessage(it, "/command", command.toByteArray())
-            }
-        }).start()
+    fun resetUserData(){
+        username = ""
+        password = ""
+        imageUri = null
+        key = ""
+        _imageUploadSuccsess.value = null
+        _profilePresent.value = false
     }
-     */
-
 }

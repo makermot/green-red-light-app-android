@@ -11,12 +11,6 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="70dp"/>
-            <TextView
-                android:id="@+id/waitingText"
-                android:layout_width="wrap_content"
-                android:layout_gravity="center"
-                android:layout_height="30dp"
-                android:text="@string/waiting" />
 
             <TextView
                 android:id="@+id/testText"

@@ -62,8 +62,13 @@ class LoginFragment : Fragment() {
                 //(activity as MainActivity).setBottomNavigationVisibility(View.VISIBLE)
 
                 if(!viewModel.fetchProfile()){
-                    viewModel.createProfile(this)
+                    viewModel.createProfile(activity?.applicationContext)
                     view.let {
+                        // Send data to wear
+                        val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+                        sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
+
+                        // Navigate to my space
                         Navigation.findNavController(it)
                             .navigate(R.id.action_loginFragment_to_mySpaceFragment)
                     }
@@ -86,6 +91,11 @@ class LoginFragment : Fragment() {
 
                 if(viewModel.fetchProfile()){
                     view.let {
+                        // Send data to wear
+                        val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+                        sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
+
+                        // Navigate to my space
                         Navigation.findNavController(it)
                             .navigate(R.id.action_loginFragment_to_mySpaceFragment)
                     }
@@ -106,20 +116,16 @@ class LoginFragment : Fragment() {
             username = "ça marche !"
             imageUri=viewModel.imageUri
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            sendDataToWear(activity?.applicationContext, dataClient)
+            sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
         }
 
         return binding.root
     }
-
-    // TEST
-    fun sendDataToWear(context: Context?, dataClient: DataClient) {
-
+    
+    fun sendUserNameAndImageToWear(context: Context?, dataClient: DataClient) {
         val matrix = Matrix()
-
-        var imageBitmap = MediaStore.Images.Media.getBitmap(context?.contentResolver, imageUri)
+        var imageBitmap = MediaStore.Images.Media.getBitmap(context?.contentResolver, viewModel.imageUri)
         val ratio: Float = 13F
-
         val imageBitmapScaled = Bitmap.createScaledBitmap(
             imageBitmap,
             (imageBitmap.width / ratio).toInt(),
@@ -135,14 +141,13 @@ class LoginFragment : Fragment() {
             matrix,
             true
         )
-
         val stream = ByteArrayOutputStream()
         imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
         val imageByteArray = stream.toByteArray()
 
         val request: PutDataRequest = PutDataMapRequest.create("/userInfo").run {
             dataMap.putByteArray("profileImage", imageByteArray)
-            dataMap.putString("username", username)
+            dataMap.putString("username", viewModel.username)
             asPutDataRequest()
         }
 
@@ -160,5 +165,12 @@ class LoginFragment : Fragment() {
                 binding.Userimage.setImageURI(imageUri)
             }
         }
+
+
+    // Reset user data when the App is paused
+    override fun onPause() {
+        super.onPause()
+        viewModel.resetUserData()
+    }
 
 }
