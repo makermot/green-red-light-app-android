@@ -2,6 +2,7 @@ package com.epfl.esl.a1_c_green_red_light
 
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -44,6 +45,21 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
         dataEvents
+            .filter {it.dataItem.uri.path == "/userInfo" }
+            .forEach { event ->
+                val receivedImage: ByteArray = DataMapItem.fromDataItem(event.dataItem).dataMap.getByteArray("profileImage")
+                val receivedUsername: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("username")
+
+                val receivedUsernameBitmap = BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
+
+                binding.logoView.setImageBitmap(receivedUsernameBitmap)
+                binding.myText.setText(receivedUsername)
+            }
+    }
+
+    /*
+    override fun onDataChanged(dataEvents: DataEventBuffer) {
+        dataEvents
             .filter { it.type == DataEvent.TYPE_CHANGED &&
                     it.dataItem.uri.path == "/Test" }
             .forEach { event ->
@@ -53,6 +69,7 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
             }
         binding.testtext.text = "Youston this a test"
     }
+    */
 }
 
 /*

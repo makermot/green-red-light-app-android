@@ -17,7 +17,7 @@ import com.google.android.gms.wearable.Wearable
 class MySpaceFragment : Fragment() {
 
     private lateinit var binding: FragmentMySpaceBinding
-    private lateinit var viewModel: SharedViewModel
+   //private lateinit var viewModel: SharedViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,9 +42,9 @@ class MySpaceFragment : Fragment() {
             }
         }
 
-        viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-        val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-        viewModel.sendDataToWear(activity?.applicationContext, dataClient)
+        //viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+        //val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+        //viewModel.sendDataToWear(activity?.applicationContext, dataClient)
 
         return binding.root
     }

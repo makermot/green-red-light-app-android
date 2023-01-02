@@ -51,10 +51,10 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
 
         binding.gotoWearButton.setOnClickListener{view: View ->
-            val dataClient: DataClient = Wearable
-                .getDataClient(activity as AppCompatActivity)
-            viewModel.sendDataToWear(activity?.applicationContext, dataClient)
-            sendCommandToWear("Start")
+            //val dataClient: DataClient = Wearable
+            //    .getDataClient(activity as AppCompatActivity)
+            //viewModel.sendDataToWear(activity?.applicationContext, dataClient)
+            //sendCommandToWear("Start")
             println("Alo")
             Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
         }

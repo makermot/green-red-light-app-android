@@ -6,30 +6,41 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@android:color/white"
         tools:deviceIds="wear">
 
-        <TextView
-            android:id="@+id/my_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Alo"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/testtext" />
-
-        <TextView
-            android:id="@+id/testtext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="yeao"
-            android:textSize="18sp"
+        <ImageView
+            android:id="@+id/logo_view"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:src="@drawable/ic_logo"
             app:layout_constraintBottom_toTopOf="@id/my_text"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/my_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/logo_view" />
 
+        <TextView
+            android:id="@+id/hrSensor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:text="@string/hr_sensor"
+            android:textColor="@android:color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/my_text"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

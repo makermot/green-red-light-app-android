@@ -73,7 +73,7 @@ class SharedViewModel : ViewModel() {
         profileRef.child(key).child("password").setValue(password)
     }
 
-
+    /*
     // Send username to the watch
     fun sendDataToWear(context: Context?, dataClient: DataClient)
     {
@@ -86,10 +86,11 @@ class SharedViewModel : ViewModel() {
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         println(username)
     }
+     */
 
-
+    /*
     // Send Start and Stop command to the watch
-    /*private fun sendCommandToWear(command: String){
+    private fun sendCommandToWear(command: String){
         Thread(Runnable {
             val connectedNodes: List<String> = Tasks
                 .await(
@@ -102,6 +103,7 @@ class SharedViewModel : ViewModel() {
                 messageClient.sendMessage(it, "/command", command.toByteArray())
             }
         }).start()
-    }*/
-    
+    }
+     */
+
 }

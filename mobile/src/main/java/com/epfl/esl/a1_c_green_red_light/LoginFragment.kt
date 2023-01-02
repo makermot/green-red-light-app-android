@@ -1,9 +1,13 @@
 package com.epfl.esl.a1_c_green_red_light
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -17,14 +21,19 @@ import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoginBinding
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
+import java.io.ByteArrayOutputStream
 
 class LoginFragment : Fragment() {
 
     private lateinit var viewModel: SharedViewModel
     private lateinit var binding: FragmentLoginBinding
 
+    // TEST
+    var imageUri: Uri? = null
+    var username: String = ""
+
     //DATA CLIENT
-    private lateinit var dataClient: DataClient
+    //private lateinit var dataClient: DataClient
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,7 +46,7 @@ class LoginFragment : Fragment() {
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
         // Initialise Data client
-        dataClient = Wearable.getDataClient(activity as AppCompatActivity)
+        //dataClient = Wearable.getDataClient(activity as AppCompatActivity)
 
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
 
@@ -100,13 +109,17 @@ class LoginFragment : Fragment() {
 
         // Button to test Data client
         binding.TestButton.setOnClickListener {
-            sendDataTestToWear()
+            username = "ça marche !"
+            imageUri=viewModel.imageUri
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            sendDataToWear(activity?.applicationContext, dataClient)
         }
 
         return binding.root
     }
 
     // Data client
+    /*
     private fun sendDataTestToWear()
     {
         // Embedded the data to send
@@ -120,10 +133,48 @@ class LoginFragment : Fragment() {
         request.setUrgent()
 
         // Send data
-        //val putTask: Task<DataItem> =
-        dataClient.putDataItem(request)
+        val putTask: Task<DataItem> = dataClient.putDataItem(request)
 
         Toast.makeText(context,"Sending test data to wear", Toast.LENGTH_SHORT).show()
+    }
+     */
+
+    // TEST
+    fun sendDataToWear(context: Context?, dataClient: DataClient) {
+
+        val matrix = Matrix()
+
+        var imageBitmap = MediaStore.Images.Media.getBitmap(context?.contentResolver, imageUri)
+        val ratio: Float = 13F
+
+        val imageBitmapScaled = Bitmap.createScaledBitmap(
+            imageBitmap,
+            (imageBitmap.width / ratio).toInt(),
+            (imageBitmap.height / ratio).toInt(),
+            false
+        )
+        imageBitmap = Bitmap.createBitmap(
+            imageBitmapScaled,
+            0,
+            0,
+            (imageBitmap.width / ratio).toInt(),
+            (imageBitmap.height / ratio).toInt(),
+            matrix,
+            true
+        )
+
+        val stream = ByteArrayOutputStream()
+        imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        val imageByteArray = stream.toByteArray()
+
+        val request: PutDataRequest = PutDataMapRequest.create("/userInfo").run {
+            dataMap.putByteArray("profileImage", imageByteArray)
+            dataMap.putString("username", username)
+            asPutDataRequest()
+        }
+
+        request.setUrgent()
+        val putTask: Task<DataItem> = dataClient.putDataItem(request)
     }
 
 
