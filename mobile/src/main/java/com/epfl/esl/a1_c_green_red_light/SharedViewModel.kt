@@ -25,14 +25,9 @@ class SharedViewModel : ViewModel() {
     var username: String
     var key: String = ""
     var password: String = ""
-    //var imageBitmap : Bitmap? = null
 
 
     // Live data
-    private val _uploadSuccess = MutableLiveData<Boolean?>()
-    val uploadSuccess: LiveData<Boolean?>
-        get() = _uploadSuccess
-
     // TODO add an observer to check for success
     private val _imageUploadSuccsess = MutableLiveData<Boolean?>()
     val imageUploadSuccsess: LiveData<Boolean?>
@@ -83,7 +78,7 @@ class SharedViewModel : ViewModel() {
                             }.addOnFailureListener {
                                 // TODO Handle any errors
                             }
-                            Thread.sleep(5_000) // Si on va trop vite -> on a pas le temps de fetch l'image qu'on à déjà call sendDataToWear et l'image n'est pas envoyé
+                            Thread.sleep(5_000) // TODO améliorer ça Si on va trop vite -> on a pas le temps de fetch l'image qu'on à déjà call sendDataToWear et l'image n'est pas envoyé
                             break
                         }
                     }
@@ -136,6 +131,18 @@ class SharedViewModel : ViewModel() {
             )
             _imageUploadSuccsess.value = true
         }
+    }
+
+
+    // Send Start command to Wear
+    fun sendStartToWear(context: Context?, dataClient: DataClient) {
+        val request: PutDataRequest = PutDataMapRequest.create("/command").run {
+            dataMap.putString("startCommand", "start")
+            asPutDataRequest()
+        }
+
+        request.setUrgent()
+        val putTask: Task<DataItem> = dataClient.putDataItem(request)
     }
 
     fun resetUserData(){

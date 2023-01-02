@@ -36,7 +36,6 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var binding: FragmentLoungeBinding
     private lateinit var viewModel: SharedViewModel
-    private lateinit var dataClient: DataClient
 
     private val LOCATION_REQUEST_CODE = 101
     private lateinit var mMap: GoogleMap
@@ -46,16 +45,12 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_lounge, container, false)
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-        dataClient = Wearable.getDataClient(activity as AppCompatActivity)
 
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
 
         binding.gotoWearButton.setOnClickListener{view: View ->
-            //val dataClient: DataClient = Wearable
-            //    .getDataClient(activity as AppCompatActivity)
-            //viewModel.sendDataToWear(activity?.applicationContext, dataClient)
-            //sendCommandToWear("Start")
-            println("Alo")
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendStartToWear(activity?.applicationContext, dataClient)
             Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
         }
 
@@ -106,11 +101,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
     }
 
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>, grantResults: IntArray
-    )
-    {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             LOCATION_REQUEST_CODE -> {
                 if (grantResults.isEmpty() || grantResults[0] !=
@@ -130,6 +121,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
             }
         }
     }
+
 
     @SuppressLint("MissingPermission")
     private fun getLastLocation() {

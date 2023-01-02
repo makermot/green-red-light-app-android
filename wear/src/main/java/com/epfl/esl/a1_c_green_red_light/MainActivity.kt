@@ -38,7 +38,18 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
                 val receivedUsernameBitmap = BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
 
                 binding.userImage.setImageBitmap(receivedUsernameBitmap)
+                binding.welcomeText.setText("Welcome")
                 binding.userName.setText(receivedUsername)
+            }
+
+
+        dataEvents
+            .filter {it.dataItem.uri.path == "/command" }
+            .forEach { event ->
+                val receivedCommand: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("startCommand")
+                if (receivedCommand == "start"){
+                    binding.userName.setText(receivedCommand)
+                }
             }
     }
 }
