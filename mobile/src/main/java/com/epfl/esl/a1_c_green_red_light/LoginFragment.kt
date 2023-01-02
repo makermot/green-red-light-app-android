@@ -32,9 +32,6 @@ class LoginFragment : Fragment() {
     var imageUri: Uri? = null
     var username: String = ""
 
-    //DATA CLIENT
-    //private lateinit var dataClient: DataClient
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -44,9 +41,6 @@ class LoginFragment : Fragment() {
 
         // Initialise viewModel
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-
-        // Initialise Data client
-        //dataClient = Wearable.getDataClient(activity as AppCompatActivity)
 
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
 
@@ -117,27 +111,6 @@ class LoginFragment : Fragment() {
 
         return binding.root
     }
-
-    // Data client
-    /*
-    private fun sendDataTestToWear()
-    {
-        // Embedded the data to send
-        val TestString: String = "Youpi !"
-
-        // Create request to send with the embedded data
-        val request: PutDataRequest = PutDataMapRequest.create("/Test").run {
-            dataMap.putString("TestString", TestString)
-            asPutDataRequest()
-        }
-        request.setUrgent()
-
-        // Send data
-        val putTask: Task<DataItem> = dataClient.putDataItem(request)
-
-        Toast.makeText(context,"Sending test data to wear", Toast.LENGTH_SHORT).show()
-    }
-     */
 
     // TEST
     fun sendDataToWear(context: Context?, dataClient: DataClient) {

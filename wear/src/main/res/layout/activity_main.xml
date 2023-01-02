@@ -9,6 +9,15 @@
         android:background="@android:color/white"
         tools:deviceIds="wear">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:layout_margin="16dp"
+            android:orientation="vertical">
+
+        </LinearLayout>
+
         <ImageView
             android:id="@+id/logo_view"
             android:layout_width="72dp"
