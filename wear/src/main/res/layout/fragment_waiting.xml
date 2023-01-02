@@ -19,11 +19,11 @@
                 android:text="@string/waiting" />
 
             <TextView
-                android:id="@+id/stillText"
+                android:id="@+id/testText"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center"
                 android:layout_height="30dp"
-                android:text="Hello there !" />
+                android:text="alo there !" />
 
     </LinearLayout>
 </layout>

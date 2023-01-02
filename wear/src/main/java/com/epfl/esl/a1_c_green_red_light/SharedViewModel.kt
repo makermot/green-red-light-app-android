@@ -11,8 +11,13 @@ import java.util.*
 import kotlin.concurrent.timerTask
 import com.google.android.gms.wearable.MessageEvent as MessageEvent
 
+class SharedViewModel: ViewModel(),SensorEventListener{
+
+    /*
 class SharedViewModel: ViewModel(), DataClient.OnDataChangedListener, SensorEventListener,
 MessageClient.OnMessageReceivedListener {
+
+     */
 
     // User Data
     //var receivedUsername: String = ""
@@ -33,6 +38,7 @@ MessageClient.OnMessageReceivedListener {
     }
 
 
+    /*
     // Message send to the watch
     override fun onMessageReceived(messageEvent: MessageEvent) {
         if(messageEvent.path == "/command") {
@@ -45,7 +51,9 @@ MessageClient.OnMessageReceivedListener {
         }
         println("we received Command")
     }
+     */
 
+    /*
     // Data send to the watch
     override fun onDataChanged(dataEvents: DataEventBuffer) {
         dataEvents
@@ -59,6 +67,7 @@ MessageClient.OnMessageReceivedListener {
         println("we received Username")
         //binding.myText.setText(receivedUsername)
     }
+     */
 
     override fun onSensorChanged(p0: SensorEvent?) {
         TODO("Not yet implemented")
