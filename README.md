@@ -14,8 +14,9 @@ Android application for playing the 1-2-3 soleil game
 - RaceFragment
 - EndFragment
 
-### navigation
-- NavigationHostFragment (mobile) hosted by activity_main.xml (mobile)
+### navigation  
+- NavigationHostFragment (mobile) hosted by activity_main.xml (mobile)  
+![Alt text](/image/MobileNavigaton.drawio.png "Mobile")  
 - NavigationHostFragment (wear) hosted by activity_main.xml (wear)
 
 ### FireBase
