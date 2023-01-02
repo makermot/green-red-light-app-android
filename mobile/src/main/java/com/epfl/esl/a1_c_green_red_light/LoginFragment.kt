@@ -120,7 +120,10 @@ class LoginFragment : Fragment() {
         request.setUrgent()
 
         // Send data
-        val putTask: Task<DataItem> = dataClient.putDataItem(request)
+        //val putTask: Task<DataItem> =
+        dataClient.putDataItem(request)
+
+        Toast.makeText(context,"Sending test data to wear", Toast.LENGTH_SHORT).show()
     }
 
 
