@@ -2,6 +2,7 @@ package com.epfl.esl.a1_c_green_red_light
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import android.provider.MediaStore
@@ -24,6 +25,10 @@ class SharedViewModel : ViewModel() {
     var username: String
     var key: String = ""
     var password: String = ""
+    //var imageBitmap : Bitmap? = null
+
+
+    // Live data
     private val _uploadSuccess = MutableLiveData<Boolean?>()
     val uploadSuccess: LiveData<Boolean?>
         get() = _uploadSuccess
@@ -36,6 +41,10 @@ class SharedViewModel : ViewModel() {
     private val _profilePresent = MutableLiveData<Boolean?>()
     val profilePresent: LiveData<Boolean?>
         get() = _profilePresent
+
+    private val _imageBitmap = MutableLiveData<Bitmap?>()
+    val imageBitmap: LiveData<Bitmap?>
+        get() = _imageBitmap
 
 
     // FIREBASE
@@ -61,8 +70,20 @@ class SharedViewModel : ViewModel() {
                     if (username == usernameDatabase) {
                         val passwordDatabase = user.child("password").getValue(String::class.java)!!
                         if (password == passwordDatabase) {
+                            // User is authentified
                             key = user.key.toString()
                             _profilePresent.value = true
+
+                            // Fetch image : find reference then fetch it in cloud storage
+                            val imageReference = storageRef.child("ProfileImages/" + username + ".jpg")
+                            val ONE_MEGABYTE: Long = 1024 * 1024
+                            imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener { receivedImage ->
+                                // Data for "ProfileImages/username.jpg" is returned, use this as needed
+                                _imageBitmap.value = BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
+                            }.addOnFailureListener {
+                                // TODO Handle any errors
+                            }
+                            Thread.sleep(5_000) // Si on va trop vite -> on a pas le temps de fetch l'image qu'on à déjà call sendDataToWear et l'image n'est pas envoyé
                             break
                         }
                     }
@@ -82,12 +103,10 @@ class SharedViewModel : ViewModel() {
         key = username
         profileRef.child(key).child("username").setValue(username)
         profileRef.child(key).child("password").setValue(password)
-        //profileRef.child(key).child("image").setValue(context?.contentResolver?.openInputStream(imageUri!!)?.readBytes())
-
 
         val profileImageRef = storageRef.child("ProfileImages/" + username + ".jpg")
         val matrix = Matrix()
-        matrix.postRotate(90F)
+        matrix.postRotate(0F)
         var imageBitmap = MediaStore.Images.Media.getBitmap(context?.contentResolver, imageUri)
         val ratio: Float = 13F
         val imageBitmapScaled = Bitmap.createScaledBitmap(
@@ -99,6 +118,10 @@ class SharedViewModel : ViewModel() {
             (imageBitmap.width / ratio).toInt(), (imageBitmap.height / ratio).toInt(),
             matrix, true
         )
+
+        // update livedata
+        _imageBitmap.value = imageBitmap
+
         val stream = ByteArrayOutputStream()
         imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
         val imageByteArray = stream.toByteArray()
@@ -107,7 +130,7 @@ class SharedViewModel : ViewModel() {
         uploadProfileImage.addOnFailureListener {
             _imageUploadSuccsess.value = false
         }.addOnSuccessListener { taskSnapshot ->
-            profileRef.child(key).child("photo URL").setValue(
+            profileRef.child(key).child("imageURL").setValue(
                 (FirebaseStorage.getInstance()
                     .getReference()).toString() + "ProfileImages/" + username + ".jpg"
             )

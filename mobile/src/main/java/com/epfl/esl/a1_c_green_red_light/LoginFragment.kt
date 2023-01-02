@@ -36,7 +36,7 @@ class LoginFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
+        // Initialise Binding
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_login, container, false)
 
         // Initialise viewModel
@@ -111,18 +111,13 @@ class LoginFragment : Fragment() {
             resultLauncher.launch(imgIntent)
         }
 
-        // Button to test Data client
-        binding.TestButton.setOnClickListener {
-            username = "ça marche !"
-            imageUri=viewModel.imageUri
-            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
-        }
-
         return binding.root
     }
-    
+
+
+    // Send image and user name to wear
     fun sendUserNameAndImageToWear(context: Context?, dataClient: DataClient) {
+        /*
         val matrix = Matrix()
         var imageBitmap = MediaStore.Images.Media.getBitmap(context?.contentResolver, viewModel.imageUri)
         val ratio: Float = 13F
@@ -141,8 +136,10 @@ class LoginFragment : Fragment() {
             matrix,
             true
         )
+         */
         val stream = ByteArrayOutputStream()
-        imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        var imageBitmap = viewModel.imageBitmap.value
+        imageBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream)
         val imageByteArray = stream.toByteArray()
 
         val request: PutDataRequest = PutDataMapRequest.create("/userInfo").run {
@@ -168,9 +165,9 @@ class LoginFragment : Fragment() {
 
 
     // Reset user data when the App is paused
-    override fun onPause() {
+    /*override fun onPause() {
         super.onPause()
         viewModel.resetUserData()
-    }
+    }*/
 
 }

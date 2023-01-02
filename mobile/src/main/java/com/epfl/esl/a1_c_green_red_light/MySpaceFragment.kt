@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoginBinding
@@ -17,14 +18,22 @@ import com.google.android.gms.wearable.Wearable
 class MySpaceFragment : Fragment() {
 
     private lateinit var binding: FragmentMySpaceBinding
-   //private lateinit var viewModel: SharedViewModel
+    private lateinit var viewModel: SharedViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // Initialise Binding
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_my_space, container, false)
-        // Inflate the layout for this fragment
+
+        // Initialise viewModel
+        viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+
+        // add an observer to the profile Image
+        viewModel.imageBitmap.observe(viewLifecycleOwner, Observer { newImageBitmap ->
+            binding.welcomeImage.setImageBitmap(newImageBitmap)
+        })
 
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
 
@@ -42,9 +51,6 @@ class MySpaceFragment : Fragment() {
             }
         }
 
-        //viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-        //val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-        //viewModel.sendDataToWear(activity?.applicationContext, dataClient)
 
         return binding.root
     }
