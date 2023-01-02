@@ -15,24 +15,29 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoginBinding
-import com.google.android.gms.wearable.DataClient
-import com.google.android.gms.wearable.Wearable
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.wearable.*
 
 class LoginFragment : Fragment() {
 
     private lateinit var viewModel: SharedViewModel
     private lateinit var binding: FragmentLoginBinding
 
+    //DATA CLIENT
+    private lateinit var dataClient: DataClient
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_login, container, false)
         // Inflate the layout for this fragment
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_login, container, false)
 
+        // Initialise viewModel
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-        // viewModel.key = viewModel.profileRef.push().key.toString()
+
+        // Initialise Data client
+        dataClient = Wearable.getDataClient(activity as AppCompatActivity)
 
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
 
@@ -40,6 +45,9 @@ class LoginFragment : Fragment() {
 
             if (binding.Username.text.toString() == "") {
                 Toast.makeText(context,"Enter username", Toast.LENGTH_SHORT).show()
+            }
+            else if (binding.Password.text.toString() == "") {
+                Toast.makeText(context,"Enter password", Toast.LENGTH_SHORT).show()
             }
             else if (viewModel.imageUri == null) {
                 Toast.makeText(context,"Pick an image", Toast.LENGTH_SHORT).show()
@@ -90,11 +98,33 @@ class LoginFragment : Fragment() {
             resultLauncher.launch(imgIntent)
         }
 
-
+        // Button to test Data client
+        binding.TestButton.setOnClickListener {
+            sendDataTestToWear()
+        }
 
         return binding.root
     }
 
+    // Data client
+    private fun sendDataTestToWear()
+    {
+        // Embedded the data to send
+        val TestString: String = "Youpi !"
+
+        // Create request to send with the embedded data
+        val request: PutDataRequest = PutDataMapRequest.create("/Test").run {
+            dataMap.putString("TestString", TestString)
+            asPutDataRequest()
+        }
+        request.setUrgent()
+
+        // Send data
+        val putTask: Task<DataItem> = dataClient.putDataItem(request)
+    }
+
+
+    // Function to handle user image selection
     var resultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
