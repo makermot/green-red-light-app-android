@@ -55,7 +55,7 @@
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="64dp"
+                android:layout_marginTop="16dp"
                 android:adjustViewBounds="true"
                 android:text="@string/my_statistics"/>
 
@@ -80,9 +80,32 @@
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="64dp"
+                android:layout_marginTop="16dp"
                 android:adjustViewBounds="true"
-                android:text="@string/lounge"/>
+                android:text="lounge"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/watchLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="16dp"
+                android:text="To refresh login in watch"/>
+
+            <Button
+                android:id="@+id/refreshWatchButton"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:adjustViewBounds="true"
+                android:text="Refresh Watch"/>
         </LinearLayout>
     </LinearLayout>
 

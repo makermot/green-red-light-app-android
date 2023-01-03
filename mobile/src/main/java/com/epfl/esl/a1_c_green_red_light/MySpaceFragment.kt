@@ -56,6 +56,14 @@ class MySpaceFragment : Fragment() {
             }
         }
 
+        binding.refreshWatchButton.setOnClickListener{view: View ->
+            view.let {
+                // Send data to wear
+                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+                viewModel.sendUserNameAndImageToWear(dataClient)
+            }
+        }
+
         return binding.root
     }
 }

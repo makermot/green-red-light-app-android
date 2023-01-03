@@ -46,6 +46,8 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
                 binding.userImage.setImageBitmap(receivedUsernameBitmap)
                 binding.welcomeText.text = "Welcome"
                 binding.userName.text = receivedUsername
+                binding.waitingView.visibility = View.VISIBLE
+                binding.startView.visibility = View.GONE
             }
 
         dataEvents
@@ -56,10 +58,8 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
                 val receivedCommand: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("command")
                 binding.welcomeText.setText(receivedTimeStamp)
                 if (receivedCommand == "start"){
-                    //binding.userName.text = "voila voila"
-                    binding.userName.setText(receivedCommand)
-                    //binding.waitingView.visibility = View.GONE
-                    //binding.startText.visibility = View.VISIBLE
+                    binding.waitingView.visibility = View.GONE
+                    binding.startView.visibility = View.VISIBLE
                 }
             }
     }
