@@ -60,7 +60,9 @@ class LoginFragment : Fragment() {
                 println("Signing up with image, password and username")
                 viewModel.username = binding.Username.text.toString()
                 viewModel.password = binding.Password.text.toString()
-                viewModel.createProfile(activity?.applicationContext)
+                println("checkprofile Call")
+                viewModel.checkProfile()
+                println("checkprofile End")
             }
         }
 
@@ -86,7 +88,7 @@ class LoginFragment : Fragment() {
         }
 
         // add an observer to see if valid login as been found (async)
-        viewModel.validLogin.observe(viewLifecycleOwner, Observer { Login ->
+        /*viewModel.validLogin.observe(viewLifecycleOwner, Observer { Login ->
             println("We Observed Valid login : its value is :")
             println(Login)
             if(Login == true){
@@ -99,6 +101,45 @@ class LoginFragment : Fragment() {
             }
             else if (Login == false){
                 Toast.makeText(context,"Incorrect password/username", Toast.LENGTH_LONG).show()
+                viewModel.resetUserData()
+            }
+        })*/
+
+        viewModel.authentification.observe(viewLifecycleOwner, Observer { code ->
+            print("Authentification changed : code :")
+            println(code)
+
+            if(code == "Invalid login"){
+                Toast.makeText(context,"Incorrect password/username", Toast.LENGTH_LONG).show()
+                viewModel.resetUserData()
+            }
+            else if (code == "Valid login"){
+                // Send data to wear
+                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+                viewModel.sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
+
+                // Navigate to my space
+                Navigation.findNavController(binding.root).navigate(R.id.action_loginFragment_to_mySpaceFragment)
+            }
+            else if (code == "Profile already existing"){
+                Toast.makeText(context,"Profile already existing", Toast.LENGTH_LONG).show()
+                viewModel.resetUserData()
+            }
+            else if (code == "Ready to create profile"){
+                println("createprofile Call")
+                viewModel.createProfile(activity?.applicationContext)
+                println("creatprofile End")
+            }
+            else if (code == "Profile created"){
+                // Send data to wear
+                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+                viewModel.sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
+
+                // Navigate to my space
+                Navigation.findNavController(binding.root).navigate(R.id.action_loginFragment_to_mySpaceFragment)
+            }
+            else if (code == "Exception"){
+                Toast.makeText(context,"Oupsi, something went wrong", Toast.LENGTH_LONG).show()
                 viewModel.resetUserData()
             }
         })
