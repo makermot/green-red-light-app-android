@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoginBinding
@@ -56,25 +57,10 @@ class LoginFragment : Fragment() {
                 Toast.makeText(context,"Pick an image", Toast.LENGTH_SHORT).show()
             }
             else {
+                println("Signing up with image, password and username")
                 viewModel.username = binding.Username.text.toString()
                 viewModel.password = binding.Password.text.toString()
-
-                //(activity as MainActivity).setBottomNavigationVisibility(View.VISIBLE)
-
-                if(!viewModel.fetchProfile()){
-                    viewModel.createProfile(activity?.applicationContext)
-                    view.let {
-                        // Send data to wear
-                        val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-                        viewModel.sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
-
-                        // Navigate to my space
-                        Navigation.findNavController(it)
-                            .navigate(R.id.action_loginFragment_to_mySpaceFragment)
-                    }
-                }else{
-                    Toast.makeText(context,"Profile already taken", Toast.LENGTH_LONG).show()
-                }
+                viewModel.createProfile(activity?.applicationContext)
             }
         }
 
@@ -89,19 +75,7 @@ class LoginFragment : Fragment() {
                 viewModel.username = binding.Username.text.toString()
                 viewModel.password = binding.Password.text.toString()
 
-                if(viewModel.fetchProfile()){
-                    view.let {
-                        // Send data to wear
-                        val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-                        viewModel.sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
-
-                        // Navigate to my space
-                        Navigation.findNavController(it)
-                            .navigate(R.id.action_loginFragment_to_mySpaceFragment)
-                    }
-                }else{
-                    Toast.makeText(context,"Incorrect password/username", Toast.LENGTH_LONG).show()
-                }
+                viewModel.fetchProfile()
             }
         }
 
@@ -110,6 +84,24 @@ class LoginFragment : Fragment() {
             imgIntent.setType("image/*")
             resultLauncher.launch(imgIntent)
         }
+
+        // add an observer to see if valid login as been found (async)
+        viewModel.validLogin.observe(viewLifecycleOwner, Observer { Login ->
+            println("We Observed Valid login : its value is :")
+            println(Login)
+            if(Login == true){
+                // Send data to wear
+                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+                viewModel.sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
+
+                // Navigate to my space
+                Navigation.findNavController(binding.root).navigate(R.id.action_loginFragment_to_mySpaceFragment)
+            }
+            else if (Login == false){
+                Toast.makeText(context,"Incorrect password/username", Toast.LENGTH_LONG).show()
+                viewModel.resetUserData()
+            }
+        })
 
         return binding.root
     }

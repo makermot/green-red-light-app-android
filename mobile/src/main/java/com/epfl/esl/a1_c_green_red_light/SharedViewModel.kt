@@ -21,22 +21,19 @@ import java.io.ByteArrayOutputStream
 class SharedViewModel : ViewModel() {
 
     // User data
-    var imageUri: Uri?
-    var username: String
+    var imageUri: Uri? = null
+    var username: String = ""
     var key: String = ""
     var password: String = ""
 
 
     // Live data
-    // TODO add an observer to check for success
-    private val _imageUploadSuccsess = MutableLiveData<Boolean?>()
-    val imageUploadSuccsess: LiveData<Boolean?>
-        get() = _imageUploadSuccsess
+    // validLogin : True is valid, false if not, null otherwise
+    private val _validLogin = MutableLiveData<Boolean?>()
+    val validLogin: LiveData<Boolean?>
+        get() = _validLogin
 
-    private val _profilePresent = MutableLiveData<Boolean?>()
-    val profilePresent: LiveData<Boolean?>
-        get() = _profilePresent
-
+    // imageBitmap : Bitmap value of profile image if valid, else null
     private val _imageBitmap = MutableLiveData<Bitmap?>()
     val imageBitmap: LiveData<Bitmap?>
         get() = _imageBitmap
@@ -50,14 +47,12 @@ class SharedViewModel : ViewModel() {
 
     // Init variable
     init {
-        imageUri = null
-        username = ""
-        _profilePresent.value = false
+        _validLogin.value = null
     }
 
 
     // Fetch profile in the FireBase
-    fun fetchProfile() : Boolean {
+    fun fetchProfile()  {
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (user in dataSnapshot.children) {
@@ -67,7 +62,7 @@ class SharedViewModel : ViewModel() {
                         if (password == passwordDatabase) {
                             // User is authentified
                             key = user.key.toString()
-                            _profilePresent.value = true
+                            //_profilePresent.value = true
 
                             // Fetch image : find reference then fetch it in cloud storage
                             val imageReference = storageRef.child("ProfileImages/" + username + ".jpg")
@@ -75,61 +70,93 @@ class SharedViewModel : ViewModel() {
                             imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener { receivedImage ->
                                 // Data for "ProfileImages/username.jpg" is returned, use this as needed
                                 _imageBitmap.value = BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
+                                _validLogin.value = true
                             }.addOnFailureListener {
                                 // TODO Handle any errors
+                                _validLogin.value = false
                             }
-                            Thread.sleep(5_000) // TODO améliorer ça Si on va trop vite -> on a pas le temps de fetch l'image qu'on à déjà call sendDataToWear et l'image n'est pas envoyé
+                            //Thread.sleep(5_000) // TODO améliorer ça Si on va trop vite -> on a pas le temps de fetch l'image qu'on à déjà call sendDataToWear et l'image n'est pas envoyé
                             break
                         }
+                        else{
+                            _validLogin.value = false
+                        }
                     }
-                }
-                if(_profilePresent.value != true){
-                    _profilePresent.value = false
+                    else {
+                        _validLogin.value = false
+                    }
                 }
             }
             override fun onCancelled(databaseError: DatabaseError) {}
         })
-        return _profilePresent.value!!
     }
 
 
     // Create Profile in the FireBase
     fun createProfile(context: Context?) {
-        key = username
-        profileRef.child(key).child("username").setValue(username)
-        profileRef.child(key).child("password").setValue(password)
+        println("Creating profile")
+        var error: Boolean = false
 
-        val profileImageRef = storageRef.child("ProfileImages/" + username + ".jpg")
-        val matrix = Matrix()
-        matrix.postRotate(0F)
-        var imageBitmap = MediaStore.Images.Media.getBitmap(context?.contentResolver, imageUri)
-        val ratio: Float = 13F
-        val imageBitmapScaled = Bitmap.createScaledBitmap(
-            imageBitmap,
-            (imageBitmap.width / ratio).toInt(), (imageBitmap.height / ratio).toInt(), false
-        )
-        imageBitmap = Bitmap.createBitmap(
-            imageBitmapScaled, 0, 0,
-            (imageBitmap.width / ratio).toInt(), (imageBitmap.height / ratio).toInt(),
-            matrix, true
-        )
+        // Check if username is already taken in the database
+        profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                for (user in dataSnapshot.children) {
+                    val usernameDatabase = user.child("username").getValue(String::class.java)!!
+                    if (username == usernameDatabase) {
+                        //Username is already taken -> abort profile creation
+                        println("Existing Profile found")
+                        error = true
+                    }
+                }
+            }
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
+        println("waiting")
+        Thread.sleep(1_000)
+        println("finnished")
+        if(!error) {
+            println("Start creating profile")
+            // Create key and add name and password to realtime database
+            key = username
+            profileRef.child(key).child("username").setValue(username)
+            profileRef.child(key).child("password").setValue(password)
 
-        // update livedata
-        _imageBitmap.value = imageBitmap
-
-        val stream = ByteArrayOutputStream()
-        imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        val imageByteArray = stream.toByteArray()
-        val uploadProfileImage = profileImageRef.putBytes(imageByteArray)
-
-        uploadProfileImage.addOnFailureListener {
-            _imageUploadSuccsess.value = false
-        }.addOnSuccessListener { taskSnapshot ->
-            profileRef.child(key).child("imageURL").setValue(
-                (FirebaseStorage.getInstance()
-                    .getReference()).toString() + "ProfileImages/" + username + ".jpg"
+            // Compress user image to bitmap and then PNG
+            val matrix = Matrix()
+            matrix.postRotate(0F)
+            var imageBitmap = MediaStore.Images.Media.getBitmap(context?.contentResolver, imageUri)
+            val ratio: Float = 13F
+            val imageBitmapScaled = Bitmap.createScaledBitmap(
+                imageBitmap,
+                (imageBitmap.width / ratio).toInt(), (imageBitmap.height / ratio).toInt(), false
             )
-            _imageUploadSuccsess.value = true
+            imageBitmap = Bitmap.createBitmap(
+                imageBitmapScaled, 0, 0,
+                (imageBitmap.width / ratio).toInt(), (imageBitmap.height / ratio).toInt(),
+                matrix, true
+            )
+            _imageBitmap.value =
+                imageBitmap // update livedata -> save the bitmap user image to be shown later
+            val stream = ByteArrayOutputStream()
+            imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            val imageByteArray = stream.toByteArray()
+
+            // Upload image to cloud storage and then create link in realtime database
+            val profileImageRef = storageRef.child("ProfileImages/" + username + ".jpg")
+            val uploadProfileImage = profileImageRef.putBytes(imageByteArray)
+            uploadProfileImage.addOnFailureListener {
+                _validLogin.value = false
+            }.addOnSuccessListener { taskSnapshot ->
+                profileRef.child(key).child("imageURL").setValue(
+                    (FirebaseStorage.getInstance()
+                        .getReference()).toString() + "ProfileImages/" + username + ".jpg"
+                )
+                _validLogin.value = true
+            }
+        }
+        else{
+            // We return validLogin only at the end to avoid being interupted by its obersver
+            _validLogin.value = false
         }
     }
 
@@ -169,7 +196,6 @@ class SharedViewModel : ViewModel() {
         password = ""
         imageUri = null
         key = ""
-        _imageUploadSuccsess.value = null
-        _profilePresent.value = false
+        _validLogin.value = null
     }
 }
