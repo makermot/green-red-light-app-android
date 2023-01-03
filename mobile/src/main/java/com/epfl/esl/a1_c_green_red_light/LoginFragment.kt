@@ -66,7 +66,7 @@ class LoginFragment : Fragment() {
                     view.let {
                         // Send data to wear
                         val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-                        sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
+                        viewModel.sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
 
                         // Navigate to my space
                         Navigation.findNavController(it)
@@ -93,7 +93,7 @@ class LoginFragment : Fragment() {
                     view.let {
                         // Send data to wear
                         val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-                        sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
+                        viewModel.sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
 
                         // Navigate to my space
                         Navigation.findNavController(it)
@@ -116,7 +116,7 @@ class LoginFragment : Fragment() {
 
 
     // Send image and user name to wear
-    fun sendUserNameAndImageToWear(context: Context?, dataClient: DataClient) {
+    /*fun sendUserNameAndImageToWear(context: Context?, dataClient: DataClient) {
         /*
         val matrix = Matrix()
         var imageBitmap = MediaStore.Images.Media.getBitmap(context?.contentResolver, viewModel.imageUri)
@@ -151,6 +151,7 @@ class LoginFragment : Fragment() {
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
     }
+     */
 
 
     // Function to handle user image selection

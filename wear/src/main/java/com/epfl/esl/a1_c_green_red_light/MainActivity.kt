@@ -3,6 +3,7 @@ package com.epfl.esl.a1_c_green_red_light
 import android.app.Activity
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.view.View
 import androidx.databinding.DataBindingUtil
 import com.epfl.esl.a1_c_green_red_light.databinding.ActivityMainBinding
 import com.google.android.gms.wearable.*
@@ -38,17 +39,19 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
                 val receivedUsernameBitmap = BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
 
                 binding.userImage.setImageBitmap(receivedUsernameBitmap)
-                binding.welcomeText.setText("Welcome")
-                binding.userName.setText(receivedUsername)
+                binding.welcomeText.text = "Welcome"
+                binding.userName.text = receivedUsername
             }
-
 
         dataEvents
             .filter {it.dataItem.uri.path == "/command" }
             .forEach { event ->
                 val receivedCommand: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("startCommand")
                 if (receivedCommand == "start"){
+                    //binding.userName.text = "voila voila"
                     binding.userName.setText(receivedCommand)
+                    //binding.waitingView.visibility = View.GONE
+                    //binding.startText.visibility = View.VISIBLE
                 }
             }
     }

@@ -49,32 +49,13 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
 
         binding.gotoWearButton.setOnClickListener{view: View ->
+            // Send start condition to wear
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            viewModel.sendStartToWear(activity?.applicationContext, dataClient)
+            viewModel.sendStartToWear(dataClient)
             Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
         }
 
         return binding.root
-    }
-
-
-    // Send Start and Stop command to the watch
-    private fun sendCommandToWear(command: String) {
-        Thread(Runnable {
-            println("Started the Thread")
-            val connectedNodes: List<String> = Tasks
-                .await(
-                    Wearable
-                        .getNodeClient(activity as MainActivity).connectedNodes
-                )
-                .map { it.id }
-            connectedNodes.forEach {
-                val messageClient: MessageClient = Wearable
-                    .getMessageClient(activity as AppCompatActivity)
-                messageClient.sendMessage(it, "/command", command.toByteArray())
-            }
-            println("Finnished the Thread")
-        }).start()
     }
 
 

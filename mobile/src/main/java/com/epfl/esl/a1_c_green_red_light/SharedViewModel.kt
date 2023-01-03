@@ -134,10 +134,29 @@ class SharedViewModel : ViewModel() {
     }
 
 
+    // Send image and user name to wear
+    fun sendUserNameAndImageToWear(context: Context?, dataClient: DataClient) {
+        val stream = ByteArrayOutputStream()
+        var imageBitmap = imageBitmap.value
+        imageBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        val imageByteArray = stream.toByteArray()
+
+        val request: PutDataRequest = PutDataMapRequest.create("/userInfo").run {
+            dataMap.putByteArray("profileImage", imageByteArray)
+            dataMap.putString("username", username)
+            asPutDataRequest()
+        }
+
+        request.setUrgent()
+        val putTask: Task<DataItem> = dataClient.putDataItem(request)
+    }
+
+
     // Send Start command to Wear
-    fun sendStartToWear(context: Context?, dataClient: DataClient) {
+    fun sendStartToWear(dataClient: DataClient) {
         val request: PutDataRequest = PutDataMapRequest.create("/command").run {
-            dataMap.putString("startCommand", "start")
+            val startCommand: String = "start"
+            dataMap.putString("startCommand", startCommand)
             asPutDataRequest()
         }
 
