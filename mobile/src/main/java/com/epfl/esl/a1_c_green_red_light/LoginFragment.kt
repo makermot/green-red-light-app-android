@@ -46,6 +46,9 @@ class LoginFragment : Fragment() {
         // Set title on the Top Bar
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Login page"
 
+        // Reset authentification variable when page is recreated
+        viewModel.resetAuthentification()
+
         binding.SignUp.setOnClickListener { view: View ->
 
             if (binding.Username.text.toString() == "") {
@@ -99,7 +102,7 @@ class LoginFragment : Fragment() {
             else if (code == "Valid login"){
                 // Send data to wear
                 val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-                viewModel.sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
+                viewModel.sendUserNameAndImageToWear(dataClient)
 
                 // Navigate to my space
                 Navigation.findNavController(binding.root).navigate(R.id.action_loginFragment_to_mySpaceFragment)
@@ -116,7 +119,7 @@ class LoginFragment : Fragment() {
             else if (code == "Profile created"){
                 // Send data to wear
                 val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-                viewModel.sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
+                viewModel.sendUserNameAndImageToWear(dataClient)
 
                 // Navigate to my space
                 Navigation.findNavController(binding.root).navigate(R.id.action_loginFragment_to_mySpaceFragment)
@@ -130,46 +133,6 @@ class LoginFragment : Fragment() {
         return binding.root
     }
 
-
-    // Send image and user name to wear
-    /*fun sendUserNameAndImageToWear(context: Context?, dataClient: DataClient) {
-        /*
-        val matrix = Matrix()
-        var imageBitmap = MediaStore.Images.Media.getBitmap(context?.contentResolver, viewModel.imageUri)
-        val ratio: Float = 13F
-        val imageBitmapScaled = Bitmap.createScaledBitmap(
-            imageBitmap,
-            (imageBitmap.width / ratio).toInt(),
-            (imageBitmap.height / ratio).toInt(),
-            false
-        )
-        imageBitmap = Bitmap.createBitmap(
-            imageBitmapScaled,
-            0,
-            0,
-            (imageBitmap.width / ratio).toInt(),
-            (imageBitmap.height / ratio).toInt(),
-            matrix,
-            true
-        )
-         */
-        val stream = ByteArrayOutputStream()
-        var imageBitmap = viewModel.imageBitmap.value
-        imageBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        val imageByteArray = stream.toByteArray()
-
-        val request: PutDataRequest = PutDataMapRequest.create("/userInfo").run {
-            dataMap.putByteArray("profileImage", imageByteArray)
-            dataMap.putString("username", viewModel.username)
-            asPutDataRequest()
-        }
-
-        request.setUrgent()
-        val putTask: Task<DataItem> = dataClient.putDataItem(request)
-    }
-     */
-
-
     // Function to handle user image selection
     var resultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -179,12 +142,5 @@ class LoginFragment : Fragment() {
                 binding.Userimage.setImageURI(imageUri)
             }
         }
-
-
-    // Reset user data when the App is paused
-    /*override fun onPause() {
-        super.onPause()
-        viewModel.resetUserData()
-    }*/
 
 }

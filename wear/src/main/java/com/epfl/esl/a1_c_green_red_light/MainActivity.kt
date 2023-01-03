@@ -21,18 +21,23 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
 
     override fun onResume() {
         super.onResume()
+        println("App resumed")
         Wearable.getDataClient(this).addListener(this)
     }
 
     override fun onPause() {
         super.onPause()
+        println("App paused")
         Wearable.getDataClient(this).removeListener(this)
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
+        println(" On Data Changed Called")
+
         dataEvents
             .filter {it.dataItem.uri.path == "/userInfo" }
             .forEach { event ->
+                println("User Info Event")
                 val receivedImage: ByteArray = DataMapItem.fromDataItem(event.dataItem).dataMap.getByteArray("profileImage")
                 val receivedUsername: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("username")
 
@@ -46,7 +51,10 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
         dataEvents
             .filter {it.dataItem.uri.path == "/command" }
             .forEach { event ->
-                val receivedCommand: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("startCommand")
+                println("command event")
+                val receivedTimeStamp: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
+                val receivedCommand: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("command")
+                binding.welcomeText.setText(receivedTimeStamp)
                 if (receivedCommand == "start"){
                     //binding.userName.text = "voila voila"
                     binding.userName.setText(receivedCommand)

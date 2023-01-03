@@ -40,18 +40,28 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
     private val LOCATION_REQUEST_CODE = 101
     private lateinit var mMap: GoogleMap
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+
+        // Initialise Binding
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_lounge, container, false)
+
+        // Initialise viewModel
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
-        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
+        // Set title on the Top Bar
+        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Lounge"
 
         binding.gotoWearButton.setOnClickListener{view: View ->
             // Send start condition to wear
+            println("declare Client")
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            viewModel.sendStartToWear(dataClient)
+            viewModel.sendCommandToWear(dataClient, "start")
+            println("End SendStart to wear : Navigate")
+
+            // Navigate to in progressFragment
             Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
         }
 

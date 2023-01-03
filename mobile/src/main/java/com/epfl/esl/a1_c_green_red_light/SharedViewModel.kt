@@ -6,17 +6,16 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import android.provider.MediaStore
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
+
 
 class SharedViewModel : ViewModel() {
 
@@ -151,10 +150,6 @@ class SharedViewModel : ViewModel() {
         val profileImageRef = storageRef.child("ProfileImages/" + username + ".jpg")
         val uploadProfileImage = profileImageRef.putBytes(imageByteArray)
         uploadProfileImage.addOnSuccessListener { taskSnapshot ->
-            profileRef.child(key).child("imageURL").setValue(
-                (FirebaseStorage.getInstance()
-                    .getReference()).toString() + "ProfileImages/" + username + ".jpg"
-            )
             _authentification.value = "Profile created"
         }.addOnFailureListener {
             _authentification.value = "Exception"
@@ -163,13 +158,18 @@ class SharedViewModel : ViewModel() {
 
 
     // Send image and user name to wear
-    fun sendUserNameAndImageToWear(context: Context?, dataClient: DataClient) {
+    fun sendUserNameAndImageToWear(dataClient: DataClient) {
+        // Add a timestamp to the message, so its truly different each time !
+        val tsLong = System.currentTimeMillis() / 1000
+        val timestamp = tsLong.toString()
+
         val stream = ByteArrayOutputStream()
         var imageBitmap = imageBitmap.value
         imageBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream)
         val imageByteArray = stream.toByteArray()
 
         val request: PutDataRequest = PutDataMapRequest.create("/userInfo").run {
+            dataMap.putString("timeStamp", timestamp)
             dataMap.putByteArray("profileImage", imageByteArray)
             dataMap.putString("username", username)
             asPutDataRequest()
@@ -177,20 +177,32 @@ class SharedViewModel : ViewModel() {
 
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
+        putTask.addOnSuccessListener {
+            println("Great Succes! : Image and user name sent to wear")
+        }
     }
 
 
-    // Send Start command to Wear
-    fun sendStartToWear(dataClient: DataClient) {
+    // Send string command to Wear
+    fun sendCommandToWear(dataClient: DataClient, command : String) {
+        // Add a timestamp to the message, so its truly different each time !
+        val tsLong = System.currentTimeMillis() / 1000
+        val timestamp = tsLong.toString()
+
         val request: PutDataRequest = PutDataMapRequest.create("/command").run {
-            val startCommand: String = "start"
-            dataMap.putString("startCommand", startCommand)
+            dataMap.putString("timeStamp", timestamp)
+            dataMap.putString("command", command)
             asPutDataRequest()
         }
 
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
+        putTask.addOnSuccessListener {
+            println("Great Succes! : Command sent to wear")
+        }
+
     }
+
 
     fun resetUserData(){
         username = ""
@@ -198,6 +210,10 @@ class SharedViewModel : ViewModel() {
         imageUri = null
         key = ""
         _validLogin.value = null
+        _authentification.value = null
+    }
+
+    fun resetAuthentification(){
         _authentification.value = null
     }
 }
