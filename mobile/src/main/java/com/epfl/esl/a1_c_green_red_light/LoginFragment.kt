@@ -43,7 +43,8 @@ class LoginFragment : Fragment() {
         // Initialise viewModel
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
-        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
+        // Set title on the Top Bar
+        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Login page"
 
         binding.SignUp.setOnClickListener { view: View ->
 
@@ -86,24 +87,6 @@ class LoginFragment : Fragment() {
             imgIntent.setType("image/*")
             resultLauncher.launch(imgIntent)
         }
-
-        // add an observer to see if valid login as been found (async)
-        /*viewModel.validLogin.observe(viewLifecycleOwner, Observer { Login ->
-            println("We Observed Valid login : its value is :")
-            println(Login)
-            if(Login == true){
-                // Send data to wear
-                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-                viewModel.sendUserNameAndImageToWear(activity?.applicationContext, dataClient)
-
-                // Navigate to my space
-                Navigation.findNavController(binding.root).navigate(R.id.action_loginFragment_to_mySpaceFragment)
-            }
-            else if (Login == false){
-                Toast.makeText(context,"Incorrect password/username", Toast.LENGTH_LONG).show()
-                viewModel.resetUserData()
-            }
-        })*/
 
         viewModel.authentification.observe(viewLifecycleOwner, Observer { code ->
             print("Authentification changed : code :")

@@ -30,12 +30,17 @@ class MySpaceFragment : Fragment() {
         // Initialise viewModel
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
+        // Set title on the Top Bar
+        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : My Space"
+
         // add an observer to the profile Image
         viewModel.imageBitmap.observe(viewLifecycleOwner, Observer { newImageBitmap ->
             binding.welcomeImage.setImageBitmap(newImageBitmap)
+            binding.welcomeUsername.text = buildString {
+                append("Welcome ")
+                append(viewModel.username)
+                append(" !") }
         })
-
-        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
 
         binding.statButton.setOnClickListener{view: View ->
             view.let {
@@ -50,7 +55,6 @@ class MySpaceFragment : Fragment() {
                     .navigate(R.id.action_mySpaceFragment_to_loungeFragment)
             }
         }
-
 
         return binding.root
     }
