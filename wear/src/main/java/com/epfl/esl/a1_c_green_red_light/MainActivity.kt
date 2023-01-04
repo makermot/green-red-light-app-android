@@ -10,14 +10,21 @@ import android.util.Log
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import com.epfl.esl.a1_c_green_red_light.databinding.ActivityMainBinding
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.wearable.*
 
 class   MainActivity : Activity(), DataClient.OnDataChangedListener {
 
     private lateinit var binding: ActivityMainBinding
+    var mFusedLocationClient: FusedLocationProviderClient? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //definition of the FusedLocationClient
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
@@ -76,10 +83,25 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
                 }
             }
     }
-}
 
 
 private fun hasGps(context : Context): Boolean{
     return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
 }
+
+private fun sendDataToMobile(mFusedLocationClient : LatLng) {
+    val dataClient: DataClient = Wearable.getDataClient(this)
+    val putDataReq: PutDataRequest = PutDataMapRequest.create("/GPS_data").run {
+        var LocationLat = mFusedLocationClient.latitude
+        var LocationLong = mFusedLocationClient.longitude
+        dataMap.putDouble("latitude", LocationLat)
+        dataMap.putDouble("longitude", LocationLong)
+        asPutDataRequest()
+    }
+    dataClient.putDataItem(putDataReq)
+}
+
+}
+
+
 
