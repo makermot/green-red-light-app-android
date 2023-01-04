@@ -21,6 +21,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.MutableLiveData
 import com.epfl.esl.a1_c_green_red_light.databinding.ActivityMainBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -33,13 +37,23 @@ import java.util.*
 import kotlin.concurrent.timerTask
 import kotlin.math.sqrt
 
-class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedListener {
+
+class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedListener,
+    LifecycleOwner {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private lateinit var dataClient : DataClient
+    private lateinit var lifecycleRegistry: LifecycleRegistry
 
     private var screen :String? = "waiting"
+
+    // Live data
+    private var stateMachine = MutableLiveData<String>()
+    // Init Live data variable
+    init {
+        stateMachine.value = "unlogged"
+    }
 
     // Constants
     private val SHAKE_THRESHOLD = 1.1f
@@ -52,24 +66,29 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private var mSensorType = 0
     private var mShakeTime: Long = 0
     private var timer = Timer()
+    private var timerDeconection: Timer? = null
     private var startTime: Long = 0
     private var mHandler: Handler = object : Handler(){}
 
     private var light: String = "green"
-    private var increase: Int = 0
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        lifecycleRegistry = LifecycleRegistry(this)
+        lifecycleRegistry.markState(Lifecycle.State.CREATED)
+
         //definition of the FusedLocationClient
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-
         // Instantiate dataclient
         dataClient = Wearable.getDataClient(this)
-        
+
+        // Initialise Binding
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
+        // Check if hardware has GPS
         if (!hasGps(this)) {
             Log.d(TAG, "This hardware doesn't have GPS.")
             // Fall back to functionality that doesn't use location or
@@ -84,27 +103,33 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         mSensorManager = this.getSystemService(SENSOR_SERVICE) as SensorManager?
         mSensor = mSensorManager!!.getDefaultSensor(mSensorType)
 
+        // Add observer on state machine
+        stateMachine.observe(this) { state ->
+            updateState()
+        }
+
     }
 
 
-    private fun updateTime(){
-        binding.elapsedTimeText.text = (System.currentTimeMillis() / 1000 - startTime).toString()
-    }
-
+    // instantiate data client
     override fun onResume() {
         super.onResume()
         println("App resumed")
         Wearable.getDataClient(this).addListener(this)
-        mSensorManager!!.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL)
+        //mSensorManager!!.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
+
+    // remove data client
     override fun onPause() {
         super.onPause()
         println("App paused")
         Wearable.getDataClient(this).removeListener(this)
-        mSensorManager!!.unregisterListener(this)
+        //mSensorManager!!.unregisterListener(this)
     }
 
+
+    // receive Message from mobile
     override fun onDataChanged(dataEvents: DataEventBuffer) {
         println(" On Data Changed Called")
 
@@ -177,20 +202,63 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                     }
                 }
             }
+
+        dataEvents
+            .filter {it.dataItem.uri.path == "/state" }
+            .forEach { event ->
+                print("Heart beat received :")
+                val receivedStatemachine: String? = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("state")
+                // To handle null case -> should never happen btw
+                if(receivedStatemachine != null){
+                    print("received state :")
+                    println(receivedStatemachine)
+
+                    // to avoid call the observer each time the value is reasigned
+                    if(stateMachine.value != receivedStatemachine){
+                        stateMachine.value = receivedStatemachine!!
+                    }
+
+                    // reset timer if present
+                    if(timerDeconection != null) {
+                        timerDeconection!!.cancel()
+                        timerDeconection!!.purge()
+                        timerDeconection = null
+                    }
+
+                    // Launch watch dog timer 10s
+                    timerDeconection = Timer()
+                    timerDeconection!!.schedule(timerTask {
+                        println("Watch Dog Timer")
+                        stateMachine.value = "unlogged"
+                    }, 10000, 5000)
+                }
+            }
     }
 
+
+    private fun updateState(){
+        print("We update the state machine with state :")
+        println(stateMachine.value)
+
+    }
+
+    // Call detect shake
     override fun onSensorChanged(event: SensorEvent) {
         detectShake(event)
     }
 
+
+    // TODO Implement
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
         println("I am in onAccuracyChanged")
     }
 
-    // References:
-    //  - http://jasonmcreynolds.com/?p=388
-    //  - http://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
+
+    // Detect with acceleromter if the user moves
     private fun detectShake(event: SensorEvent) {
+        // References:
+        //  - http://jasonmcreynolds.com/?p=388
+        //  - http://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
         val now = System.currentTimeMillis()
         //println("I am in detectShake")
         if (now - mShakeTime > SHAKE_WAIT_TIME_MS) {
@@ -226,11 +294,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     }
 
 
-    private fun hasGps(context : Context): Boolean{
-        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
-    }
-
-
+    // Get GPS position from wear and all sendGPSToMobile func if success
     private fun getGPSPositionandCallSendGPSToMobile(){
         println("We are getGPSPositionandCallSendGPSToMobile")
 
@@ -255,37 +319,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         }
     }
 
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        when (requestCode) {
-            LOCATION_REQUEST_CODE -> {
-                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(
-                        this,
-                        "Unable to show location - permission required",
-                        Toast.LENGTH_LONG
-                    ).show()
-                } else {
-                    println("Wow, we have permission now")
-                }
-            }
-        }
-    }
-
-
-    // Send GPS coordonate to mobile
-    /*private fun sendGPSToMobile(position : Location) {
-        println("We are in send GPS to Mobile")
-        val dataClient: DataClient = Wearable.getDataClient(this)
-        val putDataReq: PutDataRequest = PutDataMapRequest.create("/GPS_data").run {
-            var LocationLat = position.latitude
-            var LocationLong = position.longitude
-            dataMap.putDouble("latitude", LocationLat)
-            dataMap.putDouble("longitude", LocationLong)
-            asPutDataRequest()
-        }
-        dataClient.putDataItem(putDataReq)
-    }*/
 
     // Send GPS coordonate to mobile
     fun sendGPSToMobile(position : Location) {
@@ -312,6 +345,48 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         }
     }
 
+
+    // Function to request permision to position
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            LOCATION_REQUEST_CODE -> {
+                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(
+                        this,
+                        "Unable to show location - permission required",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    println("Wow, we have permission now")
+                }
+            }
+        }
+    }
+
+
+    // Verify if hardware has GPS capabilities
+    private fun hasGps(context : Context): Boolean{
+        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+    }
+
+
+    // update elapse time display
+    private fun updateTime(){
+        binding.elapsedTimeText.text = (System.currentTimeMillis() / 1000 - startTime).toString()
+    }
+
+
+    // update lifecycle -> needed for the observer
+    public override fun onStart() {
+        super.onStart()
+        lifecycleRegistry.markState(Lifecycle.State.STARTED)
+    }
+
+
+    // return lifecyle owner -> need for the observer
+    override fun getLifecycle(): Lifecycle {
+        return lifecycleRegistry
+    }
 }
 
 

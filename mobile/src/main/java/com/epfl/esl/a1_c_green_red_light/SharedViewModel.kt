@@ -305,7 +305,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // Start thread to update heart beat
     fun startHeartBeat(){
-        timer = Timer()
         timer.schedule(timerTask {
             println("Heart Beat")
             mHandler.post( Runnable() {
