@@ -94,6 +94,12 @@ class MySpaceFragment : Fragment() {
             }
         }
 
+        // Initialise heart beat to keep sync with wear
+        viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendStateMachineToWear(dataClient, "logged")
+        })
+
         return binding.root
     }
 }

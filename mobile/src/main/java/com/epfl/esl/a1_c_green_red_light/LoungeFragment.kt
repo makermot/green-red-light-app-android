@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoungeBinding
@@ -64,6 +65,12 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
             // Navigate to in progressFragment
             Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
         }
+
+        // Initialise heart beat to keep sync with wear
+        viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendStateMachineToWear(dataClient, "logged")
+        })
 
         return binding.root
     }

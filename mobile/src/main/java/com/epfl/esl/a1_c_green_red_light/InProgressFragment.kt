@@ -63,8 +63,11 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        // Add goal position to Map
-        //inflateMap(LatLng(46.520444, 6.567717))
+        // Initialise heart beat to keep sync with wear
+        viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendStateMachineToWear(dataClient, "racing")
+        })
 
         // Add observer to playerPosition
         viewModel.receivedPosition.observe(viewLifecycleOwner, Observer { newPosition ->

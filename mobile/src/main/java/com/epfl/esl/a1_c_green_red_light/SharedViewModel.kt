@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
+import android.os.Handler
 import android.provider.MediaStore
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -15,6 +16,8 @@ import com.google.android.gms.wearable.*
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
+import java.util.*
+import kotlin.concurrent.timerTask
 
 
 class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
@@ -24,7 +27,9 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var username: String = ""
     var key: String = ""
     var password: String = ""
+    var timer = Timer()
 
+    private var mHandler: Handler = object : Handler(){}
 
     // Live data
     // String to check how far we are in the authentification process : It can take the value :
@@ -49,6 +54,11 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     val receivedPosition: LiveData<LatLng>
         get() = _receivedPosition
 
+    //localisation of the wear
+    private val _heartBeat = MutableLiveData<Int>()
+    val heartBeat: LiveData<Int>
+        get() = _heartBeat
+
     // FIREBASE
     var storageRef = FirebaseStorage.getInstance().reference
     val database: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -58,7 +68,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     // Init variable
     init {
         _authentification.value = null
-
+        _heartBeat.value = 0
     }
 
 
@@ -235,6 +245,26 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     }
 
+    // Send wear state machine status to Wear
+    fun sendStateMachineToWear(dataClient: DataClient, wearStateMachine : String) {
+        // Add a timestamp to the message, so its truly different each time !
+        val tsLong = System.currentTimeMillis() / 1000
+        val timestamp = tsLong.toString()
+
+        val request: PutDataRequest = PutDataMapRequest.create("/state").run {
+            dataMap.putString("timeStamp", timestamp)
+            dataMap.putString("state", wearStateMachine)
+            asPutDataRequest()
+        }
+
+        request.setUrgent()
+        val putTask: Task<DataItem> = dataClient.putDataItem(request)
+        putTask.addOnSuccessListener {
+            println("Great Succes! : Heart beat sent to wear")
+        }
+
+    }
+
 
     // Function that receive GPS command from wear
     override fun onDataChanged(dataEvents: DataEventBuffer) {
@@ -267,7 +297,22 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         _authentification.value = null
     }
 
+
     fun resetAddFriendStatus(){
         _addFriendStatus.value = null
+    }
+
+
+    // Start thread to update heart beat
+    fun startHeartBeat(){
+        timer = Timer()
+        timer.schedule(timerTask {
+            println("Heart Beat")
+            mHandler.post( Runnable() {
+                run {
+                    _heartBeat.value = _heartBeat.value?.plus(1)
+                }
+            })
+        }, 0, 3000)
     }
 }
