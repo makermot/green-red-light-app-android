@@ -51,25 +51,26 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
+        // Initialise Binding
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_in_progress, container, false)
-        // Inflate the layout for this fragment
 
+        // Initialise viewModel
         viewModel = ViewModelProvider(this).get(SharedViewModel::class.java)
 
-        viewModel.receivedLatitude.observe(viewLifecycleOwner, Observer { newLatitude ->
-            currentLat = newLatitude
-            getLastLocation()
-        })
-        viewModel.receivedLongitude.observe(viewLifecycleOwner, Observer { newLongitude ->
-            currentLng = newLongitude
-            getLastLocation()
-        })
+        // Set title on the Top Bar
+        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Race"
 
+        // Initialise Map
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
+        // Add goal position to Map
+        //inflateMap(LatLng(46.520444, 6.567717))
+
+        // Add observer to playerPosition
+        viewModel.receivedPosition.observe(viewLifecycleOwner, Observer { newPosition ->
+            updatePlayerLocation(newPosition)
+        })
 
         // changing green and red lights
         timer_race = Timer()
@@ -89,13 +90,10 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     }
 
 
-    private fun newAdress(newLat: Double, newLong: Double): LatLng {
-        return LatLng(newLat, newLong)
-    }
-
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
+        /*
         val permission: Boolean = ActivityCompat.checkSelfPermission(
             this.requireActivity(),
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -111,7 +109,11 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                 this.requireActivity(),
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE
         )
-        }
+        }*/
+
+        // Add goal position to Map
+        inflateMap(LatLng(46.520444, 6.567717))
+
         mMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
     }
 
@@ -141,56 +143,63 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+
+    // Add marker to goal position and center map around goal
+    private fun inflateMap(goalPosition : LatLng){
+        // Create goal icon to display
+        val goalIcon = BitmapDescriptorFactory.fromBitmap(
+            BitmapFactory.decodeResource(
+                this.resources,
+                R.drawable.ic_pickup
+            )
+        )
+
+        // add goal position to Map
+        mMap.addMarker(
+            MarkerOptions()
+                .position(goalPosition)
+                .title("Goal Location")
+                .icon(goalIcon)
+        )
+
+        // Move Camera to goal
+        val cameraPosition = CameraPosition.Builder()
+            .target(goalPosition)
+            .zoom(17f)
+            .build()
+        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+    }
+
+
     @SuppressLint("MissingPermission")
-    private fun getLastLocation() {
-        val fusedLocationProviderClient = FusedLocationProviderClient(this.requireActivity())
-        fusedLocationProviderClient.lastLocation
-            .addOnCompleteListener(this.requireActivity()) { task ->
-                if (task.isSuccessful && task.result != null) {
-                    val mLastLocation = task.result
-                    var address = "No known address"
-                    val gcd = Geocoder(this.requireActivity(), Locale.getDefault())
-                    val addresses: List<Address>
-                    try {
-                        addresses = gcd.getFromLocation(
-                            mLastLocation.latitude,
-                            mLastLocation.longitude,
-                            1
-                        )
-                        if (addresses.isNotEmpty()) {
-                            address = addresses[0].getAddressLine(0)
-                        }
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                    }
-                    val icon = BitmapDescriptorFactory.fromBitmap(
-                        BitmapFactory.decodeResource(
-                            this.resources,
-                            R.drawable.ic_pickup
-                        )
-                    )
-                    val sat = LatLng(46.520444, 6.567717)
-                    mMap.addMarker(
-                        MarkerOptions()
-                            .position(sat)
-                            .title("Current Location")
-                            .snippet(address)
-                            .icon(icon)
-                    )
-                    val cameraPosition = CameraPosition.Builder()
-                        .target(newAdress(currentLat, currentLng))
-                        .zoom(17f)
-                        .build()
-                    mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-                } else {
-                    Toast.makeText(
-                        this.requireActivity(),
-                        "No current location found",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-        return
+    // Update player location on Map
+    private fun updatePlayerLocation(playerPosition : LatLng) {
+        // Create icon to display
+        val playerIcon = BitmapDescriptorFactory.fromBitmap(
+            BitmapFactory.decodeResource(
+                this.resources,
+                R.drawable.ic_pickup
+            )
+        )
+
+        // add player position to Map
+        mMap.addMarker(
+            MarkerOptions()
+                .position(playerPosition)
+                .title("Goal Location")
+                .icon(playerIcon)
+        )
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
     }
 
 }
