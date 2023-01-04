@@ -1,5 +1,6 @@
 package com.epfl.esl.a1_c_green_red_light
 
+import android.Manifest
 import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.Context
@@ -9,34 +10,42 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import com.epfl.esl.a1_c_green_red_light.databinding.ActivityMainBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.wearable.*
 import kotlin.math.sqrt
+import java.util.*
+import kotlin.concurrent.timerTask
 
 class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedListener {
 
     private lateinit var binding: ActivityMainBinding
-
-    var mFusedLocationClient: FusedLocationProviderClient? = null
+    private lateinit var mFusedLocationClient: FusedLocationProviderClient
 
     private var screen :String? = "waiting"
 
     // Constants
     private val SHAKE_THRESHOLD = 1.1f
     private val SHAKE_WAIT_TIME_MS = 250
+    private val LOCATION_REQUEST_CODE = 101
 
     // Variables
     private var mSensorManager: SensorManager? = null
     private var mSensor: Sensor? = null
     private var mSensorType = 0
     private var mShakeTime: Long = 0
+    private var timer = Timer()
 
 
 
@@ -111,6 +120,15 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                     binding.waitingView.visibility = View.GONE
                     binding.startView.visibility = View.VISIBLE
                     screen = "start"
+                    timer = Timer()
+                    println("Setting Timer")
+                    timer.schedule(timerTask {
+                        println("Timer timeout")
+                        getGPSPositionandCallSendGPSToMobile()
+                    }, 0, 500)
+                }
+                else if(receivedCommand == "stop"){
+                    timer.cancel()
                 }
             }
     }
@@ -178,11 +196,60 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
     }
 
-    private fun sendDataToMobile(mFusedLocationClient : LatLng) {
+
+    private fun getGPSPositionandCallSendGPSToMobile(){
+        println("We are getGPSPositionandCallSendGPSToMobile")
+
+        val permission: Boolean = ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        if (permission) {
+            mFusedLocationClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener { position ->
+                println("We find the position")
+                println(position)
+                sendGPSToMobile(position)
+            }
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE
+            )
+        }
+    }
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    )
+    {
+        when (requestCode) {
+            LOCATION_REQUEST_CODE -> {
+                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(
+                        this,
+                        "Unable to show location - permission required",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    println("Wow, we have permission now")
+                }
+            }
+        }
+    }
+
+
+    // Send GPS coordonate to mobile
+    private fun sendGPSToMobile(position : Location) {
+        println("We are in send GPS to Mobile")
         val dataClient: DataClient = Wearable.getDataClient(this)
         val putDataReq: PutDataRequest = PutDataMapRequest.create("/GPS_data").run {
-            var LocationLat = mFusedLocationClient.latitude
-            var LocationLong = mFusedLocationClient.longitude
+            var LocationLat = position.latitude
+            var LocationLong = position.longitude
             dataMap.putDouble("latitude", LocationLat)
             dataMap.putDouble("longitude", LocationLong)
             asPutDataRequest()
