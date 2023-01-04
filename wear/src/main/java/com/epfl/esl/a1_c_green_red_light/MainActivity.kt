@@ -23,6 +23,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
 import kotlin.math.sqrt
 import java.util.*
@@ -32,6 +33,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
+    private lateinit var dataClient : DataClient
 
     private var screen :String? = "waiting"
 
@@ -55,6 +57,8 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         //definition of the FusedLocationClient
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        // Instantiate dataclient
+        dataClient = Wearable.getDataClient(this)
         
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
@@ -222,11 +226,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     }
 
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>, grantResults: IntArray
-    )
-    {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             LOCATION_REQUEST_CODE -> {
                 if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
@@ -244,7 +244,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
 
     // Send GPS coordonate to mobile
-    private fun sendGPSToMobile(position : Location) {
+    /*private fun sendGPSToMobile(position : Location) {
         println("We are in send GPS to Mobile")
         val dataClient: DataClient = Wearable.getDataClient(this)
         val putDataReq: PutDataRequest = PutDataMapRequest.create("/GPS_data").run {
@@ -255,6 +255,31 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             asPutDataRequest()
         }
         dataClient.putDataItem(putDataReq)
+    }*/
+
+    // Send GPS coordonate to mobile
+    fun sendGPSToMobile(position : Location) {
+        println("We are in send GPS to Mobile")
+        // Add a timestamp to the message, so its truly different each time !
+        val tsLong = System.currentTimeMillis() / 1000
+        val timestamp = tsLong.toString()
+
+        val request: PutDataRequest = PutDataMapRequest.create("/GPS_data").run {
+            dataMap.putString("timeStamp", timestamp)
+            var LocationLat = position.latitude
+            var LocationLong = position.longitude
+            dataMap.putDouble("latitude", LocationLat)
+            dataMap.putDouble("longitude", LocationLong)
+            asPutDataRequest()
+        }
+
+        request.setUrgent()
+        val putTask: Task<DataItem> = dataClient.putDataItem(request)
+        putTask.addOnSuccessListener {
+            println("Great Succes! : Command sent to wear")
+        }.addOnFailureListener {
+            println("Oupsi... On a pas envoyé les données GPS")
+        }
     }
 
 }

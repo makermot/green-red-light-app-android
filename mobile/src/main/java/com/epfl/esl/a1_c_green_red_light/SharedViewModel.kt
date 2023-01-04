@@ -1,19 +1,15 @@
 package com.epfl.esl.a1_c_green_red_light
 
-import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import android.provider.MediaStore
-import android.util.Log
-import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
 import com.google.firebase.database.*
@@ -49,12 +45,9 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         get() = _imageBitmap
 
     //localisation of the wear
-    private val _receivedLatitude = MutableLiveData<Double>()
-    val receivedLatitude: LiveData<Double>
-        get() = _receivedLatitude
-    private val _receivedLongitude = MutableLiveData<Double>()
-    val receivedLongitude: LiveData<Double>
-        get() = _receivedLongitude
+    private val _receivedPosition = MutableLiveData<LatLng>()
+    val receivedPosition: LiveData<LatLng>
+        get() = _receivedPosition
 
     // FIREBASE
     var storageRef = FirebaseStorage.getInstance().reference
@@ -242,12 +235,21 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     }
 
+
+    // Function that receive GPS command from wear
     override fun onDataChanged(dataEvents: DataEventBuffer) {
+        println("We recceived data from wear")
+
         dataEvents
-            .filter {it.dataItem.uri.path == "/GPS_Data" }
+            .filter {it.dataItem.uri.path == "/GPS_data" }
             .forEach { event ->
-                _receivedLatitude.value = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("latitude")
-                _receivedLongitude.value = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("longitude")
+                print("We received location :")
+
+                val latitude = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("latitude")
+                val longitude = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("longitude")
+
+                _receivedPosition.value = LatLng(latitude, longitude)
+                println(_receivedPosition.value)
             }
     }
 
