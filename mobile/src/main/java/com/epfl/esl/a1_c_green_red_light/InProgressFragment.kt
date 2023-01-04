@@ -18,7 +18,6 @@ import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentInProgressBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -30,6 +29,7 @@ import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.Wearable
 import java.io.IOException
 import java.util.*
+import kotlin.concurrent.timerTask
 
 
 class InProgressFragment : Fragment(), OnMapReadyCallback {
@@ -39,7 +39,12 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private val LOCATION_REQUEST_CODE = 101
 
+
     private var markerPlayer: Marker? = null
+
+    private var timer_race = Timer()
+    private var rand: Long = 0
+
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -66,7 +71,21 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
             updatePlayerLocation(newPosition)
         })
 
+        // changing green and red lights
+        timer_race = Timer()
+        rand = findRand()
+        timer_race.schedule(timerTask {
+            print("je print le rand : ")
+            println(rand)
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendCommandToWear(dataClient, "change_light")
+        }, 0, rand)
+
         return binding.root
+    }
+
+    private fun findRand(): Long {
+        return ((1..5).random())*1000.toLong()
     }
 
 
@@ -169,6 +188,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                 .position(playerPosition)
                 .title("Goal Location")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                .visible(true)
         )
     }
 
