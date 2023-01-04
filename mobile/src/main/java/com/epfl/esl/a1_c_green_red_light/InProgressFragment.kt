@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import android.location.Address
 import android.location.Geocoder
 import android.os.Bundle
+import android.system.Os.remove
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -24,10 +25,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.Wearable
 import java.io.IOException
@@ -40,6 +38,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private lateinit var viewModel: SharedViewModel
     private lateinit var mMap: GoogleMap
     private val LOCATION_REQUEST_CODE = 101
+
+    private var markerPlayer: Marker? = null
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -140,6 +140,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                 .position(goalPosition)
                 .title("Goal Location")
                 .icon(goalIcon)
+                .draggable(true)
         )
 
         // Move Camera to goal
@@ -155,22 +156,21 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     // Update player location on Map
     private fun updatePlayerLocation(playerPosition : LatLng) {
         // Create icon to display
-        val playerIcon = BitmapDescriptorFactory.fromBitmap(
-            BitmapFactory.decodeResource(
-                this.resources,
-                R.drawable.ic_pickup
-            )
+
+        //remove the last marker
+        markerPlayer = mMap.addMarker(
+            MarkerOptions()
+                .visible(false)
         )
 
         // add player position to Map
-        mMap.addMarker(
+        markerPlayer = mMap.addMarker(
             MarkerOptions()
                 .position(playerPosition)
                 .title("Goal Location")
-                .icon(playerIcon)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
         )
     }
-
 
     override fun onResume() {
         super.onResume()
