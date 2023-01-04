@@ -5,47 +5,43 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.*
 import com.epfl.esl.a1_c_green_red_light.databinding.ActivityMainBinding
-import com.google.android.gms.wearable.*
-import androidx.lifecycle.ViewModelProvider
+import com.google.android.gms.wearable.DataClient
+import com.google.android.gms.wearable.DataEventBuffer
+import com.google.android.gms.wearable.DataMapItem
+import com.google.android.gms.wearable.Wearable
+import kotlin.math.sqrt
 
-class   MainActivity : Activity(), DataClient.OnDataChangedListener {
+class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedListener {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var viewModel: WearViewModel
 
     private var screen :String? = "waiting"
+
+    // Constants
+    private val SHAKE_THRESHOLD = 1.1f
+    private val SHAKE_WAIT_TIME_MS = 250
+
+    // Variables
+    private var mSensorManager: SensorManager? = null
+    private var mSensor: Sensor? = null
+    private var mSensorType = 0
+    private var mShakeTime: Long = 0
 
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = ViewModelProvider(this).get(WearViewModel::class.java)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-
-
-
-        viewModel.isMoving.observe(viewLifecycleOwner, Observer { value ->
-            println("isMoving changed")
-            // watch is moving
-            if (screen == "start") {
-                if (value == true) {
-                    binding.start_text.text = "Moving"
-                }
-                //watch is still
-                else {
-                    binding.start_text.text = "Still"
-                }
-            }
-        })
 
         if (!hasGps(this)) {
             Log.d(TAG, "This hardware doesn't have GPS.")
@@ -56,7 +52,11 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
             Log.d(TAG, "This hardware has GPS.")
         }
 
-        return binding.root
+
+        mSensorType = Sensor.TYPE_ACCELEROMETER
+        mSensorManager = this.getSystemService(SENSOR_SERVICE) as SensorManager?
+        mSensor = mSensorManager!!.getDefaultSensor(mSensorType)
+
     }
 
 
@@ -64,6 +64,7 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
         super.onResume()
         println("App resumed")
         Wearable.getDataClient(this).addListener(this)
+        mSensorManager!!.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     override fun onPause() {
@@ -106,10 +107,77 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
                 }
             }
     }
-}
 
+    override fun onSensorChanged(event: SensorEvent) {
+        println("I am in onSensorChanged")
+        // If sensor is unreliable, then just return
+        if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
+            println("sensor unreliable")
+            return
+        }
+        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+            println("launch detectShake")
+            detectShake(event)
+        }
+    }
 
-private fun hasGps(context : Context): Boolean{
-    return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+        println("I am in onAccuracyChanged")
+    }
+
+    // References:
+    //  - http://jasonmcreynolds.com/?p=388
+    //  - http://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
+    private fun detectShake(event: SensorEvent) {
+        val now = System.currentTimeMillis()
+        println("I am in detectShake")
+        if (now - mShakeTime > SHAKE_WAIT_TIME_MS) {
+            mShakeTime = now
+            val gX = event.values[0] / SensorManager.GRAVITY_EARTH
+            val gY = event.values[1] / SensorManager.GRAVITY_EARTH
+            val gZ = event.values[2] / SensorManager.GRAVITY_EARTH
+
+            // gForce will be close to 1 when there is no movement
+            val gForce: Float = sqrt(gX * gX + gY * gY + gZ * gZ)
+
+            // Change boolean value if gForce exceeds threshold;
+            if (gForce > SHAKE_THRESHOLD){
+                binding.welcomeText.text = "Moving"
+                println("You are moving")
+            }
+            else {
+                binding.welcomeText.text = "Still"
+            println("You are still")
+            }
+        }
+    }
+
+    private fun isMoving(){
+        println("isMoving changed")
+        // watch is moving
+        if (screen == "start") {
+            if (screen == "start") {
+                binding.startText.text = "Moving"
+            }
+            //watch is still
+            else {
+                binding.startText.text = "Still"
+            }
+        }
+        else if (screen == "waiting") {
+            if (screen == "waiting") {
+                binding.welcomeText.text = "Moving"
+            }
+            //watch is still
+            else {
+                binding.welcomeText.text = "Still"
+            }
+        }
+    }
+
+    private fun hasGps(context : Context): Boolean{
+        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+    }
+
 }
 
