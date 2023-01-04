@@ -75,6 +75,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         timer_race = Timer()
         rand = findRand()
         timer_race.schedule(timerTask {
+            rand = findRand()
             print("je print le rand : ")
             println(rand)
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
