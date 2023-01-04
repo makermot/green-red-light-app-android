@@ -177,10 +177,11 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         // Create icon to display
 
         //remove the last marker
-        markerPlayer = mMap.addMarker(
-            MarkerOptions()
-                .visible(false)
-        )
+        if (markerPlayer != null) {
+            markerPlayer!!.remove()
+            //markerPlayer?.remove()
+            markerPlayer=null
+        }
 
         // add player position to Map
         markerPlayer = mMap.addMarker(
