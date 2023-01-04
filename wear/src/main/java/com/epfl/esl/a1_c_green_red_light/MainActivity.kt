@@ -268,7 +268,10 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             userImage.value = BitmapFactory.decodeResource(this.resources,R.drawable.ic_logo)
         }
         else if(stateMachine.value == "logged"){
-
+            if(username.value == null){
+                // request user info to mobile
+                sendUserInfoRequestToMobile()
+            }
         }
         else if(stateMachine.value == "racing"){
 
@@ -379,6 +382,28 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             println("Great Succes! : Command sent to wear")
         }.addOnFailureListener {
             println("Oupsi... On a pas envoyé les données GPS")
+        }
+    }
+
+
+    // request  userInfo to mobile to mobile
+    fun sendUserInfoRequestToMobile() {
+        println("We are in send requestInfo to Mobile")
+        // Add a timestamp to the message, so its truly different each time !
+        val tsLong = System.currentTimeMillis() / 1000
+        val timestamp = tsLong.toString()
+
+        val request: PutDataRequest = PutDataMapRequest.create("/request_user_info").run {
+            dataMap.putString("timeStamp", timestamp)
+            asPutDataRequest()
+        }
+
+        request.setUrgent()
+        val putTask: Task<DataItem> = dataClient.putDataItem(request)
+        putTask.addOnSuccessListener {
+            println("Great Succes! : Command request user info sent to wear")
+        }.addOnFailureListener {
+            println("Oupsi... On a pas envoyé les données request user info")
         }
     }
 

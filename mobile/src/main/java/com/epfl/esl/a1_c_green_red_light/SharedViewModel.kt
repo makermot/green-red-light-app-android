@@ -30,6 +30,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var timer = Timer()
 
     private var mHandler: Handler = object : Handler(){}
+    private var shouldSendUserInfoToWear: Boolean = false
 
     // Live data
     // String to check how far we are in the authentification process : It can take the value :
@@ -245,6 +246,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     }
 
+
     // Send wear state machine status to Wear
     fun sendStateMachineToWear(dataClient: DataClient, wearStateMachine : String) {
         // Add a timestamp to the message, so its truly different each time !
@@ -263,6 +265,10 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             println("Great Succes! : Heart beat sent to wear")
         }
 
+        if(shouldSendUserInfoToWear){
+            shouldSendUserInfoToWear = false
+            sendUserNameAndImageToWear(dataClient)
+        }
     }
 
 
@@ -280,6 +286,13 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
                 _receivedPosition.value = LatLng(latitude, longitude)
                 println(_receivedPosition.value)
+            }
+
+        dataEvents
+            .filter {it.dataItem.uri.path == "/request_user_info" }
+            .forEach { event ->
+                print("We received info request from wear :")
+                shouldSendUserInfoToWear = true
             }
     }
 
