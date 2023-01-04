@@ -19,10 +19,18 @@ import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.Wearable
 import kotlin.math.sqrt
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.wearable.*
+import androidx.lifecycle.ViewModelProvider
 
 class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedListener {
 
     private lateinit var binding: ActivityMainBinding
+
+    var mFusedLocationClient: FusedLocationProviderClient? = null
+    private lateinit var viewModel: WearViewModel
 
     private var screen :String? = "waiting"
 
@@ -41,6 +49,10 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //definition of the FusedLocationClient
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         if (!hasGps(this)) {
@@ -179,5 +191,25 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
     }
 
+
+
+private fun hasGps(context : Context): Boolean{
+    return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
 }
+
+private fun sendDataToMobile(mFusedLocationClient : LatLng) {
+    val dataClient: DataClient = Wearable.getDataClient(this)
+    val putDataReq: PutDataRequest = PutDataMapRequest.create("/GPS_data").run {
+        var LocationLat = mFusedLocationClient.latitude
+        var LocationLong = mFusedLocationClient.longitude
+        dataMap.putDouble("latitude", LocationLat)
+        dataMap.putDouble("longitude", LocationLong)
+        asPutDataRequest()
+    }
+    dataClient.putDataItem(putDataReq)
+}
+
+}
+
+
 

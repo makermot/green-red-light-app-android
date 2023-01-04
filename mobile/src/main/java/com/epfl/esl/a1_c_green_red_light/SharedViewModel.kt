@@ -8,9 +8,11 @@ import android.graphics.Matrix
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
@@ -19,7 +21,7 @@ import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
 
 
-class SharedViewModel : ViewModel() {
+class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // User data
     var imageUri: Uri? = null
@@ -46,6 +48,13 @@ class SharedViewModel : ViewModel() {
     val imageBitmap: LiveData<Bitmap?>
         get() = _imageBitmap
 
+    //localisation of the wear
+    private val _receivedLatitude = MutableLiveData<Double>()
+    val receivedLatitude: LiveData<Double>
+        get() = _receivedLatitude
+    private val _receivedLongitude = MutableLiveData<Double>()
+    val receivedLongitude: LiveData<Double>
+        get() = _receivedLongitude
 
     // FIREBASE
     var storageRef = FirebaseStorage.getInstance().reference
@@ -56,6 +65,7 @@ class SharedViewModel : ViewModel() {
     // Init variable
     init {
         _authentification.value = null
+
     }
 
 
@@ -230,6 +240,15 @@ class SharedViewModel : ViewModel() {
             println("Great Succes! : Command sent to wear")
         }
 
+    }
+
+    override fun onDataChanged(dataEvents: DataEventBuffer) {
+        dataEvents
+            .filter {it.dataItem.uri.path == "/GPS_Data" }
+            .forEach { event ->
+                _receivedLatitude.value = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("latitude")
+                _receivedLongitude.value = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("longitude")
+            }
     }
 
 
