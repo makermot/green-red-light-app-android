@@ -1,11 +1,13 @@
 package com.epfl.esl.a1_c_green_red_light
 
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -27,16 +29,17 @@ class SharedViewModel : ViewModel() {
 
 
     // Live data
-    // validLogin : True is valid, false if not, null otherwise
-    private val _validLogin = MutableLiveData<Boolean?>()
-    val validLogin: LiveData<Boolean?>
-        get() = _validLogin
-
     // String to check how far we are in the authentification process : It can take the value :
     // Invalid login, Valid login, Profile already existing, Ready to create profile, Profile created, Exception, null
     private val _authentification = MutableLiveData<String?>()
     val authentification: LiveData<String?>
         get() = _authentification
+
+    // String to check how far we are in the adding Friend process : It can take the value :
+    // Friend successfully added, Friend already present, Friend profile don't exist, null
+    private val _addFriendStatus = MutableLiveData<String?>()
+    val addFriendStatus: LiveData<String?>
+        get() = _addFriendStatus
 
     // imageBitmap : Bitmap value of profile image if valid, else null
     private val _imageBitmap = MutableLiveData<Bitmap?>()
@@ -52,7 +55,6 @@ class SharedViewModel : ViewModel() {
 
     // Init variable
     init {
-        _validLogin.value = null
         _authentification.value = null
     }
 
@@ -157,6 +159,33 @@ class SharedViewModel : ViewModel() {
     }
 
 
+    // Add friend to profile
+    fun addFriend(friendUsername : String) {
+        // Profile ref -> branche profile de la realtime database
+        profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if(dataSnapshot.hasChild(friendUsername)){
+                    println("Friend's profile Found")
+                    if(dataSnapshot.child(key).child("friend").hasChild(friendUsername)){
+                        println("Oh no... You're already friends")
+                        _addFriendStatus.value = "Friend already present"
+                    }
+                    else{
+                        println("Let's add your friend")
+                        profileRef.child(key).child("friend").child(friendUsername).setValue(friendUsername)
+                        _addFriendStatus.value = "Friend successfully added"
+                    }
+                }
+                else{
+                    println("Oh no... friend's profile not found")
+                    _addFriendStatus.value = "Friend profile don't exist"
+                }
+            }
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
+    }
+
+
     // Send image and user name to wear
     fun sendUserNameAndImageToWear(dataClient: DataClient) {
         // Add a timestamp to the message, so its truly different each time !
@@ -209,11 +238,15 @@ class SharedViewModel : ViewModel() {
         password = ""
         imageUri = null
         key = ""
-        _validLogin.value = null
         _authentification.value = null
     }
 
+
     fun resetAuthentification(){
         _authentification.value = null
+    }
+
+    fun resetAddFriendStatus(){
+        _addFriendStatus.value = null
     }
 }

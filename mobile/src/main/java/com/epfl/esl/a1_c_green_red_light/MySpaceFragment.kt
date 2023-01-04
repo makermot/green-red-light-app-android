@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -40,6 +41,35 @@ class MySpaceFragment : Fragment() {
                 append("Welcome ")
                 append(viewModel.username)
                 append(" !") }
+        })
+
+        binding.addFriendButton.setOnClickListener{view: View ->
+            view.let {
+                if(binding.friendUsername.text.toString() != "Friend's username"){
+                    viewModel.addFriend(binding.friendUsername.text.toString())
+                }
+                else{
+                    Toast.makeText(context,"Enter friend's username", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        viewModel.addFriendStatus.observe(viewLifecycleOwner, Observer { status ->
+            print("addFriendStatus changed : status :")
+            println(status)
+
+            if(status == "Friend already present"){
+                Toast.makeText(context,"Oupsi... You're already friends", Toast.LENGTH_LONG).show()
+                viewModel.resetAddFriendStatus()
+            }
+            else if (status == "Friend profile don't exist"){
+                Toast.makeText(context,"Oupsi... We don't find your friend's profile...", Toast.LENGTH_LONG).show()
+                viewModel.resetAddFriendStatus()
+            }
+            else if (status == "Friend successfully added"){
+                Toast.makeText(context,"Friend successfully added", Toast.LENGTH_LONG).show()
+                viewModel.resetAddFriendStatus()
+            }
         })
 
         binding.statButton.setOnClickListener{view: View ->
