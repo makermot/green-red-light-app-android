@@ -1,8 +1,12 @@
 package com.epfl.esl.a1_c_green_red_light
 
 import android.app.Activity
+import android.content.ContentValues.TAG
+import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import com.epfl.esl.a1_c_green_red_light.databinding.ActivityMainBinding
@@ -16,6 +20,15 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
         super.onCreate(savedInstanceState)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+        if (!hasGps(this)) {
+            Log.d(TAG, "This hardware doesn't have GPS.")
+            // Fall back to functionality that doesn't use location or
+            // warn the user that location function isn't available.
+        }
+        else{
+            Log.d(TAG, "This hardware has GPS.")
+        }
     }
 
 
@@ -64,3 +77,9 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
             }
     }
 }
+
+
+private fun hasGps(context : Context): Boolean{
+    return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+}
+

@@ -16,5 +16,4 @@
     <string name="signin">sign in</string>
     <string name="signup">sign up</string>
     <string name="Greetings">Welcome user! Please sign up below:</string>
-    <string name="my_statistics">My statistics</string>
 </resources>
