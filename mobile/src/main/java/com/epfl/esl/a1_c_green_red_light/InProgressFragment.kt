@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory
 import android.location.Address
 import android.location.Geocoder
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,9 +14,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentInProgressBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -32,6 +31,7 @@ import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.Wearable
 import java.io.IOException
 import java.util.*
+import kotlin.concurrent.timerTask
 
 
 class InProgressFragment : Fragment(), OnMapReadyCallback {
@@ -43,6 +43,9 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
     var currentLat: Double = 0.0
     var currentLng: Double = 0.0
+
+    private var timer_race = Timer()
+    private var rand: Long = 0
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -68,7 +71,21 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app)
 
+        // changing green and red lights
+        timer_race = Timer()
+        rand = findRand()
+        timer_race.schedule(timerTask {
+            print("je print le rand : ")
+            println(rand)
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendCommandToWear(dataClient, "change_light")
+        }, 0, rand)
+
         return binding.root
+    }
+
+    private fun findRand(): Long {
+        return ((1..5).random())*1000.toLong()
     }
 
 

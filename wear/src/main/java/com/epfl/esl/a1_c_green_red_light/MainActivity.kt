@@ -12,21 +12,22 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.location.Location
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.View
+import android.view.textclassifier.ConversationActions
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.epfl.esl.a1_c_green_red_light.databinding.ActivityMainBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.wearable.*
-import kotlin.math.sqrt
 import java.util.*
 import kotlin.concurrent.timerTask
+import kotlin.math.sqrt
 
 class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedListener {
 
@@ -46,16 +47,19 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private var mSensorType = 0
     private var mShakeTime: Long = 0
     private var timer = Timer()
+    private var startTime: Long = 0
+    private var mHandler: Handler = object : Handler(){}
 
-
+    private var light: String = "green"
+    private var increase: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         //definition of the FusedLocationClient
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         if (!hasGps(this)) {
@@ -74,6 +78,11 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     }
 
+
+
+    private fun updateTime(){
+        binding.elapsedTimeText.text = (System.currentTimeMillis() / 1000 - startTime).toString()
+    }
 
     override fun onResume() {
         super.onResume()
@@ -107,6 +116,10 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                 binding.waitingView.visibility = View.VISIBLE
                 binding.startView.visibility = View.GONE
                 screen = "waiting"
+                // TEST
+                //binding.waitingView.visibility = View.GONE
+                //binding.startView.visibility = View.VISIBLE
+
             }
 
         dataEvents
@@ -115,20 +128,49 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                 println("command event")
                 val receivedTimeStamp: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
                 val receivedCommand: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("command")
-                binding.welcomeText.setText(receivedTimeStamp)
+                binding.welcomeText.text = receivedTimeStamp
                 if (receivedCommand == "start"){
+                    println("est rentré")
+                    startTime = System.currentTimeMillis() / 1000
                     binding.waitingView.visibility = View.GONE
                     binding.startView.visibility = View.VISIBLE
                     screen = "start"
+                    light = "green"
+                    println("before timer")
                     timer = Timer()
+                    println("after timer")
                     println("Setting Timer")
                     timer.schedule(timerTask {
                         println("Timer timeout")
                         getGPSPositionandCallSendGPSToMobile()
-                    }, 0, 500)
+                        mHandler.post( Runnable() {
+                            runOnUiThread() {
+                                updateTime()
+                            }
+                        })
+                    }, 0, 1000)
                 }
                 else if(receivedCommand == "stop"){
                     timer.cancel()
+                }
+                else if(receivedCommand == "change_light"){
+                    //binding.startView.background = resources.getColor(R.color.green)
+                    if (light == "green") {
+                        binding.container.setBackgroundColor(
+                            ContextCompat.getColor(applicationContext, R.color.red))
+                        binding.startView.setBackgroundColor(
+                            ContextCompat.getColor(applicationContext, R.color.red))
+                        light = "red"
+                        println("change light to red")
+                    }
+                    else{
+                        binding.container.setBackgroundColor(
+                            ContextCompat.getColor(applicationContext, R.color.green))
+                        binding.startView.setBackgroundColor(
+                            ContextCompat.getColor(applicationContext, R.color.green))
+                        light = "green"
+                        println("change light to green")
+                    }
                 }
             }
     }
@@ -146,7 +188,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     //  - http://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
     private fun detectShake(event: SensorEvent) {
         val now = System.currentTimeMillis()
-        println("I am in detectShake")
+        //println("I am in detectShake")
         if (now - mShakeTime > SHAKE_WAIT_TIME_MS) {
             mShakeTime = now
             val gX = event.values[0] / SensorManager.GRAVITY_EARTH
@@ -157,13 +199,24 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             val gForce: Float = sqrt(gX * gX + gY * gY + gZ * gZ)
 
             // Change boolean value if gForce exceeds threshold;
-            if (gForce > SHAKE_THRESHOLD){
-                binding.welcomeText.text = "Moving"
-                println("You are moving")
-            }
-            else {
-                binding.welcomeText.text = "Still"
-            println("You are still")
+            if (light == "red"){
+                if (gForce > SHAKE_THRESHOLD) {
+                    binding.startView.visibility = View.GONE
+                    binding.cheatingView.visibility = View.VISIBLE
+                    binding.container.setBackgroundColor(
+                        ContextCompat.getColor(applicationContext, R.color.yellow))
+                }
+                else{
+                    binding.cheatingView.visibility = View.GONE
+                    binding.startView.visibility = View.VISIBLE
+                    if (light == "green"){
+                        binding.container.setBackgroundColor(
+                            ContextCompat.getColor(applicationContext, R.color.green))}
+                    else{
+                        binding.container.setBackgroundColor(
+                            ContextCompat.getColor(applicationContext, R.color.red))
+                    }
+                }
             }
         }
     }
@@ -171,13 +224,13 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private fun isMoving(){
         println("isMoving changed")
         // watch is moving
-        if (screen == "start") {
-            if (screen == "start") {
-                binding.startText.text = "Moving"
+        if (screen == "green") {
+            if (screen == "green") {
+                //binding.startText.text = "Moving"
             }
             //watch is still
             else {
-                binding.startText.text = "Still"
+                //binding.startText.text = "Still"
             }
         }
         else if (screen == "waiting") {
@@ -258,6 +311,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     }
 
 }
+
 
 
 
