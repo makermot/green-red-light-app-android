@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -30,6 +31,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
@@ -50,9 +52,13 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     // Live data
     private var stateMachine = MutableLiveData<String>()
+    private var username  = MutableLiveData<String?>()
+    private var userImage = MutableLiveData<Bitmap?>()
     // Init Live data variable
     init {
         stateMachine.value = "unlogged"
+        username.value = null
+        userImage.value = null
     }
 
     // Constants
@@ -108,6 +114,23 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             updateState()
         }
 
+        // Add observer on username
+        username.observe(this) { name ->
+            if(name == null){
+                binding.welcomeText.text = this.getString(R.string.waiting_for_logging)
+                binding.userName.text = this.getString(R.string.on_tablet)
+            }
+            else{
+                binding.welcomeText.text = this.getString(R.string.welcome)
+                binding.userName.text = name
+            }
+        }
+
+        // Add observer on userImage
+        userImage.observe(this) { image ->
+            binding.userImage.setImageBitmap(image)
+        }
+
     }
 
 
@@ -138,13 +161,9 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             .forEach { event ->
                 println("User Info Event")
                 val receivedImage: ByteArray = DataMapItem.fromDataItem(event.dataItem).dataMap.getByteArray("profileImage")
-                val receivedUsername: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("username")
+                username.value = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("username")
+                userImage.value = BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
 
-                val receivedUsernameBitmap = BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
-
-                binding.userImage.setImageBitmap(receivedUsernameBitmap)
-                binding.welcomeText.text = "Welcome"
-                binding.userName.text = receivedUsername
                 binding.waitingView.visibility = View.VISIBLE
                 binding.startView.visibility = View.GONE
                 screen = "waiting"
@@ -229,7 +248,11 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                     timerDeconection = Timer()
                     timerDeconection!!.schedule(timerTask {
                         println("Watch Dog Timer")
-                        stateMachine.value = "unlogged"
+                        mHandler.post( Runnable() {
+                            runOnUiThread() {
+                                stateMachine.value = "unlogged"
+                            }
+                        })
                     }, 10000, 5000)
                 }
             }
@@ -239,6 +262,20 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private fun updateState(){
         print("We update the state machine with state :")
         println(stateMachine.value)
+
+        if(stateMachine.value == "unlogged"){
+            username.value = null
+            userImage.value = BitmapFactory.decodeResource(this.resources,R.drawable.ic_logo)
+        }
+        else if(stateMachine.value == "logged"){
+
+        }
+        else if(stateMachine.value == "racing"){
+
+        }
+        else{
+            println("0h oh... wrong state machine")
+        }
 
     }
 
