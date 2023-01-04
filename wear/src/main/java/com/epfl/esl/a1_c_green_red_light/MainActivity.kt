@@ -19,6 +19,7 @@ import android.view.textclassifier.ConversationActions
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.get
 import androidx.databinding.DataBindingUtil
 import com.epfl.esl.a1_c_green_red_light.databinding.ActivityMainBinding
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -123,10 +124,8 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                 binding.waitingView.visibility = View.VISIBLE
                 binding.startView.visibility = View.GONE
                 screen = "waiting"
-                // TEST
-                //binding.waitingView.visibility = View.GONE
-                //binding.startView.visibility = View.VISIBLE
-
+                binding.container.setBackgroundColor(
+                    ContextCompat.getColor(applicationContext, R.color.white))
             }
 
         dataEvents
@@ -161,7 +160,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                     timer.cancel()
                 }
                 else if(receivedCommand == "change_light"){
-                    //binding.startView.background = resources.getColor(R.color.green)
                     if (light == "green") {
                         binding.container.setBackgroundColor(
                             ContextCompat.getColor(applicationContext, R.color.red))
@@ -224,29 +222,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                             ContextCompat.getColor(applicationContext, R.color.red))
                     }
                 }
-            }
-        }
-    }
-
-    private fun isMoving(){
-        println("isMoving changed")
-        // watch is moving
-        if (screen == "green") {
-            if (screen == "green") {
-                //binding.startText.text = "Moving"
-            }
-            //watch is still
-            else {
-                //binding.startText.text = "Still"
-            }
-        }
-        else if (screen == "waiting") {
-            if (screen == "waiting") {
-                binding.welcomeText.text = "Moving"
-            }
-            //watch is still
-            else {
-                binding.welcomeText.text = "Still"
             }
         }
     }
