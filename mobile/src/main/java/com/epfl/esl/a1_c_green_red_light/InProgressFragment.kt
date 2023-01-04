@@ -75,7 +75,6 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         })
 
         // changing green and red lights
-        timer_race = Timer()
         rand = findRand()
         timer_race.schedule(timerTask {
             rand = findRand()
@@ -91,7 +90,6 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private fun findRand(): Long {
         return ((1..5).random())*1000.toLong()
     }
-
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
