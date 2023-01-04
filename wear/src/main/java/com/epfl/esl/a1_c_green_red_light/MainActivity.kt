@@ -7,19 +7,45 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.*
 import com.epfl.esl.a1_c_green_red_light.databinding.ActivityMainBinding
 import com.google.android.gms.wearable.*
+import androidx.lifecycle.ViewModelProvider
 
 class   MainActivity : Activity(), DataClient.OnDataChangedListener {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var viewModel: WearViewModel
+
+    private var screen :String? = "waiting"
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        viewModel = ViewModelProvider(this).get(WearViewModel::class.java)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+
+
+        viewModel.isMoving.observe(viewLifecycleOwner, Observer { value ->
+            println("isMoving changed")
+            // watch is moving
+            if (screen == "start") {
+                if (value == true) {
+                    binding.start_text.text = "Moving"
+                }
+                //watch is still
+                else {
+                    binding.start_text.text = "Still"
+                }
+            }
+        })
 
         if (!hasGps(this)) {
             Log.d(TAG, "This hardware doesn't have GPS.")
@@ -29,6 +55,8 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
         else{
             Log.d(TAG, "This hardware has GPS.")
         }
+
+        return binding.root
     }
 
 
@@ -61,6 +89,7 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
                 binding.userName.text = receivedUsername
                 binding.waitingView.visibility = View.VISIBLE
                 binding.startView.visibility = View.GONE
+                screen = "waiting"
             }
 
         dataEvents
@@ -73,6 +102,7 @@ class   MainActivity : Activity(), DataClient.OnDataChangedListener {
                 if (receivedCommand == "start"){
                     binding.waitingView.visibility = View.GONE
                     binding.startView.visibility = View.VISIBLE
+                    screen = "start"
                 }
             }
     }
