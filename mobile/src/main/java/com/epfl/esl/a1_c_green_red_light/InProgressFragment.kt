@@ -145,20 +145,12 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
     // Add marker to goal position and center map around goal
     private fun inflateMap(goalPosition : LatLng){
-        // Create goal icon to display
-        val goalIcon = BitmapDescriptorFactory.fromBitmap(
-            BitmapFactory.decodeResource(
-                this.resources,
-                R.drawable.ic_pickup
-            )
-        )
-
         // add goal position to Map
         mMap.addMarker(
             MarkerOptions()
                 .position(goalPosition)
                 .title("Goal Location")
-                .icon(goalIcon)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA))
                 .draggable(true)
         )
 

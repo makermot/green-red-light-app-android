@@ -116,54 +116,45 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     private fun getLastLocation() {
-        val fusedLocationProviderClient = FusedLocationProviderClient(this.requireActivity())
-        fusedLocationProviderClient.lastLocation
-            .addOnCompleteListener(this.requireActivity()) { task ->
-                if (task.isSuccessful && task.result != null) {
-                    val mLastLocation = task.result
-                    var address = "No known address"
-                    val gcd = Geocoder(this.requireActivity(), Locale.getDefault())
-                    val addresses: List<Address>
-                    try {
-                        addresses = gcd.getFromLocation(
-                            mLastLocation.latitude,
-                            mLastLocation.longitude,
-                            1
-                        )
-                        if (addresses.isNotEmpty()) {
-                            address = addresses[0].getAddressLine(0)
-                        }
-                    } catch (e: IOException) {
-                        e.printStackTrace()
+        val fusedLocationProviderClient = FusedLocationProviderClient( this.requireActivity())
+        fusedLocationProviderClient.lastLocation.addOnCompleteListener(this.requireActivity()) { task ->
+            if (task.isSuccessful && task.result != null) {
+                val mLastLocation = task.result
+                var address = "No known address"
+                val gcd = Geocoder(this.requireActivity(), Locale.getDefault())
+                val addresses: List<Address>
+                try {
+                    addresses = gcd.getFromLocation(
+                        mLastLocation.latitude,
+                        mLastLocation.longitude,
+                        1)
+                    if (addresses.isNotEmpty()) {
+                        address = addresses[0].getAddressLine(0)
                     }
-                    val icon = BitmapDescriptorFactory.fromBitmap(
-                        BitmapFactory.decodeResource(
-                            this.resources,
-                            R.drawable.ic_pickup
-                        )
-                    )
 
-                    val sat = LatLng(46.520444, 6.567717)
-                    mMap.addMarker(
-                        MarkerOptions()
-                            .position(sat)
-                            .title("Current Location")
-                            .snippet(address)
-                            .icon(icon)
-                    )
-                    val cameraPosition = CameraPosition.Builder()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+
+                mMap.addMarker(MarkerOptions()
+                    .position(LatLng(mLastLocation.latitude, mLastLocation.longitude))
+                    .title("Current Location")
+                    .snippet(address)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA))
+                )
+                val cameraPosition = CameraPosition.Builder()
                         .target(LatLng(mLastLocation.latitude, mLastLocation.longitude))
                         .zoom(17f)
                         .build()
                     mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-                } else {
-                    Toast.makeText(
-                        this.requireActivity(),
-                        "No current location found",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+            } else {
+                Toast.makeText(
+                    this.requireActivity(),
+                    "No current location found",
+                    Toast.LENGTH_LONG
+                ).show()
             }
+        }
         return
     }
 
