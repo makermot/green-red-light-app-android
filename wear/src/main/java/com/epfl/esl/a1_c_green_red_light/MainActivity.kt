@@ -14,15 +14,11 @@ import android.util.Log
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import com.epfl.esl.a1_c_green_red_light.databinding.ActivityMainBinding
-import com.google.android.gms.wearable.DataClient
-import com.google.android.gms.wearable.DataEventBuffer
-import com.google.android.gms.wearable.DataMapItem
-import com.google.android.gms.wearable.Wearable
-import kotlin.math.sqrt
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.wearable.*
+import kotlin.math.sqrt
 
 class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedListener {
 
@@ -62,7 +58,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             Log.d(TAG, "This hardware has GPS.")
         }
 
-
+        // accelerometer variables
         mSensorType = Sensor.TYPE_ACCELEROMETER
         mSensorManager = this.getSystemService(SENSOR_SERVICE) as SensorManager?
         mSensor = mSensorManager!!.getDefaultSensor(mSensorType)
@@ -81,6 +77,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         super.onPause()
         println("App paused")
         Wearable.getDataClient(this).removeListener(this)
+        mSensorManager!!.unregisterListener(this)
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
@@ -119,16 +116,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     }
 
     override fun onSensorChanged(event: SensorEvent) {
-        println("I am in onSensorChanged")
-        // If sensor is unreliable, then just return
-        if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
-            println("sensor unreliable")
-            return
-        }
-        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            println("launch detectShake")
-            detectShake(event)
-        }
+        detectShake(event)
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
