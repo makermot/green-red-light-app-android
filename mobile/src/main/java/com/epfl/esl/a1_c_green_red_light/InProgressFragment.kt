@@ -63,8 +63,11 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        // Add goal position to Map
-        //inflateMap(LatLng(46.520444, 6.567717))
+        // Initialise heart beat to keep sync with wear
+        viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendStateMachineToWear(dataClient, "racing")
+        })
 
         // Add observer to playerPosition
         viewModel.receivedPosition.observe(viewLifecycleOwner, Observer { newPosition ->
@@ -72,9 +75,9 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         })
 
         // changing green and red lights
-        timer_race = Timer()
         rand = findRand()
         timer_race.schedule(timerTask {
+            rand = findRand()
             print("je print le rand : ")
             println(rand)
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
@@ -87,7 +90,6 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private fun findRand(): Long {
         return ((1..5).random())*1000.toLong()
     }
-
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap

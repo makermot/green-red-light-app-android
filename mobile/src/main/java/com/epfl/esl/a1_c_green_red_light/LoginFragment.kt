@@ -49,6 +49,8 @@ class LoginFragment : Fragment() {
         // Reset authentification variable when page is recreated
         viewModel.resetAuthentification()
 
+        viewModel.startHeartBeat()
+
         binding.SignUp.setOnClickListener { view: View ->
 
             if (binding.Username.text.toString() == "") {
@@ -128,6 +130,12 @@ class LoginFragment : Fragment() {
                 Toast.makeText(context,"Oupsi, something went wrong", Toast.LENGTH_LONG).show()
                 viewModel.resetUserData()
             }
+        })
+
+        // Initialise heart beat to keep sync with wear
+        viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendStateMachineToWear(dataClient, "unlogged")
         })
 
         return binding.root

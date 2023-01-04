@@ -87,7 +87,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     }
 
 
-
     private fun updateTime(){
         binding.elapsedTimeText.text = (System.currentTimeMillis() / 1000 - startTime).toString()
     }
