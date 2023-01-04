@@ -23,14 +23,12 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.wearable.*
-import androidx.lifecycle.ViewModelProvider
 
 class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedListener {
 
     private lateinit var binding: ActivityMainBinding
 
     var mFusedLocationClient: FusedLocationProviderClient? = null
-    private lateinit var viewModel: WearViewModel
 
     private var screen :String? = "waiting"
 
@@ -187,27 +185,22 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         }
     }
 
+
     private fun hasGps(context : Context): Boolean{
         return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
     }
 
-
-
-private fun hasGps(context : Context): Boolean{
-    return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
-}
-
-private fun sendDataToMobile(mFusedLocationClient : LatLng) {
-    val dataClient: DataClient = Wearable.getDataClient(this)
-    val putDataReq: PutDataRequest = PutDataMapRequest.create("/GPS_data").run {
-        var LocationLat = mFusedLocationClient.latitude
-        var LocationLong = mFusedLocationClient.longitude
-        dataMap.putDouble("latitude", LocationLat)
-        dataMap.putDouble("longitude", LocationLong)
-        asPutDataRequest()
+    private fun sendDataToMobile(mFusedLocationClient : LatLng) {
+        val dataClient: DataClient = Wearable.getDataClient(this)
+        val putDataReq: PutDataRequest = PutDataMapRequest.create("/GPS_data").run {
+            var LocationLat = mFusedLocationClient.latitude
+            var LocationLong = mFusedLocationClient.longitude
+            dataMap.putDouble("latitude", LocationLat)
+            dataMap.putDouble("longitude", LocationLong)
+            asPutDataRequest()
+        }
+        dataClient.putDataItem(putDataReq)
     }
-    dataClient.putDataItem(putDataReq)
-}
 
 }
 
