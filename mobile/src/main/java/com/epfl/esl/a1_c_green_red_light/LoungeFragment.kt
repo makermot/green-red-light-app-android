@@ -1,11 +1,9 @@
 package com.epfl.esl.a1_c_green_red_light
 
 import android.Manifest
+import android.R
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
-import android.location.Address
-import android.location.Geocoder
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,19 +17,16 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoungeBinding
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
-import java.io.IOException
 import java.util.*
 
-class LoungeFragment : Fragment(), OnMapReadyCallback {
+
+class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragListener {
 
     private lateinit var binding: FragmentLoungeBinding
     private lateinit var viewModel: SharedViewModel
@@ -87,6 +82,10 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
                 ).show()
             }
 
+            // Save the position of the goal and the position of the player
+            viewModel.goalPosition = markerGoal.position
+            println(markerGoal.position)
+            //viewModel.playerPosition = viewModel.receivedPosition.value!!
         }
 
         // Initialise Map
@@ -99,6 +98,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+
         var goal = LatLng(46.520444, 6.567717)
 
         permission = ActivityCompat.checkSelfPermission(
@@ -119,6 +119,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
         }
 
         //map of the earth when the permission is not given
+        // Map of the earth when the permission is not given
         mMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
     }
 
@@ -148,7 +149,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
     //Creation of the map with the goal position
     @SuppressLint("MissingPermission", "SuspiciousIndentation")
     private fun inflateMap(goalPosition : LatLng){
-        // add goal position to Map
+        // Add goal position to Map
         markerGoal = mMap.addMarker(
             MarkerOptions()
                 .position(goalPosition)
@@ -156,6 +157,8 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA))
                 .draggable(true)
         ) as Marker
+        //mMap.setOnMarkerDragListener(markerGoal)
+        onMarkerDrag(markerGoal)
 
         // Move Camera to goal
         val cameraPosition = CameraPosition.Builder()
@@ -164,7 +167,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
             .build()
         mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
     }
-
+    
 
     // Start HeartBeatTime
     override fun onStart() {
@@ -181,4 +184,21 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
         viewModel.stopHeartBeatTimer()
     }
 
+        
+    override fun onMarkerDragStart(p0: Marker) {
+        println("Marker moves !!!")
+    }
+
+        
+    override fun onMarkerDrag(marker: Marker) {
+        println("onMarkerDrag.  Current Position: " + marker.position)
+    }
+        
+        
+    override fun onMarkerDragEnd(p0: Marker) {
+        println("Marker moves !!!")
+    }
+
 }
+
+
