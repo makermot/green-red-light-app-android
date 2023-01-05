@@ -16,8 +16,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.navArgs
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentInProgressBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -47,6 +49,12 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private var rand: Long = 0
     private var lightColor: String = "red"
 
+    // Live data and Init Live data variable
+    private var mapInitialised = MutableLiveData<Boolean>()
+    init {
+        mapInitialised.value = false
+    }
+
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -55,8 +63,11 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         // Initialise Binding
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_in_progress, container, false)
 
+        //val args : InProgressFragmentArgs by navArgs()
+        //val goalPosition = args.goalPosition
+
         // Initialise viewModel
-        viewModel = ViewModelProvider(this)[SharedViewModel::class.java]
+        viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
         // Set title on the Top Bar
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Race"
@@ -67,13 +78,28 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         // Add listener to dataclient to be able to recieve data from wear
         Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
 
+
+        // Add observer on username
+        mapInitialised.observe(viewLifecycleOwner) { isInitialised ->
+            if(isInitialised){
+                print("We've initialised the map !, saved pos is :")
+                println(viewModel.goalPosition)
+                // Add goal position to Map
+                inflateMap(viewModel.goalPosition)
+            }
+        }
+
         // Initialise Map
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
         // Add observer to playerPosition
         viewModel.receivedPosition.observe(viewLifecycleOwner, Observer { newPosition ->
-            updatePlayerLocation(newPosition)
+            print("new position :")
+            println(newPosition)
+            if(mapInitialised.value == true){
+                updatePlayerLocation(newPosition)
+            }
         })
 
         // Launch random timer to send green and red command
@@ -129,11 +155,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
-        // Add goal position to Map
-        inflateMap(viewModel.goalPosition)
-
         mMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
+        mapInitialised.value = true
     }
 
 
@@ -161,6 +184,10 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
     // Add marker to goal position and center map around goal
     private fun inflateMap(goalPosition : LatLng){
+        print("We infalte the map with goal position : ")
+        println(goalPosition)
+        print("While goal pos is : ")
+        println(viewModel.goalPosition)
         // add goal position to Map
         mMap.addMarker(
             MarkerOptions()

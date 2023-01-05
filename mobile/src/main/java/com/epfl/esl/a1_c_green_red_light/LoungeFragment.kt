@@ -1,7 +1,6 @@
 package com.epfl.esl.a1_c_green_red_light
 
 import android.Manifest
-import android.R
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -16,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoungeBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -23,7 +23,6 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.gms.wearable.*
-import java.util.*
 
 
 class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragListener {
@@ -68,11 +67,11 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
                 viewModel.sendCommandToWear(dataClient, "start")
                 println("End SendStart to wear : Navigate")
 
-                // Save the position of the goal and the position of the player
-                viewModel.goalPosition = markerGoal.position
-                //viewModel.playerPosition = viewModel.receivedPosition.value!!
-
                 // Navigate to in progressFragment
+                //val directions = LoungeFragmentDirections.actionLoungeFragmentToInProgressFragment(viewModel.goalPosition)
+                //
+                //
+                // view.findNavController().navigate(directions)
                 Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
             }else{
                 Toast.makeText(
@@ -99,7 +98,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        var goal = LatLng(46.520444, 6.567717)
+        //var goal = LatLng(46.520444, 6.567717)
 
         permission = ActivityCompat.checkSelfPermission(
             this.requireActivity(),
@@ -110,16 +109,18 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
         ) == PackageManager.PERMISSION_GRANTED
         if (permission) {
             mMap.isMyLocationEnabled = true
-            inflateMap(goal)
+            inflateMap(viewModel.goalPosition)
         } else {
             ActivityCompat.requestPermissions(
                 this.requireActivity(),
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE
             )
+            permission = true
         }
 
         //map of the earth when the permission is not given
         // Map of the earth when the permission is not given
+
         mMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
     }
 
@@ -149,6 +150,8 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
     //Creation of the map with the goal position
     @SuppressLint("MissingPermission", "SuspiciousIndentation")
     private fun inflateMap(goalPosition : LatLng){
+        mMap.clear()
+
         // Add goal position to Map
         markerGoal = mMap.addMarker(
             MarkerOptions()
@@ -157,8 +160,9 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA))
                 .draggable(true)
         ) as Marker
-        //mMap.setOnMarkerDragListener(markerGoal)
-        onMarkerDrag(markerGoal)
+
+        mMap.setOnMarkerDragListener(this)
+        //onMarkerDrag(markerGoal)
 
         // Move Camera to goal
         val cameraPosition = CameraPosition.Builder()
@@ -184,19 +188,20 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
         viewModel.stopHeartBeatTimer()
     }
 
-        
+
     override fun onMarkerDragStart(p0: Marker) {
-        println("Marker moves !!!")
+    }
+
+
+    override fun onMarkerDrag(marker: Marker) {
     }
 
         
-    override fun onMarkerDrag(marker: Marker) {
-        println("onMarkerDrag.  Current Position: " + marker.position)
-    }
-        
-        
     override fun onMarkerDragEnd(p0: Marker) {
-        println("Marker moves !!!")
+        println("onMarkerDrag.  Current Position: " + p0.position)
+        viewModel.goalPosition = p0.position
+        print("saved position in view model is : ")
+        println(viewModel.goalPosition)
     }
 
 }
