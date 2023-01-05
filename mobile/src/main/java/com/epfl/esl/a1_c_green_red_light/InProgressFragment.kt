@@ -19,6 +19,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentInProgressBinding
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -32,6 +33,7 @@ import com.google.android.gms.wearable.Wearable
 import java.io.IOException
 import java.util.*
 import kotlin.concurrent.timerTask
+import kotlin.math.pow
 
 
 class InProgressFragment : Fragment(), OnMapReadyCallback {
@@ -48,6 +50,9 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     //private var timerRaceDeconection: Timer? = null
     private var rand: Long = 0
     private var lightColor: String = "red"
+
+    // Variable has won or not
+    var winner = false
 
     // Live data and Init Live data variable
     private var mapInitialised = MutableLiveData<Boolean>()
@@ -78,6 +83,12 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         // Add listener to dataclient to be able to recieve data from wear
         Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
 
+        if(winner) {
+            view?.let {
+                Navigation.findNavController(it)
+                    .navigate(R.id.action_inProgressFragment_to_resultFragment)
+            }
+        }
 
         // Add observer on username
         mapInitialised.observe(viewLifecycleOwner) { isInitialised ->
@@ -222,6 +233,9 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                 .visible(true)
         )
+
+        hasWon(playerPosition)
+
     }
 
 
@@ -274,6 +288,19 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    private fun hasWon(position: LatLng) {
+        var tolerance = 10
+        val latitudeGoal = viewModel.goalPosition.latitude
+        val longitudeGoal = viewModel.goalPosition.longitude
+        val latitudeCurrent= position.latitude
+        val longitudeCurrent= position.longitude
+
+        val circle = (latitudeCurrent - latitudeGoal).pow(2) + (longitudeCurrent - longitudeGoal).pow(2)
+
+        if (circle <= tolerance){
+            winner = true
+        }
+    }
 
 }
 
