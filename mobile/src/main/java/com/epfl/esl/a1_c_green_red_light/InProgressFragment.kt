@@ -76,19 +76,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
             updatePlayerLocation(newPosition)
         })
 
+        // Launch random timer to send green and red command
         timerCeption()
-
-        /*
-        // changing green and red lights
-        rand = findRand()
-        timerRace.schedule(timerTask {
-            rand = findRand()
-            print("je print le rand : ")
-            println(rand)
-            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            viewModel.sendCommandToWear(dataClient, "change_light")
-        }, 0, rand)
-        */
 
         return binding.root
     }
@@ -97,6 +86,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         return ((1..5).random())*1000.toLong()
     }
 
+
+    // launch a random timer to send green and red command
     private fun timerCeption(){
         // reset timer if present
         if(timerRace != null) {
@@ -123,6 +114,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         }, rand, 1000)
 
     }
+
+
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
