@@ -11,6 +11,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentStatBinding
+import com.google.android.gms.wearable.DataClient
+import com.google.android.gms.wearable.Wearable
 import com.google.firebase.database.*
 
 class StatFragment : Fragment() {
@@ -39,10 +41,22 @@ class StatFragment : Fragment() {
         viewModelStat = ViewModelProvider(this).get(StatViewModel::class.java)
         viewModelShared = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
+        // Initialise heart beat observer to keep sync with wear
+        viewModelShared.heartBeat.observe(viewLifecycleOwner, Observer { time ->
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModelShared.sendStateMachineToWear(dataClient, "logged")
+        })
+
+        // add an observer to the shouldSendUserInfoRequest Image
+        viewModelShared.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
+            // Send data to wear
+            println("We observed should send request !!!")
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModelShared.sendUserNameAndImageToWear(dataClient)
+        })
+
         // Retrieve current user
-        username = viewModelShared.key
-        print("USer in frag :")
-        println(username)
+        username = viewModelShared.username
 
         // Retrieve stat for that user
         viewModelStat.listenForStat(context,username)
@@ -54,5 +68,23 @@ class StatFragment : Fragment() {
             }
         })
         return binding.root
+    }
+
+
+    // Start HeartBeatTime
+    override fun onStart() {
+        super.onStart()
+        println("My space started")
+        viewModelShared.startHeartBeatTimer()
+        Wearable.getDataClient(activity as MainActivity).addListener(viewModelShared)
+    }
+
+
+    // Stop and destroy HeartBeatTimer
+    override fun onStop() {
+        super.onStop()
+        println("My space stopped")
+        viewModelShared.stopHeartBeatTimer()
+        Wearable.getDataClient(activity as MainActivity).removeListener(viewModelShared)
     }
 }
