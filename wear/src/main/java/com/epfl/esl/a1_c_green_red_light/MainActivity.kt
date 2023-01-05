@@ -49,11 +49,13 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private var stateMachine = MutableLiveData<String>()
     private var username  = MutableLiveData<String?>()
     private var userImage = MutableLiveData<Bitmap?>()
+    private var light = MutableLiveData<String>()
     // Init Live data variable
     init {
         stateMachine.value = "unlogged"
         username.value = null
         userImage.value = null
+        light.value = "green"
     }
 
     // Constants
@@ -70,8 +72,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private var watchdogTimer: Timer? = null
     private var startTime: Long = 0
     private var mHandler: Handler = object : Handler(){}
-
-    private var light: String = "green"
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,24 +118,31 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         userImage.observe(this) { image ->
             binding.userImage.setImageBitmap(image)
         }
-    }
 
-
-    // instantiate data client
-    override fun onResume() {
-        super.onResume()
-        println("App resumed")
-        Wearable.getDataClient(this).addListener(this)
-        //mSensorManager!!.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL)
-    }
-
-
-    // remove data client
-    override fun onPause() {
-        super.onPause()
-        println("App paused")
-        Wearable.getDataClient(this).removeListener(this)
-        //mSensorManager!!.unregisterListener(this)
+        light.observe(this) { color ->
+            if(stateMachine.value == "racing"){
+                when (color) {
+                    "green" -> {
+                        binding.container.setBackgroundColor(
+                            ContextCompat.getColor(applicationContext, R.color.green)
+                        )
+                        binding.startView.setBackgroundColor(
+                            ContextCompat.getColor(applicationContext, R.color.green)
+                        )
+                        println("change light to green")
+                    }
+                    "red" -> {
+                        binding.container.setBackgroundColor(
+                            ContextCompat.getColor(applicationContext, R.color.red)
+                        )
+                        binding.startView.setBackgroundColor(
+                            ContextCompat.getColor(applicationContext, R.color.red)
+                        )
+                        println("change light to red")
+                    }
+                }
+            }
+        }
     }
 
 
@@ -161,20 +168,10 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
                 when (receivedCommand) {
                     "green" -> {
-                        binding.container.setBackgroundColor(
-                            ContextCompat.getColor(applicationContext, R.color.green))
-                        binding.startView.setBackgroundColor(
-                            ContextCompat.getColor(applicationContext, R.color.green))
-                        light = "green"
-                        println("change light to green")
+                        light.value = "green"
                     }
                     "red" -> {
-                        binding.container.setBackgroundColor(
-                            ContextCompat.getColor(applicationContext, R.color.red))
-                        binding.startView.setBackgroundColor(
-                            ContextCompat.getColor(applicationContext, R.color.red))
-                        light = "red"
-                        println("change light to red")
+                        light.value = "red"
                     }
                 }
             }
@@ -194,23 +191,8 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                         stateMachine.value = receivedStatemachine!!
                     }
 
-                    // reset timer if present
-                    if(watchdogTimer != null) {
-                        watchdogTimer!!.cancel()
-                        watchdogTimer!!.purge()
-                        watchdogTimer = null
-                    }
-
-                    // Launch watch dog timer 10s
-                    watchdogTimer = Timer()
-                    watchdogTimer!!.schedule(timerTask {
-                        println("Watch Dog Timer")
-                        mHandler.post( Runnable() {
-                            runOnUiThread() {
-                                stateMachine.value = "unlogged"
-                            }
-                        })
-                    }, 10000, 5000)
+                    // Re-start watchdog timer
+                    startWatchDogTimer()
                 }
             }
     }
@@ -227,7 +209,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         binding.container.setBackgroundColor(
             ContextCompat.getColor(applicationContext, R.color.white))
 
-        //reset timer elapsed time also
+        stopRaceTimer()
 
         when (stateMachine.value) {
             "unlogged" -> {
@@ -249,24 +231,8 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                 // Save start time to compute elapse time
                 startTime = System.currentTimeMillis() / 1000
 
-                // reset timer if present : should never be the case
-                if(raceTimer != null) {
-                    raceTimer!!.cancel()
-                    raceTimer!!.purge()
-                    raceTimer = null
-                }
-
                 // start timer to send GPS position and update elapse time
-                raceTimer = Timer()
-                raceTimer!!.schedule(timerTask {
-                    println("race Timer timeout")
-                    getGPSPositionandCallSendGPSToMobile()
-                    mHandler.post( Runnable() {
-                        runOnUiThread() {
-                            updateTime()
-                        }
-                    })
-                }, 0, 1000)
+                startRaceTimer()
             }
             else -> {
                 println("0h oh... wrong state machine")
@@ -302,7 +268,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             val gForce: Float = sqrt(gX * gX + gY * gY + gZ * gZ)
 
             // Change boolean value if gForce exceeds threshold;
-            if (light == "red"){
+            if (light.value == "red"){
                 if (gForce > SHAKE_THRESHOLD) {
                     binding.startView.visibility = View.GONE
                     binding.cheatingView.visibility = View.VISIBLE
@@ -312,7 +278,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                 else{
                     binding.cheatingView.visibility = View.GONE
                     binding.startView.visibility = View.VISIBLE
-                    if (light == "green"){
+                    if (light.value == "green"){
                         binding.container.setBackgroundColor(
                             ContextCompat.getColor(applicationContext, R.color.green))}
                     else{
@@ -327,7 +293,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     // Get GPS position from wear and all sendGPSToMobile func if success
     private fun getGPSPositionandCallSendGPSToMobile(){
-        println("We are getGPSPositionandCallSendGPSToMobile")
+        //println("We are getGPSPositionandCallSendGPSToMobile")
 
         val permission: Boolean = ActivityCompat.checkSelfPermission(
             this,
@@ -338,8 +304,8 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         ) == PackageManager.PERMISSION_GRANTED
         if (permission) {
             mFusedLocationClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener { position ->
-                println("We find the position")
-                println(position)
+                //print("We find the position : ")
+                //println(position)
                 sendGPSToMobile(position)
             }
         } else {
@@ -432,7 +398,129 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     // update lifecycle -> needed for the observer
     public override fun onStart() {
         super.onStart()
+        println("Application started")
         lifecycleRegistry.markState(Lifecycle.State.STARTED)
+    }
+
+
+    // Restart race timer
+    private fun startRaceTimer(){
+        // reset timer if present : should never be the case
+        if(raceTimer != null) {
+            raceTimer!!.cancel()
+            raceTimer!!.purge()
+            raceTimer = null
+        }
+
+        // start timer to send GPS position and update elapse time
+        raceTimer = Timer()
+        raceTimer!!.schedule(timerTask {
+            println("race Timer timeout")
+            getGPSPositionandCallSendGPSToMobile()
+            mHandler.post( Runnable() {
+                runOnUiThread() {
+                    updateTime()
+                }
+            })
+        }, 0, 1000)
+    }
+
+
+    // Destroy race timer
+    private fun stopRaceTimer(){
+        // reset timer if present
+        if(raceTimer != null) {
+            raceTimer!!.cancel()
+            raceTimer!!.purge()
+            raceTimer = null
+        }
+    }
+
+
+    // Restart watchdog timer
+    private fun startWatchDogTimer(){
+        // reset timer if present
+        if(watchdogTimer != null) {
+            watchdogTimer!!.cancel()
+            watchdogTimer!!.purge()
+            watchdogTimer = null
+        }
+
+        // Launch watch dog timer 10s
+        watchdogTimer = Timer()
+        watchdogTimer!!.schedule(timerTask {
+            println("Watch Dog Timer")
+            mHandler.post( Runnable() {
+                runOnUiThread() {
+                    stateMachine.value = "unlogged"
+                }
+            })
+        }, 10000, 5000)
+    }
+
+
+    // Destroy watchdog timer
+    private fun stopWatchDogTimer(){
+        // reset timer if present
+        if(watchdogTimer != null) {
+            watchdogTimer!!.cancel()
+            watchdogTimer!!.purge()
+            watchdogTimer = null
+        }
+    }
+
+
+    // instantiate data client
+    override fun onResume() {
+        super.onResume()
+        println("App resumed")
+        Wearable.getDataClient(this).addListener(this)
+        //mSensorManager!!.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL)
+
+        startWatchDogTimer()
+    }
+
+
+    // remove data client
+    override fun onPause() {
+        super.onPause()
+        println("App paused")
+        Wearable.getDataClient(this).removeListener(this)
+        //mSensorManager!!.unregisterListener(this)
+
+        //Reset App state
+        stateMachine.value = "unlogged"
+        username.value = null
+        userImage.value = null
+        light.value = "green"
+
+        // Stop all Timer
+        stopRaceTimer()
+        stopWatchDogTimer()
+    }
+
+
+    // update lifecycle -> needed for the observer
+    public override fun onStop() {
+        super.onStop()
+        println("Application Stopped")
+        //lifecycleRegistry.markState(Lifecycle.State.DESTROYED)
+
+    }
+
+
+    public override fun onDestroy() {
+        super.onDestroy()
+        println("Application Destroyed")
+
+        stateMachine.value = "unlogged"
+        username.value = null
+        userImage.value = null
+        light.value = "green"
+
+        // Stop all Timer
+        stopRaceTimer()
+        stopWatchDogTimer()
     }
 
 

@@ -273,6 +273,10 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             println("Great Succes! : Heart beat sent to wear")
         }.addOnFailureListener {
             println("Fuck! : drop the Heart beat")
+        }.addOnCanceledListener {
+            println("Wtf... we canceled the heart beat")
+        }.addOnCompleteListener{
+            print("WTF ?!?!?")
         }
 
         if(shouldSendUserInfoToWear){
@@ -285,12 +289,12 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // Function that receive GPS command from wear
     override fun onDataChanged(dataEvents: DataEventBuffer) {
-        println("We recceived data from wear")
+        //print("We recceived data from wear :")
 
         dataEvents
             .filter {it.dataItem.uri.path == "/GPS_data" }
             .forEach { event ->
-                print("We received location :")
+                //print("We received location :")
 
                 val latitude = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("latitude")
                 val longitude = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("longitude")
@@ -302,7 +306,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         dataEvents
             .filter {it.dataItem.uri.path == "/request_user_info" }
             .forEach { event ->
-                print("We received info request from wear :")
+                println("We received info request from wear :")
                 val timestamp = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
                 shouldSendUserInfoToWear = true
             }

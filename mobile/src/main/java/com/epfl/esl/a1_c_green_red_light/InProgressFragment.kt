@@ -55,7 +55,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_in_progress, container, false)
 
         // Initialise viewModel
-        viewModel = ViewModelProvider(this).get(SharedViewModel::class.java)
+        viewModel = ViewModelProvider(this)[SharedViewModel::class.java]
 
         // Set title on the Top Bar
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Race"
@@ -103,7 +103,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         // Launch timer with random period
         timerRace = Timer()
         timerRace!!.schedule(timerTask {
-            println("Timer Race")
+            //println("Timer Race")
 
             lightColor = if (lightColor == "red"){"green"} else {"red"}
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
