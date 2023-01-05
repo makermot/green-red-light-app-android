@@ -203,6 +203,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     // Send image and user name to wear
     fun sendUserNameAndImageToWear(dataClient: DataClient) {
         // Add a timestamp to the message, so its truly different each time !
+        println("We are in send User Image and name to wear")
         val tsLong = System.currentTimeMillis() / 1000
         val timestamp = tsLong.toString()
 
@@ -267,6 +268,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
         if(shouldSendUserInfoToWear){
             shouldSendUserInfoToWear = false
+            println("we call send user name and image to wear from send State machine")
             sendUserNameAndImageToWear(dataClient)
         }
     }
@@ -292,6 +294,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             .filter {it.dataItem.uri.path == "/request_user_info" }
             .forEach { event ->
                 print("We received info request from wear :")
+                val timestamp = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
                 shouldSendUserInfoToWear = true
             }
     }
