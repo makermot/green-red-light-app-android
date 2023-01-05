@@ -48,7 +48,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private lateinit var dataClient : DataClient
     private lateinit var lifecycleRegistry: LifecycleRegistry
 
-    private var screen :String? = "waiting"
+    //private var screen :String? = "waiting"
 
     // Live data
     private var stateMachine = MutableLiveData<String>()
@@ -116,21 +116,13 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
         // Add observer on username
         username.observe(this) { name ->
-            if(name == null){
-                binding.welcomeText.text = this.getString(R.string.waiting_for_logging)
-                binding.userName.text = this.getString(R.string.on_tablet)
-            }
-            else{
-                binding.welcomeText.text = this.getString(R.string.welcome)
-                binding.userName.text = name
-            }
+            binding.userName.text = name
         }
 
         // Add observer on userImage
         userImage.observe(this) { image ->
             binding.userImage.setImageBitmap(image)
         }
-
     }
 
 
@@ -163,12 +155,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                 val receivedImage: ByteArray = DataMapItem.fromDataItem(event.dataItem).dataMap.getByteArray("profileImage")
                 username.value = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("username")
                 userImage.value = BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
-
-                binding.waitingView.visibility = View.VISIBLE
-                binding.startView.visibility = View.GONE
-                screen = "waiting"
-                binding.container.setBackgroundColor(
-                    ContextCompat.getColor(applicationContext, R.color.white))
+                //screen = "waiting"
             }
 
         dataEvents
@@ -183,7 +170,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                     startTime = System.currentTimeMillis() / 1000
                     binding.waitingView.visibility = View.GONE
                     binding.startView.visibility = View.VISIBLE
-                    screen = "start"
+                    //screen = "start"
                     light = "green"
                     println("before timer")
                     timer = Timer()
@@ -263,23 +250,35 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         print("We update the state machine with state :")
         println(stateMachine.value)
 
-        if(stateMachine.value == "unlogged"){
-            username.value = null
-            userImage.value = BitmapFactory.decodeResource(this.resources,R.drawable.ic_logo)
-        }
-        else if(stateMachine.value == "logged"){
-            if(username.value == null){
-                // request user info to mobile
-                sendUserInfoRequestToMobile()
+        // clearing everything on the screen
+        binding.waitingView.visibility = View.GONE
+        binding.loggedView.visibility = View.GONE
+        binding.startView.visibility = View.GONE
+        binding.container.setBackgroundColor(
+            ContextCompat.getColor(applicationContext, R.color.white))
+
+        //reset timer elapsed time also
+
+        when (stateMachine.value) {
+            "unlogged" -> {
+                username.value = null
+                userImage.value = BitmapFactory.decodeResource(this.resources,R.drawable.ic_logo)
+                binding.waitingView.visibility = View.VISIBLE
+            }
+            "logged" -> {
+                if(username.value == null){
+                    // request user info to mobile
+                    sendUserInfoRequestToMobile()
+                }
+                binding.loggedView.visibility = View.VISIBLE
+            }
+            "racing" -> {
+                binding.startView.visibility = View.VISIBLE
+            }
+            else -> {
+                println("0h oh... wrong state machine")
             }
         }
-        else if(stateMachine.value == "racing"){
-
-        }
-        else{
-            println("0h oh... wrong state machine")
-        }
-
     }
 
     // Call detect shake
@@ -288,13 +287,12 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     }
 
 
-    // TODO Implement
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
         println("I am in onAccuracyChanged")
     }
 
 
-    // Detect with acceleromter if the user moves
+    // Detect with accelerometer if the user moves
     private fun detectShake(event: SensorEvent) {
         // References:
         //  - http://jasonmcreynolds.com/?p=388
