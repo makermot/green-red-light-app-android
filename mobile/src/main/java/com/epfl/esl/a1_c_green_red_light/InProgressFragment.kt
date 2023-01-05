@@ -39,7 +39,6 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private val LOCATION_REQUEST_CODE = 101
 
-
     private var markerPlayer: Marker? = null
 
     private var timer_race = Timer()
@@ -94,26 +93,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        /*
-        val permission: Boolean = ActivityCompat.checkSelfPermission(
-            this.requireActivity(),
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-            this.requireActivity(),
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        if (permission) {
-            mMap.isMyLocationEnabled = true
-            getLastLocation()
-        } else {
-            ActivityCompat.requestPermissions(
-                this.requireActivity(),
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE
-        )
-        }*/
-
         // Add goal position to Map
-        inflateMap(LatLng(46.520444, 6.567717))
+        inflateMap(viewModel.goalPosition)
 
         mMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
     }
@@ -153,7 +134,6 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                 .position(goalPosition)
                 .title("Goal Location")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA))
-                .draggable(true)
         )
 
         // Move Camera to goal
@@ -168,12 +148,9 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     // Update player location on Map
     private fun updatePlayerLocation(playerPosition : LatLng) {
-        // Create icon to display
-
-        //remove the last marker
+        // remove the last marker
         if (markerPlayer != null) {
             markerPlayer!!.remove()
-            //markerPlayer?.remove()
             markerPlayer=null
         }
 

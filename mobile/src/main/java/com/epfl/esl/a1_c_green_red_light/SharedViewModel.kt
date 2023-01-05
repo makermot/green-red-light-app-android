@@ -11,6 +11,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
 import com.google.firebase.database.*
@@ -54,6 +55,12 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     private val _receivedPosition = MutableLiveData<LatLng>()
     val receivedPosition: LiveData<LatLng>
         get() = _receivedPosition
+
+    // Localisation of beginning of the race
+    var goalPosition: LatLng = LatLng(46.520444, 6.567717)
+
+    // Localisation of the goal of the race
+    var playerPosition: LatLng = LatLng(46.520444, 6.567717)
 
     //localisation of the wear
     private val _heartBeat = MutableLiveData<Int>()

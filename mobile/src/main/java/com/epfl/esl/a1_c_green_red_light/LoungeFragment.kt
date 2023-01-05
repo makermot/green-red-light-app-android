@@ -20,14 +20,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoungeBinding
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
 import java.io.IOException
@@ -37,6 +35,8 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var binding: FragmentLoungeBinding
     private lateinit var viewModel: SharedViewModel
+
+    private lateinit var markerGoal: Marker
 
     private val LOCATION_REQUEST_CODE = 101
     private lateinit var mMap: GoogleMap
@@ -62,9 +62,17 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
             viewModel.sendCommandToWear(dataClient, "start")
             println("End SendStart to wear : Navigate")
 
+            // Save the position of the goal and the position of the player
+            viewModel.goalPosition = markerGoal.position
+            viewModel.playerPosition = viewModel.receivedPosition.value!!
+
             // Navigate to in progressFragment
             Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
         }
+
+        // Initialise Map
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
 
         // Initialise heart beat to keep sync with wear
         viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
@@ -78,6 +86,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        var goal = LatLng(46.520444, 6.567717)
 
         val permission: Boolean = ActivityCompat.checkSelfPermission(
             this.requireActivity(),
@@ -88,13 +97,15 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
         ) == PackageManager.PERMISSION_GRANTED
         if (permission) {
             mMap.isMyLocationEnabled = true
-            getLastLocation()
+            inflateMap(goal)
         } else {
             ActivityCompat.requestPermissions(
                 this.requireActivity(),
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE
             )
         }
+
+        //map of the earth when the permission is not given
         mMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
     }
 
@@ -121,48 +132,24 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
     }
 
 
-    @SuppressLint("MissingPermission")
-    private fun getLastLocation() {
-        val fusedLocationProviderClient = FusedLocationProviderClient( this.requireActivity())
-        fusedLocationProviderClient.lastLocation.addOnCompleteListener(this.requireActivity()) { task ->
-            if (task.isSuccessful && task.result != null) {
-                val mLastLocation = task.result
-                var address = "No known address"
-                val gcd = Geocoder(this.requireActivity(), Locale.getDefault())
-                val addresses: List<Address>
-                try {
-                    addresses = gcd.getFromLocation(
-                        mLastLocation.latitude,
-                        mLastLocation.longitude,
-                        1)
-                    if (addresses.isNotEmpty()) {
-                        address = addresses[0].getAddressLine(0)
-                    }
+    //Creation of the map with the goal position
+    @SuppressLint("MissingPermission", "SuspiciousIndentation")
+    private fun inflateMap(goalPosition : LatLng){
+        // add goal position to Map
+        markerGoal = mMap.addMarker(
+            MarkerOptions()
+                .position(goalPosition)
+                .title("Goal Location")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA))
+                .draggable(true)
+        ) as Marker
 
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-
-                mMap.addMarker(MarkerOptions()
-                    .position(LatLng(mLastLocation.latitude, mLastLocation.longitude))
-                    .title("Current Location")
-                    .snippet(address)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA))
-                )
-                val cameraPosition = CameraPosition.Builder()
-                        .target(LatLng(mLastLocation.latitude, mLastLocation.longitude))
-                        .zoom(17f)
-                        .build()
-                    mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-            } else {
-                Toast.makeText(
-                    this.requireActivity(),
-                    "No current location found",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
-        return
+        // Move Camera to goal
+        val cameraPosition = CameraPosition.Builder()
+            .target(goalPosition)
+            .zoom(17f)
+            .build()
+        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
     }
 
 }
