@@ -16,4 +16,9 @@
     <string name="signin">sign in</string>
     <string name="signup">sign up</string>
     <string name="Greetings">Welcome user! Please sign up below:</string>
+    <string name="date_time_stat">Date/Time</string>
+    <string name="coordinates_start_stat">(46.520444, 6.567717)</string>
+    <string name="coordinates_finish_stat">(46.520444, 6.567717)</string>
+    <string name="elapsed_time_stat">00.00.00</string>
+    <string name="players_list_stat">[Shakira, Britney Bitch]</string>
 </resources>
