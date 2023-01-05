@@ -28,7 +28,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var username: String = ""
     var key: String = ""
     var password: String = ""
-    var timer = Timer()
+    var heartBeatTimer = Timer()
 
     private var mHandler: Handler = object : Handler(){}
     private var shouldSendUserInfoToWear: Boolean = false
@@ -210,6 +210,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     // Send image and user name to wear
     fun sendUserNameAndImageToWear(dataClient: DataClient) {
         // Add a timestamp to the message, so its truly different each time !
+        println("We are in send User Image and name to wear")
         val tsLong = System.currentTimeMillis() / 1000
         val timestamp = tsLong.toString()
 
@@ -270,10 +271,13 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
             println("Great Succes! : Heart beat sent to wear")
+        }.addOnFailureListener {
+            println("Fuck! : drop the Heart beat")
         }
 
         if(shouldSendUserInfoToWear){
             shouldSendUserInfoToWear = false
+            println("we call send user name and image to wear from send State machine")
             sendUserNameAndImageToWear(dataClient)
         }
     }
@@ -299,6 +303,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             .filter {it.dataItem.uri.path == "/request_user_info" }
             .forEach { event ->
                 print("We received info request from wear :")
+                val timestamp = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
                 shouldSendUserInfoToWear = true
             }
     }
@@ -325,7 +330,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // Start thread to update heart beat
     fun startHeartBeat(){
-        timer.schedule(timerTask {
+        heartBeatTimer.schedule(timerTask {
             println("Heart Beat")
             mHandler.post( Runnable() {
                 run {

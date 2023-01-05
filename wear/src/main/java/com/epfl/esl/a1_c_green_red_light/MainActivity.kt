@@ -16,11 +16,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
-import android.view.textclassifier.ConversationActions
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.get
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -30,9 +28,6 @@ import com.epfl.esl.a1_c_green_red_light.databinding.ActivityMainBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
 import java.util.*
@@ -48,7 +43,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private lateinit var dataClient : DataClient
     private lateinit var lifecycleRegistry: LifecycleRegistry
 
-    private var screen :String? = "waiting"
+    //private var screen :String? = "waiting"
 
     // Live data
     private var stateMachine = MutableLiveData<String>()
@@ -71,8 +66,8 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private var mSensor: Sensor? = null
     private var mSensorType = 0
     private var mShakeTime: Long = 0
-    private var timer = Timer()
-    private var timerDeconection: Timer? = null
+    private var raceTimer: Timer? = null
+    private var watchdogTimer: Timer? = null
     private var startTime: Long = 0
     private var mHandler: Handler = object : Handler(){}
 
@@ -116,21 +111,13 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
         // Add observer on username
         username.observe(this) { name ->
-            if(name == null){
-                binding.welcomeText.text = this.getString(R.string.waiting_for_logging)
-                binding.userName.text = this.getString(R.string.on_tablet)
-            }
-            else{
-                binding.welcomeText.text = this.getString(R.string.welcome)
-                binding.userName.text = name
-            }
+            binding.userName.text = name
         }
 
         // Add observer on userImage
         userImage.observe(this) { image ->
             binding.userImage.setImageBitmap(image)
         }
-
     }
 
 
@@ -154,64 +141,26 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     // receive Message from mobile
     override fun onDataChanged(dataEvents: DataEventBuffer) {
-        println(" On Data Changed Called")
+        print(" On Data Changed Called : ")
 
         dataEvents
             .filter {it.dataItem.uri.path == "/userInfo" }
             .forEach { event ->
-                println("User Info Event")
+                println("with User Info Event")
                 val receivedImage: ByteArray = DataMapItem.fromDataItem(event.dataItem).dataMap.getByteArray("profileImage")
                 username.value = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("username")
                 userImage.value = BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
-
-                binding.waitingView.visibility = View.VISIBLE
-                binding.startView.visibility = View.GONE
-                screen = "waiting"
-                binding.container.setBackgroundColor(
-                    ContextCompat.getColor(applicationContext, R.color.white))
+                //screen = "waiting"
             }
 
         dataEvents
             .filter {it.dataItem.uri.path == "/command" }
             .forEach { event ->
-                println("command event")
-                val receivedTimeStamp: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
+                print(" with command event : ")
                 val receivedCommand: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("command")
-                binding.welcomeText.text = receivedTimeStamp
-                if (receivedCommand == "start"){
-                    println("est rentré")
-                    startTime = System.currentTimeMillis() / 1000
-                    binding.waitingView.visibility = View.GONE
-                    binding.startView.visibility = View.VISIBLE
-                    screen = "start"
-                    light = "green"
-                    println("before timer")
-                    timer = Timer()
-                    println("after timer")
-                    println("Setting Timer")
-                    timer.schedule(timerTask {
-                        println("Timer timeout")
-                        getGPSPositionandCallSendGPSToMobile()
-                        mHandler.post( Runnable() {
-                            runOnUiThread() {
-                                updateTime()
-                            }
-                        })
-                    }, 0, 1000)
-                }
-                else if(receivedCommand == "stop"){
-                    timer.cancel()
-                }
-                else if(receivedCommand == "change_light"){
-                    if (light == "green") {
-                        binding.container.setBackgroundColor(
-                            ContextCompat.getColor(applicationContext, R.color.red))
-                        binding.startView.setBackgroundColor(
-                            ContextCompat.getColor(applicationContext, R.color.red))
-                        light = "red"
-                        println("change light to red")
-                    }
-                    else{
+
+                when (receivedCommand) {
+                    "green" -> {
                         binding.container.setBackgroundColor(
                             ContextCompat.getColor(applicationContext, R.color.green))
                         binding.startView.setBackgroundColor(
@@ -219,13 +168,21 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                         light = "green"
                         println("change light to green")
                     }
+                    "red" -> {
+                        binding.container.setBackgroundColor(
+                            ContextCompat.getColor(applicationContext, R.color.red))
+                        binding.startView.setBackgroundColor(
+                            ContextCompat.getColor(applicationContext, R.color.red))
+                        light = "red"
+                        println("change light to red")
+                    }
                 }
             }
 
         dataEvents
             .filter {it.dataItem.uri.path == "/state" }
             .forEach { event ->
-                print("Heart beat received :")
+                print(" with Heart beat received :")
                 val receivedStatemachine: String? = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("state")
                 // To handle null case -> should never happen btw
                 if(receivedStatemachine != null){
@@ -238,15 +195,15 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                     }
 
                     // reset timer if present
-                    if(timerDeconection != null) {
-                        timerDeconection!!.cancel()
-                        timerDeconection!!.purge()
-                        timerDeconection = null
+                    if(watchdogTimer != null) {
+                        watchdogTimer!!.cancel()
+                        watchdogTimer!!.purge()
+                        watchdogTimer = null
                     }
 
                     // Launch watch dog timer 10s
-                    timerDeconection = Timer()
-                    timerDeconection!!.schedule(timerTask {
+                    watchdogTimer = Timer()
+                    watchdogTimer!!.schedule(timerTask {
                         println("Watch Dog Timer")
                         mHandler.post( Runnable() {
                             runOnUiThread() {
@@ -263,23 +220,58 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         print("We update the state machine with state :")
         println(stateMachine.value)
 
-        if(stateMachine.value == "unlogged"){
-            username.value = null
-            userImage.value = BitmapFactory.decodeResource(this.resources,R.drawable.ic_logo)
-        }
-        else if(stateMachine.value == "logged"){
-            if(username.value == null){
-                // request user info to mobile
-                sendUserInfoRequestToMobile()
+        // clearing everything on the screen
+        binding.waitingView.visibility = View.GONE
+        binding.loggedView.visibility = View.GONE
+        binding.startView.visibility = View.GONE
+        binding.container.setBackgroundColor(
+            ContextCompat.getColor(applicationContext, R.color.white))
+
+        //reset timer elapsed time also
+
+        when (stateMachine.value) {
+            "unlogged" -> {
+                username.value = null
+                userImage.value = BitmapFactory.decodeResource(this.resources,R.drawable.ic_logo)
+                binding.waitingView.visibility = View.VISIBLE
+            }
+            "logged" -> {
+                if(username.value == null){
+                    // request user info to mobile
+                    sendUserInfoRequestToMobile()
+                }
+                binding.loggedView.visibility = View.VISIBLE
+            }
+            "racing" -> {
+                // Set up view visibility
+                binding.startView.visibility = View.VISIBLE
+
+                // Save start time to compute elapse time
+                startTime = System.currentTimeMillis() / 1000
+
+                // reset timer if present : should never be the case
+                if(raceTimer != null) {
+                    raceTimer!!.cancel()
+                    raceTimer!!.purge()
+                    raceTimer = null
+                }
+
+                // start timer to send GPS position and update elapse time
+                raceTimer = Timer()
+                raceTimer!!.schedule(timerTask {
+                    println("race Timer timeout")
+                    getGPSPositionandCallSendGPSToMobile()
+                    mHandler.post( Runnable() {
+                        runOnUiThread() {
+                            updateTime()
+                        }
+                    })
+                }, 0, 1000)
+            }
+            else -> {
+                println("0h oh... wrong state machine")
             }
         }
-        else if(stateMachine.value == "racing"){
-
-        }
-        else{
-            println("0h oh... wrong state machine")
-        }
-
     }
 
     // Call detect shake
@@ -288,13 +280,12 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     }
 
 
-    // TODO Implement
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
         println("I am in onAccuracyChanged")
     }
 
 
-    // Detect with acceleromter if the user moves
+    // Detect with accelerometer if the user moves
     private fun detectShake(event: SensorEvent) {
         // References:
         //  - http://jasonmcreynolds.com/?p=388

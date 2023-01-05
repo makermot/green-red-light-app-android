@@ -41,8 +41,10 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
     private var markerPlayer: Marker? = null
 
-    private var timer_race = Timer()
+    private var timerRace: Timer? = null
+    //private var timerRaceDeconection: Timer? = null
     private var rand: Long = 0
+    private var lightColor: String = "red"
 
 
 
@@ -73,15 +75,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
             updatePlayerLocation(newPosition)
         })
 
-        // changing green and red lights
-        rand = findRand()
-        timer_race.schedule(timerTask {
-            rand = findRand()
-            print("je print le rand : ")
-            println(rand)
-            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            viewModel.sendCommandToWear(dataClient, "change_light")
-        }, 0, rand)
+        // Launch random timer to send green and red command
+        timerCeption()
 
         return binding.root
     }
@@ -89,6 +84,36 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private fun findRand(): Long {
         return ((1..5).random())*1000.toLong()
     }
+
+
+    // launch a random timer to send green and red command
+    private fun timerCeption(){
+        // reset timer if present
+        if(timerRace != null) {
+            timerRace!!.cancel()
+            timerRace!!.purge()
+            timerRace = null
+        }
+
+        // find random period
+        rand = findRand()
+        print("je print le rand : ")
+        println(rand)
+
+        // Launch timer with random period
+        timerRace = Timer()
+        timerRace!!.schedule(timerTask {
+            println("Timer Race")
+
+            lightColor = if (lightColor == "red"){"green"} else {"red"}
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendCommandToWear(dataClient, lightColor)
+
+            timerCeption()
+        }, rand, 1000)
+
+    }
+
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
