@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 
 
 class ResultFragment : Fragment() {
@@ -19,6 +20,7 @@ class ResultFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
+        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Results"
         return inflater.inflate(R.layout.fragment_result, container, false)
     }
 }

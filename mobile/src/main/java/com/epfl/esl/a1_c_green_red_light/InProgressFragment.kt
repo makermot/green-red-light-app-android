@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -52,7 +53,10 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private var lightColor: String = "red"
 
     // Variable has won or not
-    var winner = false
+    private var winner = MutableLiveData<Boolean>()
+    init {
+        winner.value = false
+    }
 
     // Live data and Init Live data variable
     private var mapInitialised = MutableLiveData<Boolean>()
@@ -83,10 +87,10 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         // Add listener to dataclient to be able to recieve data from wear
         Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
 
-        if(winner) {
-            view?.let {
-                Navigation.findNavController(it)
-                    .navigate(R.id.action_inProgressFragment_to_resultFragment)
+
+        winner.observe(viewLifecycleOwner) { win ->
+            if(win) {
+                Navigation.findNavController(binding.root).navigate(R.id.action_inProgressFragment_to_resultFragment)
             }
         }
 
@@ -289,7 +293,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun hasWon(position: LatLng) {
-        var tolerance = 10
+        var tolerance = 10.0
+        tolerance = tolerance.pow(-9)
         val latitudeGoal = viewModel.goalPosition.latitude
         val longitudeGoal = viewModel.goalPosition.longitude
         val latitudeCurrent= position.latitude
@@ -297,11 +302,13 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         val circle = (latitudeCurrent - latitudeGoal).pow(2) + (longitudeCurrent - longitudeGoal).pow(2)
 
+        println("circle = $circle")
         if (circle <= tolerance){
-            winner = true
+            winner.value = true
         }
     }
 
 }
+
 
 
