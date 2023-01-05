@@ -41,6 +41,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
     private var markerPlayer: Marker? = null
 
+    private var timerHeartBeat: Timer? = null
     private var timerRace: Timer? = null
     //private var timerRaceDeconection: Timer? = null
     private var rand: Long = 0
@@ -60,15 +61,15 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         // Set title on the Top Bar
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Race"
 
+        // Start timer for heartBeat : private timer not from view model and Initialise heart beat to keep sync with wear
+        startHeartBeatTimer()
+
+        // Add listener to dataclient to be able to recieve data from wear
+        Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
+
         // Initialise Map
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
-        // Initialise heart beat to keep sync with wear
-        viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
-            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            viewModel.sendStateMachineToWear(dataClient, "racing")
-        })
 
         // Add observer to playerPosition
         viewModel.receivedPosition.observe(viewLifecycleOwner, Observer { newPosition ->
@@ -97,8 +98,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         // find random period
         rand = findRand()
-        print("je print le rand : ")
-        println(rand)
+        //print("je print le rand : ")
+        //println(rand)
 
         // Launch timer with random period
         timerRace = Timer()
@@ -115,6 +116,17 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     }
 
 
+    // Stop and destroy random timer for green and red light
+    fun stopTimerCeption(){
+        // reset timer if present
+        if(timerRace != null) {
+            timerRace!!.cancel()
+            timerRace!!.purge()
+            timerRace = null
+        }
+    }
+
+
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
@@ -125,11 +137,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     }
 
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>, grantResults: IntArray
-    )
-    {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             LOCATION_REQUEST_CODE -> {
                 if (grantResults.isEmpty() || grantResults[0] !=
@@ -189,15 +197,56 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         )
     }
 
+
+    /*
     override fun onResume() {
         super.onResume()
-        Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
+        //Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
     }
 
     override fun onPause() {
         super.onPause()
+        //Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
+    }*/
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        println("In progress : Everything destroyed")
+        stopHeartBeatTimer()
+        stopTimerCeption()
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
     }
+
+
+    // Start thread to update heart beat
+    fun startHeartBeatTimer(){
+        // reset timer if present
+        if(timerHeartBeat != null) {
+            timerHeartBeat!!.cancel()
+            timerHeartBeat!!.purge()
+            timerHeartBeat = null
+        }
+
+        timerHeartBeat = Timer()
+        timerHeartBeat?.schedule(timerTask {
+            println("Heart Beat")
+            val dataClient2: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendStateMachineToWear(dataClient2, "racing")
+        }, 0, 3000)
+    }
+
+
+    // Stop heart beat thread
+    fun stopHeartBeatTimer(){
+        // reset timer if present
+        if(timerHeartBeat != null) {
+            timerHeartBeat!!.cancel()
+            timerHeartBeat!!.purge()
+            timerHeartBeat = null
+        }
+    }
+
 
 }
 

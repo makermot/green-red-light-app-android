@@ -28,7 +28,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var username: String = ""
     var key: String = ""
     var password: String = ""
-    var heartBeatTimer = Timer()
+    var heartBeatTimer: Timer? = null
 
     private var mHandler: Handler = object : Handler(){}
     private var shouldSendUserInfoToWear: Boolean = false
@@ -275,15 +275,14 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             println("Fuck! : drop the Heart beat")
         }.addOnCanceledListener {
             println("Wtf... we canceled the heart beat")
-        }.addOnCompleteListener{
-            print("WTF ?!?!?")
         }
 
+        /*
         if(shouldSendUserInfoToWear){
             shouldSendUserInfoToWear = false
             println("we call send user name and image to wear from send State machine")
             sendUserNameAndImageToWear(dataClient)
-        }
+        }*/
     }
 
 
@@ -294,7 +293,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         dataEvents
             .filter {it.dataItem.uri.path == "/GPS_data" }
             .forEach { event ->
-                //print("We received location :")
+                print("We received location from wear :")
 
                 val latitude = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("latitude")
                 val longitude = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("longitude")
@@ -333,8 +332,16 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
 
     // Start thread to update heart beat
-    fun startHeartBeat(){
-        heartBeatTimer.schedule(timerTask {
+    fun startHeartBeatTimer(){
+        // reset timer if present
+        if(heartBeatTimer != null) {
+            heartBeatTimer!!.cancel()
+            heartBeatTimer!!.purge()
+            heartBeatTimer = null
+        }
+
+        heartBeatTimer = Timer()
+        heartBeatTimer?.schedule(timerTask {
             println("Heart Beat")
             mHandler.post( Runnable() {
                 run {
@@ -342,5 +349,16 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                 }
             })
         }, 0, 3000)
+    }
+
+
+    // Stop heart beat thread
+    fun stopHeartBeatTimer(){
+        // reset timer if present
+        if(heartBeatTimer != null) {
+            heartBeatTimer!!.cancel()
+            heartBeatTimer!!.purge()
+            heartBeatTimer = null
+        }
     }
 }

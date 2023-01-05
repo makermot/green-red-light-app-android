@@ -40,6 +40,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
 
     private val LOCATION_REQUEST_CODE = 101
     private lateinit var mMap: GoogleMap
+    private var permission: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,33 +53,45 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
         // Initialise viewModel
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
+        // Initialise heart beat observer to keep sync with wear
+        viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendStateMachineToWear(dataClient, "logged")
+        })
+
+        // Start timer for heartBeat
+        viewModel.startHeartBeatTimer()
+
         // Set title on the Top Bar
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Lounge"
 
         binding.gotoWearButton.setOnClickListener{view: View ->
-            // Send start condition to wear
-            println("declare Client")
-            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            viewModel.sendCommandToWear(dataClient, "start")
-            println("End SendStart to wear : Navigate")
+            if(permission){
+                // Send start condition to wear
+                println("declare Client")
+                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+                viewModel.sendCommandToWear(dataClient, "start")
+                println("End SendStart to wear : Navigate")
 
-            // Save the position of the goal and the position of the player
-            viewModel.goalPosition = markerGoal.position
-            viewModel.playerPosition = viewModel.receivedPosition.value!!
+                // Save the position of the goal and the position of the player
+                viewModel.goalPosition = markerGoal.position
+                //viewModel.playerPosition = viewModel.receivedPosition.value!!
 
-            // Navigate to in progressFragment
-            Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
+                // Navigate to in progressFragment
+                Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
+            }else{
+                Toast.makeText(
+                    this.requireActivity(),
+                    "Oupsi... Localisation permission required",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+
         }
 
         // Initialise Map
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
-        // Initialise heart beat to keep sync with wear
-        viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
-            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            viewModel.sendStateMachineToWear(dataClient, "logged")
-        })
 
         return binding.root
     }
@@ -88,7 +101,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
         mMap = googleMap
         var goal = LatLng(46.520444, 6.567717)
 
-        val permission: Boolean = ActivityCompat.checkSelfPermission(
+        permission = ActivityCompat.checkSelfPermission(
             this.requireActivity(),
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
@@ -150,6 +163,22 @@ class LoungeFragment : Fragment(), OnMapReadyCallback {
             .zoom(17f)
             .build()
         mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+    }
+
+
+    // Start HeartBeatTime
+    override fun onStart() {
+        super.onStart()
+        println("Lounge started")
+        viewModel.startHeartBeatTimer()
+    }
+
+
+    // Stop and destroy HeartBeatTimer
+    override fun onStop() {
+        super.onStop()
+        println("Lounge stopped")
+        viewModel.stopHeartBeatTimer()
     }
 
 }

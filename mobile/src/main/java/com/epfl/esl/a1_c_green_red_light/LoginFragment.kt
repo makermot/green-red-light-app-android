@@ -49,7 +49,14 @@ class LoginFragment : Fragment() {
         // Reset authentification variable when page is recreated
         viewModel.resetAuthentification()
 
-        viewModel.startHeartBeat()
+        // Initialise heart beat to keep sync with wear
+        viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendStateMachineToWear(dataClient, "unlogged")
+        })
+
+        // Start timer for heartBeat
+        viewModel.startHeartBeatTimer()
 
         binding.SignUp.setOnClickListener { view: View ->
 
@@ -132,14 +139,9 @@ class LoginFragment : Fragment() {
             }
         })
 
-        // Initialise heart beat to keep sync with wear
-        viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
-            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            viewModel.sendStateMachineToWear(dataClient, "unlogged")
-        })
-
         return binding.root
     }
+
 
     // Function to handle user image selection
     var resultLauncher =
@@ -151,4 +153,19 @@ class LoginFragment : Fragment() {
             }
         }
 
+
+    // Start HeartBeatTime
+    override fun onStart() {
+        super.onStart()
+        println("Login started")
+        viewModel.startHeartBeatTimer()
+    }
+
+
+    // Stop and destroy HeartBeatTimer
+    override fun onStop() {
+        super.onStop()
+        println("Login stopped")
+        viewModel.stopHeartBeatTimer()
+    }
 }

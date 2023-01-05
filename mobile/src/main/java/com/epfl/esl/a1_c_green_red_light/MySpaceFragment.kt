@@ -31,6 +31,15 @@ class MySpaceFragment : Fragment() {
         // Initialise viewModel
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
+        // Initialise heart beat observer to keep sync with wear
+        viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendStateMachineToWear(dataClient, "logged")
+        })
+
+        // Start timer for heartBeat
+        viewModel.startHeartBeatTimer()
+
         // Set title on the Top Bar
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : My Space"
 
@@ -94,12 +103,21 @@ class MySpaceFragment : Fragment() {
             }
         }
 
-        // Initialise heart beat to keep sync with wear
-        viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
-            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            viewModel.sendStateMachineToWear(dataClient, "logged")
-        })
-
         return binding.root
+    }
+
+    // Start HeartBeatTime
+    override fun onStart() {
+        super.onStart()
+        println("My space started")
+        viewModel.startHeartBeatTimer()
+    }
+
+
+    // Stop and destroy HeartBeatTimer
+    override fun onStop() {
+        super.onStop()
+        println("My space stopped")
+        viewModel.stopHeartBeatTimer()
     }
 }
