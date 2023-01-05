@@ -14,6 +14,11 @@ import com.epfl.esl.a1_c_green_red_light.databinding.FragmentStatBinding
 import com.google.firebase.database.*
 
 class StatFragment : Fragment() {
+    private lateinit var viewModelStat: StatViewModel
+    private lateinit var viewModelShared: SharedViewModel
+
+    var username: String = "alo"
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -26,17 +31,22 @@ class StatFragment : Fragment() {
         // Set title on the Top Bar
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : My statistics"
 
-
         // Set the LayoutManager that this RecyclerView will use.
-        binding.recyclerViewItems.layoutManager = LinearLayoutManager(context,
-            LinearLayoutManager.VERTICAL, false)
+        binding.recyclerViewItems.layoutManager = LinearLayoutManager(requireContext())
+        //binding.recyclerViewItems.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
-        val viewModelStat = ViewModelProvider(this).get(StatViewModel::class.java)
-        val viewModelShared = ViewModelProvider(this).get(SharedViewModel::class.java)
+        // Instantiate the viewModels
+        viewModelStat = ViewModelProvider(this).get(StatViewModel::class.java)
+        viewModelShared = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
-        val username = viewModelShared.username
+        // Retrieve current user
+        username = viewModelShared.key
+        print("USer in frag :")
+        println(username)
 
+        // Retrieve stat for that user
         viewModelStat.listenForStat(context,username)
+
         viewModelStat.statUpdate.observe(viewLifecycleOwner, Observer { statUpdate ->
             if(statUpdate == true){
                 binding.recyclerViewItems.adapter = viewModelStat.itemAdapter

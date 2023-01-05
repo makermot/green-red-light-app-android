@@ -25,9 +25,16 @@ class StatViewModel: ViewModel() {
     val statUpdate: LiveData<Boolean?>
         get() = _statUpdate
 
+    init {
+        _statUpdate.value = false
+    }
+
     fun listenForStat(context:Context?, username: String?) {
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
+                print("user :")
+                println(username)
+
                 if(dataSnapshot.hasChild(username!!)) {
                     println("")
                     println("Current username found in database in StatViewModel")
@@ -38,10 +45,16 @@ class StatViewModel: ViewModel() {
                     val elapsedTimeList: ArrayList<String> = ArrayList<String>()
                     val playersList: ArrayList<String> = ArrayList<String>()
 
-                    for (race in dataSnapshot.child(username).child("races").children){
+                    print("user :")
+                    println(username)
+
+                    for (race in dataSnapshot.child("/"+username).child("/races").children){
+                        println("Racing")
+                        println(race)
                         val dateDatabase = race
                             .child("date")
                             .getValue(String::class.java)!!
+                        println(dateDatabase)
                         dateTimeList.add(dateDatabase)
                         val coordinatesStartDatabase = race
                             .child("start coordinates")
@@ -56,9 +69,8 @@ class StatViewModel: ViewModel() {
                             .getValue(String::class.java)!!
                         elapsedTimeList.add(elapsedTimeDatabase)
                         var playerString = ""
-                        for (player in race.child("players").children) {
-                            val playersDatabase = race
-                                .child("players")
+                        for (player in race.child("/players").children) {
+                            val playersDatabase = player
                                 .getValue(String::class.java)!!
                             playerString = "$playerString, $playersDatabase"
                         }
@@ -66,6 +78,11 @@ class StatViewModel: ViewModel() {
                         print("The players of this race are: ")
                         println(playerString)
                     }
+
+                    print("Date :")
+                    println(dateTimeList)
+                    print("Player :")
+                    println(playersList)
 
                     // Adapter class is initialized and list is passed in the param.
                     itemAdapter = context?.let {
@@ -78,9 +95,9 @@ class StatViewModel: ViewModel() {
                             items_5 = playersList
                         )
                     }
+                    _statUpdate.value = true
                 }
                 else{println("I can't recover the current username in StatViewModel")}
-                _statUpdate.value = true
             }
             override fun onCancelled(databaseError: DatabaseError) {}
         })
