@@ -10,9 +10,6 @@ import com.google.firebase.storage.FirebaseStorage
 
 class StatViewModel: ViewModel() {
 
-    //val database: FirebaseDatabase = FirebaseDatabase.getInstance()
-    //val profileRef: DatabaseReference = database.getReference("Profiles")
-
     // FIREBASE
     //var storageRef = FirebaseStorage.getInstance().reference
     val database: FirebaseDatabase = FirebaseDatabase.getInstance()

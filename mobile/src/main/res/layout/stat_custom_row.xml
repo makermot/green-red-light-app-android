@@ -8,7 +8,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/card_view_item"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="wrap_content"
         android:layout_margin="6dp"
         android:padding="16dp">
 
@@ -27,7 +27,7 @@
                     android:id="@+id/title_stat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="20sp"
+                    android:textSize="30sp"
                     android:textColor="@android:color/black"
                     android:text="@string/date_time_stat" />
 
@@ -43,6 +43,7 @@
                     android:id="@+id/coordinates_start"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textSize="20sp"
                     android:gravity="start"
                     android:text="@string/coordinates_start_stat" />
 
@@ -58,6 +59,7 @@
                     android:id="@+id/coordinates_finish"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textSize="20sp"
                     android:gravity="start"
                     android:text="@string/coordinates_finish_stat" />
 
@@ -73,6 +75,7 @@
                     android:id="@+id/elapsed_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textSize="20sp"
                     android:text="@string/elapsed_time_stat" />
 
             </LinearLayout>
@@ -87,6 +90,7 @@
                 android:id="@+id/players"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="20sp"
                 android:text="@string/players_list_stat" />
 
         </LinearLayout>
