@@ -75,46 +75,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         viewModel.receivedPosition.observe(viewLifecycleOwner, Observer { newPosition ->
             updatePlayerLocation(newPosition)
         })
-        /*
-        /////////////////////////////////////////////////////////////////////////////////////////
-        // reset timer if present
-        if(timerDeconection != null) {
-            timerDeconection!!.cancel()
-            timerDeconection!!.purge()
-            timerDeconection = null
-        }
-        // Launch watch dog timer 10s
-        timerDeconection = Timer()
-        timerDeconection!!.schedule(timerTask {
-            println("Watch Dog Timer")
-            mHandler.post( Runnable() {
-                runOnUiThread() {
-                    stateMachine.value = "unlogged"
-                }
-            })
-        }, 10000, 5000)
-        //////////////////////////////////////////////////////////////////////////////////////////
-         */
-        // reset timer if present
-        if(timerRace != null) {
-            timerRace!!.cancel()
-            timerRace!!.purge()
-            timerRace = null
-        }
 
-        // find random period
-        rand = findRand()
-        print("je print le rand : ")
-        println(rand)
-        
-        // Launch timer with random period
-        timerRace = Timer()
-        timerRace!!.schedule(timerTask {
-            println("Timer Race")
-            lightColor = if (lightColor == "red"){"green"} else {"red"}
-            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            viewModel.sendCommandToWear(dataClient, lightColor)
-        }, 0, rand)
+        timerCeption()
 
         /*
         // changing green and red lights
@@ -135,6 +97,32 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         return ((1..5).random())*1000.toLong()
     }
 
+    private fun timerCeption(){
+        // reset timer if present
+        if(timerRace != null) {
+            timerRace!!.cancel()
+            timerRace!!.purge()
+            timerRace = null
+        }
+
+        // find random period
+        rand = findRand()
+        print("je print le rand : ")
+        println(rand)
+
+        // Launch timer with random period
+        timerRace = Timer()
+        timerRace!!.schedule(timerTask {
+            println("Timer Race")
+
+            lightColor = if (lightColor == "red"){"green"} else {"red"}
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendCommandToWear(dataClient, lightColor)
+
+            timerCeption()
+        }, rand, 1000)
+
+    }
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 

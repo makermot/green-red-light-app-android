@@ -27,7 +27,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var username: String = ""
     var key: String = ""
     var password: String = ""
-    var timer = Timer()
+    var heartBeatTimer = Timer()
 
     private var mHandler: Handler = object : Handler(){}
     private var shouldSendUserInfoToWear: Boolean = false
@@ -264,6 +264,8 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
             println("Great Succes! : Heart beat sent to wear")
+        }.addOnFailureListener {
+            println("Fuck! : drop the Heart beat")
         }
 
         if(shouldSendUserInfoToWear){
@@ -321,7 +323,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // Start thread to update heart beat
     fun startHeartBeat(){
-        timer.schedule(timerTask {
+        heartBeatTimer.schedule(timerTask {
             println("Heart Beat")
             mHandler.post( Runnable() {
                 run {
