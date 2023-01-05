@@ -31,7 +31,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var heartBeatTimer: Timer? = null
 
     private var mHandler: Handler = object : Handler(){}
-    private var shouldSendUserInfoToWear: Boolean = false
 
     // Live data
     // String to check how far we are in the authentification process : It can take the value :
@@ -56,6 +55,11 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     val receivedPosition: LiveData<LatLng>
         get() = _receivedPosition
 
+    //localisation of the wear
+    private val _shouldSendUserInfoToWear = MutableLiveData<Boolean>()
+    val shouldSendUserInfoToWear: LiveData<Boolean>
+        get() = _shouldSendUserInfoToWear
+
     // Localisation of beginning of the race
     var goalPosition: LatLng = LatLng(46.520444, 6.567717)
 
@@ -77,6 +81,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     init {
         _authentification.value = null
         _heartBeat.value = 0
+        _shouldSendUserInfoToWear.value = false
     }
 
 
@@ -307,7 +312,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             .forEach { event ->
                 println("We received info request from wear :")
                 val timestamp = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
-                shouldSendUserInfoToWear = true
+                _shouldSendUserInfoToWear.value = true
             }
     }
 

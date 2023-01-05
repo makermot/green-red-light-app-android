@@ -52,6 +52,14 @@ class MySpaceFragment : Fragment() {
                 append(" !") }
         })
 
+        // add an observer to the shouldSendUserInfoRequest Image
+        viewModel.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
+            // Send data to wear
+            println("We observed should send request !!!")
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendUserNameAndImageToWear(dataClient)
+        })
+
         binding.addFriendButton.setOnClickListener{view: View ->
             view.let {
                 if(binding.friendUsername.text.toString() != "Friend's username"){
@@ -111,6 +119,7 @@ class MySpaceFragment : Fragment() {
         super.onStart()
         println("My space started")
         viewModel.startHeartBeatTimer()
+        Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
     }
 
 
@@ -119,5 +128,6 @@ class MySpaceFragment : Fragment() {
         super.onStop()
         println("My space stopped")
         viewModel.stopHeartBeatTimer()
+        Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
     }
 }

@@ -50,12 +50,14 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private var username  = MutableLiveData<String?>()
     private var userImage = MutableLiveData<Bitmap?>()
     private var light = MutableLiveData<String>()
+    private var shouldSendInfoRequest = MutableLiveData<Boolean>()
     // Init Live data variable
     init {
         stateMachine.value = "unlogged"
         username.value = null
         userImage.value = null
         light.value = "green"
+        shouldSendInfoRequest.value = false
     }
 
     // Constants
@@ -119,6 +121,13 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             binding.userImage.setImageBitmap(image)
         }
 
+        // Add observer on shouldSendInfoRequest
+        shouldSendInfoRequest.observe(this) { request ->
+            if(request){
+                sendUserInfoRequestToMobile()
+            }
+        }
+
         light.observe(this) { color ->
             if(stateMachine.value == "racing"){
                 when (color) {
@@ -148,6 +157,8 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     // receive Message from mobile
     override fun onDataChanged(dataEvents: DataEventBuffer) {
+        print(" User name : ")
+        println(username.value)
         print(" On Data Changed Called : ")
 
         dataEvents
@@ -189,6 +200,10 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                     // to avoid call the observer each time the value is reasigned
                     if(stateMachine.value != receivedStatemachine){
                         stateMachine.value = receivedStatemachine!!
+                    }
+
+                    if(stateMachine.value == "logged" && username.value == null){
+                        shouldSendInfoRequest.value = true
                     }
 
                     // Re-start watchdog timer
@@ -359,6 +374,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
             println("Great Succes! : Command request user info sent to wear")
+            shouldSendInfoRequest.value=false
         }.addOnFailureListener {
             println("Oupsi... On a pas envoyé les données request user info")
         }
@@ -493,6 +509,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         username.value = null
         userImage.value = null
         light.value = "green"
+        shouldSendInfoRequest.value = false
 
         // Stop all Timer
         stopRaceTimer()
@@ -517,6 +534,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         username.value = null
         userImage.value = null
         light.value = "green"
+        shouldSendInfoRequest.value = false
 
         // Stop all Timer
         stopRaceTimer()

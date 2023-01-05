@@ -178,6 +178,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
         super.onStart()
         println("Lounge started")
         viewModel.startHeartBeatTimer()
+        Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
     }
 
 
@@ -186,6 +187,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
         super.onStop()
         println("Lounge stopped")
         viewModel.stopHeartBeatTimer()
+        Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
     }
 
 
