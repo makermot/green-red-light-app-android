@@ -53,14 +53,23 @@
                 android:hint="Friend's username"
                 android:gravity="center"
                 android:inputType="textPersonName" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/addFriend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
             <Button
                 android:id="@+id/addFriendButton"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
                 android:adjustViewBounds="true"
                 android:text="Add friend"/>
+
         </LinearLayout>
 
         <LinearLayout
@@ -68,13 +77,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="8dp">
             <Button
                 android:id="@+id/statButton"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
                 android:adjustViewBounds="true"
                 android:text="My statistics"/>
 
@@ -85,13 +93,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="8dp">
             <Button
                 android:id="@+id/friendsButton"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
                 android:adjustViewBounds="true"
                 android:text="@string/friends_button"/>
         </LinearLayout>
@@ -101,13 +108,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="8dp">
             <Button
                 android:id="@+id/loungeButton"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
                 android:adjustViewBounds="true"
                 android:text="lounge"/>
         </LinearLayout>
@@ -117,13 +123,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="8dp">
             <Button
                 android:id="@+id/multiButton"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
                 android:adjustViewBounds="true"
                 android:text="Join a race"/>
         </LinearLayout>
