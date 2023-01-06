@@ -144,12 +144,17 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
 
         // Add Friend to race functionality
         binding.playWithFriend.setOnClickListener{view: View ->
-            if(binding.friendUsername.text.toString() != "Friend's username"){
-                viewModel.requestFriendToPlayWith(binding.friendUsername.text.toString())
+            if(viewModel.playWithFriends < 7){
+                if(binding.friendUsername.text.toString() != "Friend's username"){
+                    viewModel.requestFriendToPlayWith(binding.friendUsername.text.toString())
+                }
+                else{
+                    Toast.makeText(context,"Enter friend's username", Toast.LENGTH_SHORT).show()
+                }
+            }else{
+                Toast.makeText(context,"You've reached max player for this race", Toast.LENGTH_SHORT).show()
             }
-            else{
-                Toast.makeText(context,"Enter friend's username", Toast.LENGTH_SHORT).show()
-            }
+
         }
 
         // Add observer on userImage

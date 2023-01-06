@@ -23,6 +23,7 @@ class MultPlayerFragment : Fragment() {
     private lateinit var viewModel: SharedViewModel
 
     private var timerHeartBeat: Timer? = null
+    private var racing : Boolean = false
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -36,6 +37,12 @@ class MultPlayerFragment : Fragment() {
 
         // Set title
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : MultiPlayer"
+
+        // Initialise heart beat observer to keep sync with wear
+        viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendStateMachineToWear(dataClient, "logged")
+        })
 
         viewModel.getPlayRequest()
 
@@ -53,8 +60,14 @@ class MultPlayerFragment : Fragment() {
             // Add listener to dataclient to be able to recieve data from wear
             Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
 
+            viewModel.acceptPlayRequest()
+
             // Start timer for heartBeat : private timer not from view model and Initialise heart beat to keep sync with wear
+            viewModel.stopHeartBeatTimer()
             startHeartBeatTimer()
+
+            // change status to racing
+            racing = true
 
             // Observer on the received position
             viewModel.receivedPosition.observe(viewLifecycleOwner, Observer { newPosition ->
@@ -71,7 +84,25 @@ class MultPlayerFragment : Fragment() {
         super.onDestroy()
         println("In progress : Everything destroyed")
         stopHeartBeatTimer()
+        racing = false
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
+    }
+
+    // Start HeartBeatTime
+    override fun onStart() {
+        super.onStart()
+        if(!racing){
+            viewModel.startHeartBeatTimer()
+        }
+    }
+
+
+    // Stop and destroy HeartBeatTimer
+    override fun onStop() {
+        super.onStop()
+        if(!racing){
+            viewModel.stopHeartBeatTimer()
+        }
     }
 
     // Start thread to update heart beat

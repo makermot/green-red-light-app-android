@@ -93,7 +93,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         // Add listener to dataclient to be able to recieve data from wear
         Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
 
-
+        //Check for winner condition
         winner.observe(viewLifecycleOwner) { win ->
             if(win) {
                 // Save stop time to compute elapse time
@@ -107,6 +107,16 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
                 Navigation.findNavController(binding.root).navigate(R.id.action_inProgressFragment_to_resultFragment)
             }
+        }
+
+        // Check for multiple player and add listener to change position
+        if(viewModel.playWithFriends > 0){
+            println("Game with multiple friends !!!")
+            viewModel.getFriendUpdatePosition()
+            viewModel.newFriendsPos.observe(viewLifecycleOwner) { newPosInt ->
+                addMarkersOfFriends()
+            }
+
         }
 
         // Add observer on username
@@ -255,7 +265,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         markerPlayer = mMap.addMarker(
             MarkerOptions()
                 .position(playerPosition)
-                .title("Goal Location")
+                .title(viewModel.username)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                 .visible(true)
         )
@@ -314,6 +324,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+
     private fun hasWon(position: LatLng) {
         var tolerance = 10.0
         tolerance = tolerance.pow(-9)
@@ -330,8 +341,9 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+
     // Add the marker of the friends during multiplayer race
-    fun addMarkersOfFriends(position: MutableList<LatLng>) {
+    fun addMarkersOfFriends() {
         val colors = listOf(BitmapDescriptorFactory.HUE_BLUE, BitmapDescriptorFactory.HUE_CYAN,
             BitmapDescriptorFactory.HUE_GREEN, BitmapDescriptorFactory.HUE_ORANGE,
             BitmapDescriptorFactory.HUE_ROSE, BitmapDescriptorFactory.HUE_VIOLET,
@@ -339,20 +351,40 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         var increment : Int = 0
 
-        // Delete all the previous markers
-        markers.clear()
-        for (friend in viewModel.friendsWePlayWith) {
+        if(mapInitialised.value == true){
+            mMap.clear()
 
-            // add player position to Map
-            var markerMulti: Marker = mMap.addMarker(
+            for (friendPos in viewModel.friendsPos){
+                // add player position to Map
+                var markerMulti: Marker = mMap.addMarker(
+                    MarkerOptions()
+                        .position(friendPos)
+                        .title(viewModel.friendsName.elementAt(increment))
+                        .icon(BitmapDescriptorFactory.defaultMarker(colors.elementAt(increment)))
+                        .visible(true)
+                )
+                //markers.add(increment, markerMulti)
+                increment += increment
+            }
+
+            if(viewModel.receivedPosition.value != null){
+                markerPlayer = mMap.addMarker(
+                    MarkerOptions()
+                        .position(viewModel.receivedPosition.value!!)
+                        .title(viewModel.username)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                        .visible(true)
+                )
+            }
+
+            mMap.addMarker(
                 MarkerOptions()
-                    .position(position.elementAt(increment))
-                    .title(friend)
-                    .icon(BitmapDescriptorFactory.defaultMarker(colors.elementAt(increment)))
-                    .visible(true)
+                    .position(viewModel.goalPosition)
+                    .title("Goal Location")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA))
             )
-            markers.add(increment, markerMulti)
-            increment += increment
+
+
         }
     }
 }

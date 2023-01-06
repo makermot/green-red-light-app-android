@@ -18,6 +18,7 @@ import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.concurrent.timerTask
 
 
@@ -33,6 +34,8 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var stopTime: Long? = null
     var playWithFriends : Int = 0
     var friendsWePlayWith : ArrayList<String> = ArrayList<String>()
+    var friendsPos : ArrayList<LatLng> = ArrayList<LatLng>()
+    var friendsName : ArrayList<String> = ArrayList<String>()
 
     private var mHandler: Handler = object : Handler(){}
 
@@ -79,6 +82,11 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     val gameOwner: LiveData<String?>
         get() = _gameOwner
 
+    // update friends position
+    private val _newFriendsPos = MutableLiveData<Int?>()
+    val newFriendsPos: LiveData<Int?>
+        get() = _newFriendsPos
+
 
     // Localisation of beginning of the race
     var goalPosition: LatLng = LatLng(46.520444, 6.567717)
@@ -106,6 +114,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         _heartBeat.value = 0
         _shouldSendUserInfoToWear.value = false
         _gameOwner.value = null
+        _newFriendsPos.value = 0
     }
 
 
@@ -531,11 +540,46 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         })
     }
 
+
     // Send current position while multiplayer
     fun addPositionMultiplayer(){
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener{
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 profileRef.child(_gameOwner.value!!).child("/currentRacePosition").child(username).setValue(playerPosition)
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+
+    fun getFriendUpdatePosition(){
+        profileRef.addValueEventListener(object :ValueEventListener{
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                println(" We have friend updated position call !!!!")
+                if( dataSnapshot.child(username).hasChild("currentRacePosition") &&
+                    dataSnapshot.child(username).child("currentRacePosition").hasChildren()){
+                    friendsPos.clear()
+                    friendsName.clear()
+                    for (player in dataSnapshot.child(username).child("currentRacePosition").children){
+                        val latitude = player.child("latitude").getValue(Double::class.java)
+                        val longitude = player.child("longitude").getValue(Double::class.java)
+                        LatLng(latitude!!, longitude!!)
+                        friendsPos.add(LatLng(latitude!!, longitude!!))
+                        friendsName.add(player.getKey()!!)
+                    }
+                    _newFriendsPos.value = _newFriendsPos.value?.plus(1)
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+    }
+
+    fun acceptPlayRequest(){
+        profileRef.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                profileRef.child(_gameOwner.value!!).child("accepted request").child(username).setValue("yes")
             }
             override fun onCancelled(error: DatabaseError) {}
         })
