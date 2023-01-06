@@ -11,7 +11,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
 import com.google.firebase.database.*
@@ -66,7 +65,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         get() = _shouldSendUserInfoToWear
 
     // String to check how far we are in the playing with Friend process : It can take the value :
-    // send play request successfully added, send request already sent, Friend profile don't exist, you can't play with yourself, null
+    // send play request successfully added, send request already sent, Friend profile don't exist, you can't play with yourself, you're not friends, null
     private val _playWithFriendStatus = MutableLiveData<String?>()
     val playWithFriendStatus: LiveData<String?>
         get() = _playWithFriendStatus
@@ -375,6 +374,10 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         _addFriendStatus.value = null
     }
 
+    fun resetPlayWithFriendStatus(){
+        _playWithFriendStatus.value = null
+    }
+
 
     // Start thread to update heart beat
     fun startHeartBeatTimer(){
@@ -417,6 +420,10 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         // Profile ref -> branche profile de la realtime database
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if(!dataSnapshot.child(username).child("friend").hasChild(friendUserName)){
+                    _playWithFriendStatus.value = "you're not friends"
+                    return
+                }
                 if(dataSnapshot.hasChild(friendUserName)){
                     println("Friend's profile Found")
                     if(dataSnapshot.child(friendUserName).child("play request").hasChildren() &&
@@ -426,7 +433,10 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                     }
                     else{
                         println("Let's send play request to your friend")
+                        profileRef.child(username).child("accepted request").child(friendUserName).setValue("no")
                         profileRef.child(friendUserName).child("play request").child("request").setValue(username)
+                        playWithFriends += 1
+                        friendsWePlayWith.add(friendUserName)
                         _playWithFriendStatus.value = "send play request successfully added"
                     }
                 }
@@ -446,16 +456,53 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         // Profile ref -> branche profile de la realtime database
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
+                println("On dataChange")
                 if(dataSnapshot.hasChild(username)){
+                    println("Found user")
                     if(dataSnapshot.child(username).child("accepted request").hasChildren()){
+                        println("Request has children")
                         var count : Int = 0
                         for (playerReady in dataSnapshot.child(username).child("accepted request").children){
-                            count += 1
+                            val playerName: String? = playerReady.getKey()
+                            print("Player name : ")
+                            println(playerName)
+                            if(friendsWePlayWith.contains(playerName) && playerReady.getValue(String::class.java) == "yes"){
+                                println("sucessfully increment counter")
+                                count += 1
+                            }
                         }
                         _friendsResponse.value = count
                     }
                     else{
                         _friendsResponse.value = 0
+                    }
+                }
+            }
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
+    }
+
+    fun resetFriendsPlayDemand(){
+        playWithFriends = 0
+        friendsWePlayWith.clear()
+
+        profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if(dataSnapshot.hasChild(username)){
+                    if(dataSnapshot.child(username).child("accepted request").hasChildren()){
+                        for (playerReady in dataSnapshot.child(username).child("accepted request").children){
+                            // Get friends name
+                            val playerName: String? = playerReady.getKey()
+
+                            // Reset accepted demand in our user profil
+                            profileRef.child(username).child("accepted request").child(playerName!!).setValue(null)
+
+                            // Reset play demand in friend profil
+                            if( dataSnapshot.child(playerName!!).hasChild("play request") &&
+                                dataSnapshot.child(playerName!!).child("play request").child("request").getValue(String::class.java) == username){
+                                profileRef.child(playerName!!).child("play request").child("request").setValue(null)
+                            }
+                        }
                     }
                 }
             }

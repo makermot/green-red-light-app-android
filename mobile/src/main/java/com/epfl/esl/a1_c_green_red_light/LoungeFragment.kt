@@ -92,8 +92,8 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
                 "you can't play with yourself" -> {
                     Toast.makeText(context,"you can't play with yourself", Toast.LENGTH_SHORT).show()
                 }
-                else -> {
-                    Toast.makeText(context,"Oupsi...", Toast.LENGTH_SHORT).show()
+                "you're not friends" -> {
+                    Toast.makeText(context,"Oupsi... you're not friends", Toast.LENGTH_SHORT).show()
                 }
             }
         })
@@ -145,8 +145,6 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
         // Add Friend to race functionality
         binding.playWithFriend.setOnClickListener{view: View ->
             if(binding.friendUsername.text.toString() != "Friend's username"){
-                viewModel.playWithFriends = viewModel.playWithFriends + 1
-                viewModel.friendsWePlayWith.add(binding.friendUsername.text.toString())
                 viewModel.requestFriendToPlayWith(binding.friendUsername.text.toString())
             }
             else{
@@ -250,6 +248,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
         println("Lounge started")
         viewModel.startHeartBeatTimer()
         Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
+        viewModel.resetFriendsPlayDemand()
     }
 
 
@@ -259,6 +258,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
         println("Lounge stopped")
         viewModel.stopHeartBeatTimer()
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
+        viewModel.resetPlayWithFriendStatus()
     }
 
 
