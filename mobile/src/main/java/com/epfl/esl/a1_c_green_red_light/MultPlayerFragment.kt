@@ -13,12 +13,16 @@ import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentMultPlayerBinding
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.Wearable
+import java.util.*
+import kotlin.concurrent.timerTask
 
 
 class MultPlayerFragment : Fragment() {
 
     private lateinit var binding: FragmentMultPlayerBinding
     private lateinit var viewModel: SharedViewModel
+
+    private var timerHeartBeat: Timer? = null
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -46,10 +50,56 @@ class MultPlayerFragment : Fragment() {
         })
 
         binding.acceptButton.setOnClickListener{view : View ->
-            
-        }
+            // Add listener to dataclient to be able to recieve data from wear
+            Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
 
+            // Start timer for heartBeat : private timer not from view model and Initialise heart beat to keep sync with wear
+            startHeartBeatTimer()
+
+            // Observer on the received position
+            viewModel.receivedPosition.observe(viewLifecycleOwner, Observer { newPosition ->
+                viewModel.playerPosition = newPosition
+                //viewModel.playerPosition = viewModel.receivedPosition.value!!
+                viewModel.addPositionMultiplayer()
+            })
+        }
 
         return binding.root
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        println("In progress : Everything destroyed")
+        stopHeartBeatTimer()
+        Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
+    }
+
+    // Start thread to update heart beat
+    fun startHeartBeatTimer(){
+        // reset timer if present
+        if(timerHeartBeat != null) {
+            timerHeartBeat!!.cancel()
+            timerHeartBeat!!.purge()
+            timerHeartBeat = null
+        }
+
+        timerHeartBeat = Timer()
+        timerHeartBeat?.schedule(timerTask {
+            println("Heart Beat")
+            val dataClient2: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendStateMachineToWear(dataClient2, "racing")
+        }, 0, 3000)
+    }
+
+
+    // Stop heart beat thread
+    fun stopHeartBeatTimer(){
+        // reset timer if present
+        if(timerHeartBeat != null) {
+            timerHeartBeat!!.cancel()
+            timerHeartBeat!!.purge()
+            timerHeartBeat = null
+        }
+    }
+
 }

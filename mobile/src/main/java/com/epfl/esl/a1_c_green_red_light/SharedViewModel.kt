@@ -530,4 +530,14 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             override fun onCancelled(error: DatabaseError) {}
         })
     }
+
+    // Send current position while multiplayer
+    fun addPositionMultiplayer(){
+        profileRef.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                profileRef.child(_gameOwner.value!!).child("/currentRacePosition").child(username).setValue(playerPosition)
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
 }
