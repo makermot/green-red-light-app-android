@@ -48,6 +48,9 @@
         <action
             android:id="@+id/action_mySpaceFragment_to_statFragment"
             app:destination="@id/statFragment" />
+        <action
+            android:id="@+id/action_mySpaceFragment_to_friendsFragment"
+            app:destination="@id/friendsFragment" />
     </fragment>
     <fragment
         android:id="@+id/inProgressFragment"
@@ -59,4 +62,9 @@
         <argument android:name="goalPosition"
             app:argType="com.google.android.gms.maps.model.LatLng" />
     </fragment>
+    <fragment
+        android:id="@+id/friendsFragment"
+        android:name="com.epfl.esl.a1_c_green_red_light.FriendsFragment"
+        android:label="fragment_friends"
+        tools:layout="@layout/fragment_friends" />
 </navigation>
