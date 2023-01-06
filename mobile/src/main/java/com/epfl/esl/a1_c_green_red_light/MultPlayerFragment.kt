@@ -40,9 +40,14 @@ class MultPlayerFragment : Fragment() {
             if(owner != null){
                 println(" Game requested !!")
                 binding.noFriendsLayout.visibility = View.GONE
+                binding.ownerName.text = owner
                 binding.ownerLayout.visibility = View.VISIBLE
             }
         })
+
+        binding.acceptButton.setOnClickListener{view : View ->
+            
+        }
 
 
         return binding.root
