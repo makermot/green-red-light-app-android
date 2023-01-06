@@ -64,6 +64,9 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         mapInitialised.value = false
     }
 
+    // Variable state the number of positions received on the watch
+    private var isTheFirst: Boolean = true
+
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -71,9 +74,6 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     ): View? {
         // Initialise Binding
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_in_progress, container, false)
-
-        //val args : InProgressFragmentArgs by navArgs()
-        //val goalPosition = args.goalPosition
 
         // Initialise viewModel
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
@@ -83,6 +83,9 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         // Start timer for heartBeat : private timer not from view model and Initialise heart beat to keep sync with wear
         startHeartBeatTimer()
+
+        // Save start time to compute elapse time
+        viewModel.startTime = System.currentTimeMillis() / 1000
 
         // Add listener to dataclient to be able to recieve data from wear
         Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
@@ -112,6 +115,13 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         viewModel.receivedPosition.observe(viewLifecycleOwner, Observer { newPosition ->
             print("new position :")
             println(newPosition)
+            println("is the first " + isTheFirst)
+            if(isTheFirst){
+                viewModel.playerPosition = viewModel.receivedPosition.value!!
+                isTheFirst = false
+                println("la position du player is " + viewModel.playerPosition )
+                println("la position sauvegardée is " + viewModel.receivedPosition.value)
+            }
             if(mapInitialised.value == true){
                 updatePlayerLocation(newPosition)
             }

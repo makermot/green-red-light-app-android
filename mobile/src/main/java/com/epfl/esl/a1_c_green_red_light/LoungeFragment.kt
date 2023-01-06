@@ -162,7 +162,6 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
         ) as Marker
 
         mMap.setOnMarkerDragListener(this)
-        //onMarkerDrag(markerGoal)
 
         // Move Camera to goal
         val cameraPosition = CameraPosition.Builder()

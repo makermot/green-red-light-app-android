@@ -17,6 +17,7 @@ import com.google.android.gms.wearable.*
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.concurrent.timerTask
 
@@ -29,6 +30,8 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var key: String = ""
     var password: String = ""
     var heartBeatTimer: Timer? = null
+    var startTime: Long? = null
+    var stopTime: Long? = null
 
     private var mHandler: Handler = object : Handler(){}
 
@@ -65,6 +68,9 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // Localisation of the goal of the race
     var playerPosition: LatLng = LatLng(46.520444, 6.567717)
+
+    // Winner of the game
+    var winner: String = "winner"
 
     //localisation of the wear
     private val _heartBeat = MutableLiveData<Int>()
@@ -184,6 +190,26 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         }
     }
 
+    // Add parameters of the race to the database
+    fun addRaceToDataBase(){
+        profileRef.addListenerForSingleValueEvent(object : ValueEventListener{
+            val rightNow = Calendar.getInstance()
+            val df = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK)
+            val formattedDate: String = df.format(rightNow.time)
+            var activityKey: String = Random().nextInt().toString()
+            val elapse = stopTime?.minus(startTime!!)
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                profileRef.child(key).child("/races").child(activityKey).child("date").setValue(formattedDate)
+                profileRef.child(key).child("/races").child(activityKey).child("elapsed time").setValue(elapse.toString())
+                profileRef.child(key).child("/races").child(activityKey).child("finish coordinates").setValue(goalPosition.toString())
+                profileRef.child(key).child("/races").child(activityKey).child("start coordinates").setValue(playerPosition.toString())
+                profileRef.child(key).child("/races").child(activityKey).child("/players").child(key).setValue(key)
+                profileRef.child(key).child("/races").child(activityKey).child("winner").setValue(winner)
+
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
 
     // Add friend to profile
     fun addFriend(friendUsername : String) {
@@ -314,6 +340,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                 val timestamp = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
                 _shouldSendUserInfoToWear.value = true
             }
+
     }
 
 

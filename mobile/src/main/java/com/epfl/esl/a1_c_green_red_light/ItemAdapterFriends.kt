@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ItemAdapterFriends(val context: Context, val items: ArrayList<String>,
+/*class ItemAdapterFriends(val context: Context, val items: ArrayList<String>,
                   val items_2: ArrayList<String>) :
     RecyclerView.Adapter<ItemAdapter.ViewHolder>()
 {
@@ -64,4 +64,4 @@ class ItemAdapterFriends(val context: Context, val items: ArrayList<String>,
         var tvItem_5 = view.findViewById<TextView>(R.id.elapsed_time)
         var tvItem_6 = view.findViewById<TextView>(R.id.players)
     }
-}
+}*/
