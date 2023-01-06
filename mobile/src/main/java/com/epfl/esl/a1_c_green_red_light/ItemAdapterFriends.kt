@@ -1,4 +1,4 @@
-package com.epfl.esl.a1_c_green_red_light
+/*package com.epfl.esl.a1_c_green_red_light
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -64,4 +64,4 @@ class ItemAdapterFriends(val context: Context, val items: ArrayList<String>,
         var tvItem_5 = view.findViewById<TextView>(R.id.elapsed_time)
         var tvItem_6 = view.findViewById<TextView>(R.id.players)
     }
-}
+}*/

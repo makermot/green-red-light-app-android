@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
@@ -34,7 +35,12 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
 
     private val LOCATION_REQUEST_CODE = 101
     private lateinit var mMap: GoogleMap
-    private var permission: Boolean = false
+    //private var permission: Boolean = false
+
+    private var permission = MutableLiveData<Boolean>()
+    init {
+        permission.value = false
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,32 +65,51 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
         // Set title on the Top Bar
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Lounge"
 
+        // Start race functionality
         binding.gotoWearButton.setOnClickListener{view: View ->
-            if(permission){
-                // Send start condition to wear
-                println("declare Client")
-                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-                viewModel.sendCommandToWear(dataClient, "start")
-                println("End SendStart to wear : Navigate")
 
-                // Navigate to in progressFragment
-                //val directions = LoungeFragmentDirections.actionLoungeFragmentToInProgressFragment(viewModel.goalPosition)
-                //
-                //
-                // view.findNavController().navigate(directions)
-                Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
-            }else{
+            // Check if localisation permission was granted
+            permission.value = ActivityCompat.checkSelfPermission(
+                this.requireActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+                this.requireActivity(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+            // If not -> request it again
+            if(permission.value == false){
                 Toast.makeText(
                     this.requireActivity(),
                     "Oupsi... Localisation permission required",
                     Toast.LENGTH_LONG
                 ).show()
-            }
 
-            // Save the position of the goal and the position of the player
-            viewModel.goalPosition = markerGoal.position
-            println(markerGoal.position)
-            //viewModel.playerPosition = viewModel.receivedPosition.value!!
+                ActivityCompat.requestPermissions(
+                    this.requireActivity(),
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE)
+            }
+            //Else navigate to race fragment
+            else{
+                // Save the position of the goal and the position of the player
+                viewModel.goalPosition = markerGoal.position
+                println(markerGoal.position)
+
+                // Navigate to race fragment
+                Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
+            }
+        }
+
+        // Add Friend to race functionality
+        binding.playWithFriend.setOnClickListener{view: View ->
+
+        }
+
+        // Add observer on userImage
+        permission.observe(viewLifecycleOwner) { permissionGranted ->
+            if(permissionGranted == true){
+                inflateMap(viewModel.goalPosition)
+            }
         }
 
         // Initialise Map
@@ -100,14 +125,14 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
 
         //var goal = LatLng(46.520444, 6.567717)
 
-        permission = ActivityCompat.checkSelfPermission(
+        permission.value = ActivityCompat.checkSelfPermission(
             this.requireActivity(),
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
             this.requireActivity(),
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
-        if (permission) {
+        if (permission.value == true) {
             mMap.isMyLocationEnabled = true
             inflateMap(viewModel.goalPosition)
         } else {
@@ -115,11 +140,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
                 this.requireActivity(),
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE
             )
-            permission = true
         }
-
-        //map of the earth when the permission is not given
-        // Map of the earth when the permission is not given
 
         mMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
     }
@@ -141,6 +162,8 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
                         childFragmentManager.findFragmentById(R.id.map) as
                                 SupportMapFragment
                     mapFragment.getMapAsync(this)
+
+                    permission.value = true
                 }
             }
         }
