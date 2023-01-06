@@ -21,8 +21,7 @@
                 android:layout_weight="1"
                 android:adjustViewBounds="true"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/sun"
-                />
+                android:src="@drawable/sun" />
             <TextView
                 android:id="@+id/welcomeUsername"
                 android:layout_width="0dp"

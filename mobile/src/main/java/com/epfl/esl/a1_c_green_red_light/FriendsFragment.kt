@@ -68,6 +68,12 @@ class FriendsFragment : Fragment() {
                 viewModelFriends.resetUpdate()
             }
         })
+
+        viewModelFriends.nbFriends.observe(viewLifecycleOwner, Observer { nbFriends ->
+            if (nbFriends == viewModelFriends.numberFriends) {
+                viewModelFriends.sendToItemAdapter(context)
+            }
+        })
         return binding.root
     }
 
