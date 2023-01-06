@@ -31,6 +31,8 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.Wearable
+import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
 import java.io.IOException
 import java.util.*
 import kotlin.concurrent.timerTask
@@ -45,6 +47,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private val LOCATION_REQUEST_CODE = 101
 
     private var markerPlayer: Marker? = null
+    private lateinit var markers: MutableList<Marker>
 
     private var timerHeartBeat: Timer? = null
     private var timerRace: Timer? = null
@@ -327,6 +330,31 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    // Add the marker of the friends during multiplayer race
+    fun addMarkersOfFriends(position: MutableList<LatLng>) {
+        val colors = listOf(BitmapDescriptorFactory.HUE_BLUE, BitmapDescriptorFactory.HUE_CYAN,
+            BitmapDescriptorFactory.HUE_GREEN, BitmapDescriptorFactory.HUE_ORANGE,
+            BitmapDescriptorFactory.HUE_ROSE, BitmapDescriptorFactory.HUE_VIOLET,
+            BitmapDescriptorFactory.HUE_YELLOW);
+
+        var increment : Int = 0
+
+        // Delete all the previous markers
+        markers.clear()
+        for (friend in viewModel.friendsWePlayWith) {
+
+            // add player position to Map
+            var markerMulti: Marker = mMap.addMarker(
+                MarkerOptions()
+                    .position(position.elementAt(increment))
+                    .title(friend)
+                    .icon(BitmapDescriptorFactory.defaultMarker(colors.elementAt(increment)))
+                    .visible(true)
+            )
+            markers.add(increment, markerMulti)
+            increment += increment
+        }
+    }
 }
 
 

@@ -212,7 +212,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     fun addRaceToDataBase(){
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener{
             val rightNow = Calendar.getInstance()
-            val df = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK)
+            val df = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.FRANCE)
             val formattedDate: String = df.format(rightNow.time)
             var activityKey: String = Random().nextInt().toString()
             val elapse = stopTime?.minus(startTime!!)
@@ -223,7 +223,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                 profileRef.child(key).child("/races").child(activityKey).child("start coordinates").setValue(playerPosition.toString())
                 profileRef.child(key).child("/races").child(activityKey).child("/players").child(key).setValue(key)
                 profileRef.child(key).child("/races").child(activityKey).child("winner").setValue(winner)
-
             }
             override fun onCancelled(error: DatabaseError) {}
         })
