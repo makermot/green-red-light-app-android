@@ -57,20 +57,22 @@ class FriendsViewModel: ViewModel() {
                         val friendsDatabase = friend
                             .getValue(String::class.java)!!
                         println(friendsDatabase)
-                        friendsList.add(friendsDatabase)
                         val imageFriend = storageRef.child("ProfileImages/" + friendsDatabase + ".jpg")
                         val ONE_MEGABYTE: Long = 1024 * 1024
                         imageFriend.getBytes(ONE_MEGABYTE).addOnSuccessListener { receivedImage ->
                             // Data for "ProfileImages/username.jpg" is returned, use this as needed
                             imagesList.add(BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size))
+                            friendsList.add(friendsDatabase)
                             counter = counter.plus(1)
-                            print("counter is: ")
-                            println(counter)
+                            //print("counter is: ")
+                            //println(counter)
+                            print("Getting image of: ")
+                            println(friendsDatabase)
                             _nbFriends.value = counter
                         }
                     }
                 }
-                else{println("I can't recover the current username in StatViewModel")}
+                else{println("I can't recover the current username in FriendsViewModel")}
             }
             override fun onCancelled(databaseError: DatabaseError) {}
         })
@@ -78,7 +80,6 @@ class FriendsViewModel: ViewModel() {
 
     fun sendToItemAdapter(context:Context?){
         // Adapter class is initialized and list is passed in the param.
-        println("is inside sendToItemAdapter")
         itemAdapterFriends = context?.let {
             ItemAdapterFriends(
                 context = it,

@@ -10,7 +10,6 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="winnerAnnouncement">The Winner is :</string>
     <string name="name_app">Sunshine</string>
     <string name="username">username</string>
     <string name="signin">sign in</string>
@@ -29,7 +28,7 @@
     <string name="players_title">"Players: "</string>
     <string name="current_username">Current username</string>
     <string name="friend_username">Friend username</string>
-    <string name="friends_button">Friends</string>
+    <string name="friends_button">My Friends</string>
     <string name="returnHome">Return to MySpace</string>
     <string name="timeAnnouncement">With a time of : </string>
 </resources>

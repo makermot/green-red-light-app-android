@@ -75,6 +75,11 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     val friendsResponse: LiveData<Int?>
         get() = _friendsResponse
 
+    private val _gameOwner = MutableLiveData<String?>()
+    val gameOwner: LiveData<String?>
+        get() = _gameOwner
+
+
     // Localisation of beginning of the race
     var goalPosition: LatLng = LatLng(46.520444, 6.567717)
 
@@ -100,6 +105,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         _authentification.value = null
         _heartBeat.value = 0
         _shouldSendUserInfoToWear.value = false
+        _gameOwner.value = null
     }
 
 
@@ -206,7 +212,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     fun addRaceToDataBase(){
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener{
             val rightNow = Calendar.getInstance()
-            val df = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK)
+            val df = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.FRANCE)
             val formattedDate: String = df.format(rightNow.time)
             var activityKey: String = Random().nextInt().toString()
             val elapse = stopTime?.minus(startTime!!)
@@ -217,7 +223,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                 profileRef.child(key).child("/races").child(activityKey).child("start coordinates").setValue(playerPosition.toString())
                 profileRef.child(key).child("/races").child(activityKey).child("/players").child(key).setValue(key)
                 profileRef.child(key).child("/races").child(activityKey).child("winner").setValue(winner)
-
             }
             override fun onCancelled(error: DatabaseError) {}
         })
@@ -482,6 +487,8 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         })
     }
 
+
+    // Reset the friends demand in firebase
     fun resetFriendsPlayDemand(){
         playWithFriends = 0
         friendsWePlayWith.clear()
@@ -507,6 +514,20 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                 }
             }
             override fun onCancelled(databaseError: DatabaseError) {}
+        })
+    }
+
+
+    // Find if a player has request a game with you
+    fun getPlayRequest(){
+        profileRef.addValueEventListener(object :ValueEventListener{
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if( dataSnapshot.hasChild(username) &&
+                    dataSnapshot.child(username).hasChild("play request")){
+                    _gameOwner.value = dataSnapshot.child(username).child("play request").child("request").getValue(String::class.java)
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {}
         })
     }
 }
