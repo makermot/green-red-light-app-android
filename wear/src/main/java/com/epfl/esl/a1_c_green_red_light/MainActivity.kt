@@ -3,7 +3,6 @@ package com.epfl.esl.a1_c_green_red_light
 import android.Manifest
 import android.app.Activity
 import android.content.ContentValues.TAG
-import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -12,8 +11,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.location.Location
-import android.os.Bundle
-import android.os.Handler
+import android.os.*
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -33,6 +31,7 @@ import com.google.android.gms.wearable.*
 import java.util.*
 import kotlin.concurrent.timerTask
 import kotlin.math.sqrt
+import android.content.Context as Context1
 
 
 class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedListener,
@@ -42,8 +41,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private lateinit var dataClient : DataClient
     private lateinit var lifecycleRegistry: LifecycleRegistry
-
-    //private var screen :String? = "waiting"
 
     // Live data
     private var stateMachine = MutableLiveData<String>()
@@ -130,6 +127,9 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
         light.observe(this) { color ->
             if(stateMachine.value == "racing"){
+
+                vibrateWear(this)
+
                 when (color) {
                     "green" -> {
                         binding.container.setBackgroundColor(
@@ -241,6 +241,8 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             }
             "racing" -> {
                 // Set up view visibility
+                binding.container.setBackgroundColor(
+                    ContextCompat.getColor(applicationContext, R.color.green))
                 binding.startView.visibility = View.VISIBLE
 
                 // Save start time to compute elapse time
@@ -400,7 +402,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
 
     // Verify if hardware has GPS capabilities
-    private fun hasGps(context : Context): Boolean{
+    private fun hasGps(context : Context1): Boolean{
         return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
     }
 
@@ -491,7 +493,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         super.onResume()
         println("App resumed")
         Wearable.getDataClient(this).addListener(this)
-        //mSensorManager!!.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL)
+        mSensorManager!!.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL)
 
         startWatchDogTimer()
     }
@@ -502,7 +504,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         super.onPause()
         println("App paused")
         Wearable.getDataClient(this).removeListener(this)
-        //mSensorManager!!.unregisterListener(this)
+        mSensorManager!!.unregisterListener(this)
 
         //Reset App state
         stateMachine.value = "unlogged"
@@ -545,6 +547,16 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     // return lifecyle owner -> need for the observer
     override fun getLifecycle(): Lifecycle {
         return lifecycleRegistry
+    }
+
+    // vibrator function
+    private fun vibrateWear(context : Context1) {
+        val vibrator = context.getSystemService(Context1.VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= 26) {
+            vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            vibrator.vibrate(200)
+        }
     }
 }
 
