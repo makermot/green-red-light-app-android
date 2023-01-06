@@ -212,15 +212,15 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     fun addRaceToDataBase(){
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener{
             val rightNow = Calendar.getInstance()
-            val df = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK)
+            val df = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.FRANCE)
             val formattedDate: String = df.format(rightNow.time)
             var activityKey: String = Random().nextInt().toString()
             val elapse = stopTime?.minus(startTime!!)
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 profileRef.child(key).child("/races").child(activityKey).child("date").setValue(formattedDate)
                 profileRef.child(key).child("/races").child(activityKey).child("elapsed time").setValue(elapse.toString())
-                profileRef.child(key).child("/races").child(activityKey).child("finish coordinates").setValue(goalPosition.toString())
-                profileRef.child(key).child("/races").child(activityKey).child("start coordinates").setValue(playerPosition.toString())
+                profileRef.child(key).child("/races").child(activityKey).child("finish coordinates").setValue(goalPosition.toString().toFloat().toString())
+                profileRef.child(key).child("/races").child(activityKey).child("start coordinates").setValue(playerPosition.toString().toFloat().toString())
                 profileRef.child(key).child("/races").child(activityKey).child("/players").child(key).setValue(key)
                 profileRef.child(key).child("/races").child(activityKey).child("winner").setValue(winner)
 
