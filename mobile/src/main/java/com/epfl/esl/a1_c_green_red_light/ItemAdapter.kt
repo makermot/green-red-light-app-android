@@ -9,7 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 class ItemAdapter(val context: Context, val items: ArrayList<String>,
                   val items_2: ArrayList<String>, val items_3: ArrayList<String>,
-                  val items_4: ArrayList<String>, val items_5: ArrayList<String>) :
+                  val items_4: ArrayList<String>, val items_5: ArrayList<String>,
+                  val items_6: ArrayList<String>) :
     RecyclerView.Adapter<ItemAdapter.ViewHolder>()
 {
     /**
@@ -39,11 +40,13 @@ class ItemAdapter(val context: Context, val items: ArrayList<String>,
         val item_3_position = items_3.get(position)
         val item_4_position = items_4.get(position)
         val item_5_position = items_5.get(position)
+        val item_6_position = items_6.get(position)
         holder.tvItem.text = item_position
         holder.tvItem_2.text = item_2_position
         holder.tvItem_3.text = item_3_position
         holder.tvItem_4.text = item_4_position
         holder.tvItem_5.text = item_5_position
+        holder.tvItem_6.text = item_6_position
     }
     /**
      * Gets the number of items in the list
@@ -59,7 +62,8 @@ class ItemAdapter(val context: Context, val items: ArrayList<String>,
         var tvItem = view.findViewById<TextView>(R.id.title_stat)
         var tvItem_2 = view.findViewById<TextView>(R.id.coordinates_start)
         var tvItem_3 = view.findViewById<TextView>(R.id.coordinates_finish)
-        var tvItem_4 = view.findViewById<TextView>(R.id.elapsed_time)
-        var tvItem_5 = view.findViewById<TextView>(R.id.players)
+        var tvItem_4 = view.findViewById<TextView>(R.id.winner)
+        var tvItem_5 = view.findViewById<TextView>(R.id.elapsed_time)
+        var tvItem_6 = view.findViewById<TextView>(R.id.players)
     }
 }

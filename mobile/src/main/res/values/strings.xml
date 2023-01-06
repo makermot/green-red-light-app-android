@@ -21,4 +21,10 @@
     <string name="coordinates_finish_stat">(46.520444, 6.567717)</string>
     <string name="elapsed_time_stat">00.00.00</string>
     <string name="players_list_stat">[Shakira, Britney Bitch]</string>
+    <string name="winner_stat">the king</string>
+    <string name="time_title">"Best time: "</string>
+    <string name="start_title">"Start coordinates: "</string>
+    <string name="finish_title">"Finish coordinates: "</string>
+    <string name="winner_title">"Winner: "</string>
+    <string name="players_title">"Players: "</string>
 </resources>

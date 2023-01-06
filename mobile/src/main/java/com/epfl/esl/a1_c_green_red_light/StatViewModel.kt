@@ -39,6 +39,7 @@ class StatViewModel: ViewModel() {
                     val dateTimeList: ArrayList<String> = ArrayList<String>()
                     val coordinatesStartList: ArrayList<String> = ArrayList<String>()
                     val coordinatesFinishList: ArrayList<String> = ArrayList<String>()
+                    val winnerList: ArrayList<String> = ArrayList<String>()
                     val elapsedTimeList: ArrayList<String> = ArrayList<String>()
                     val playersList: ArrayList<String> = ArrayList<String>()
 
@@ -61,6 +62,10 @@ class StatViewModel: ViewModel() {
                             .child("finish coordinates")
                             .getValue(String::class.java)!!
                         coordinatesFinishList.add(coordinatesFinishDatabase)
+                        val winnerDatabase = race
+                            .child("winner")
+                            .getValue(String::class.java)!!
+                        winnerList.add(winnerDatabase)
                         val elapsedTimeDatabase = race
                             .child("elapsed time")
                             .getValue(String::class.java)!!
@@ -69,7 +74,8 @@ class StatViewModel: ViewModel() {
                         for (player in race.child("/players").children) {
                             val playersDatabase = player
                                 .getValue(String::class.java)!!
-                            playerString = "$playerString, $playersDatabase"
+                            playerString = if (playerString == ""){ "$playerString  $playersDatabase" }
+                            else{ "$playerString, $playersDatabase" }
                         }
                         playersList.add(playerString)
                         print("The players of this race are: ")
@@ -88,8 +94,9 @@ class StatViewModel: ViewModel() {
                             items = dateTimeList,
                             items_2 = coordinatesStartList,
                             items_3 = coordinatesFinishList,
-                            items_4 = elapsedTimeList,
-                            items_5 = playersList
+                            items_4 = winnerList,
+                            items_5 = elapsedTimeList,
+                            items_6 = playersList
                         )
                     }
                     _statUpdate.value = true

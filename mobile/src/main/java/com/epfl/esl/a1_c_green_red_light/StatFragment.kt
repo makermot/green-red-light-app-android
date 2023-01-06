@@ -19,7 +19,7 @@ class StatFragment : Fragment() {
     private lateinit var viewModelStat: StatViewModel
     private lateinit var viewModelShared: SharedViewModel
 
-    var username: String = "alo"
+    var username: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,8 +34,8 @@ class StatFragment : Fragment() {
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : My statistics"
 
         // Set the LayoutManager that this RecyclerView will use.
-        binding.recyclerViewItems.layoutManager = LinearLayoutManager(requireContext())
-        //binding.recyclerViewItems.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        //binding.recyclerViewItems.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerViewItems.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
         // Instantiate the viewModels
         viewModelStat = ViewModelProvider(this).get(StatViewModel::class.java)

@@ -40,10 +40,18 @@
                 android:layout_weight="1">
 
                 <TextView
+                    android:id="@+id/coordinates_start_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/black"
+                    android:text="@string/start_title" />
+
+                <TextView
                     android:id="@+id/coordinates_start"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="20sp"
+                    android:textSize="15sp"
                     android:gravity="start"
                     android:text="@string/coordinates_start_stat" />
 
@@ -56,10 +64,18 @@
                 android:layout_weight="1">
 
                 <TextView
+                    android:id="@+id/coordinates_finish_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/black"
+                    android:text="@string/finish_title" />
+
+                <TextView
                     android:id="@+id/coordinates_finish"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="20sp"
+                    android:textSize="15sp"
                     android:gravity="start"
                     android:text="@string/coordinates_finish_stat" />
 
@@ -70,6 +86,37 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/winner_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/black"
+                    android:text="@string/winner_title" />
+
+                <TextView
+                    android:id="@+id/winner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:text="@string/winner_stat" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/elapsed_time_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/black"
+                    android:text="@string/time_title" />
 
                 <TextView
                     android:id="@+id/elapsed_time"
@@ -85,6 +132,14 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/players_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textColor="@android:color/black"
+                android:text="@string/players_title" />
 
             <TextView
                 android:id="@+id/players"
