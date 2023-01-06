@@ -1,29 +1,23 @@
 package com.epfl.esl.a1_c_green_red_light
 
-import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context.VIBRATOR_SERVICE
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
-import android.location.Address
-import android.location.Geocoder
 import android.os.Bundle
-import android.system.Os.remove
-import androidx.fragment.app.Fragment
+import android.os.Vibrator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.LifecycleOwner
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
-import androidx.navigation.fragment.navArgs
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentInProgressBinding
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -31,9 +25,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.Wearable
-import com.google.firebase.database.*
-import com.google.firebase.storage.FirebaseStorage
-import java.io.IOException
 import java.util.*
 import kotlin.concurrent.timerTask
 import kotlin.math.pow
@@ -106,6 +97,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                 viewModel.addRaceToDataBase()
 
                 Navigation.findNavController(binding.root).navigate(R.id.action_inProgressFragment_to_resultFragment)
+                onDestroy()
             }
         }
 
@@ -156,7 +148,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun findRand(): Long {
-        return ((3..8).random())*1000.toLong()
+        return ((3..7).random())*1000.toLong()
     }
 
 
@@ -177,11 +169,12 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         // Launch timer with random period
         timerRace = Timer()
         timerRace!!.schedule(timerTask {
-            //println("Timer Race")
+            println("Timer Race")
 
             lightColor = if (lightColor == "red"){"green"} else {"red"}
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
             viewModel.sendCommandToWear(dataClient, lightColor)
+
 
             timerCeption()
         }, rand, 1000)
@@ -193,6 +186,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     fun stopTimerCeption(){
         // reset timer if present
         if(timerRace != null) {
+            println("TimerRace in tablet is stopped")
             timerRace!!.cancel()
             timerRace!!.purge()
             timerRace = null
