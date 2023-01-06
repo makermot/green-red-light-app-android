@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentResultBinding
 
 
@@ -34,6 +35,16 @@ class ResultFragment : Fragment() {
         // Inflate the layout for this fragment
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Results"
 
+        // Set the name of the winner
+        viewModel.winner = viewModel.username
+
+        binding.ReturnHome.setOnClickListener { view: View ->
+            Navigation.findNavController(view).navigate(R.id.action_resultFragment_to_mySpaceFragment)
+        }
+
+        binding.winner.text = viewModel.winner
+        val elapse = viewModel.stopTime?.minus(viewModel.startTime!!)
+        binding.time.text = elapse.toString()
 
         return binding.root
     }

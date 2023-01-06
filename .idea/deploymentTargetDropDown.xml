@@ -7,23 +7,11 @@
         <deviceKey>
           <Key>
             <type value="SERIAL_NUMBER" />
-            <value value="TKQ7N17410000392" />
+            <value value="4JPNU18921110444" />
           </Key>
         </deviceKey>
       </Target>
     </runningDeviceTargetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2023-01-06T11:03:40.894690Z" />
-    <targetSelectedWithDropDown>
-      <Target>
-        <type value="QUICK_BOOT_TARGET" />
-        <deviceKey>
-          <Key>
-            <type value="VIRTUAL_DEVICE_PATH" />
-            <value value="C:\Users\Théo\.android\avd\Pixel_4_XL_API_30.avd" />
-          </Key>
-        </deviceKey>
-      </Target>
-    </targetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2023-01-06T10:02:05.671377400Z" />
+    <timeTargetWasSelectedWithDropDown value="2023-01-06T11:51:44.251657Z" />
   </component>
 </project>

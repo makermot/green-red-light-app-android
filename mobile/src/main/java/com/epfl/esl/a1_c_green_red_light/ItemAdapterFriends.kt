@@ -7,9 +7,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-/*class ItemAdapterFriends(val context: Context, val items: ArrayList<String>,
-                  val items_2: ArrayList<String>) :
-    RecyclerView.Adapter<ItemAdapter.ViewHolder>()
 class ItemAdapterFriends(val context: Context, val items: ArrayList<String>) :
     RecyclerView.Adapter<ItemAdapterFriends.ViewHolder>()
 {
@@ -51,4 +48,4 @@ class ItemAdapterFriends(val context: Context, val items: ArrayList<String>) :
         // Holds the TextView that will add each item to
         var tvItem = view.findViewById<TextView>(R.id.friend)!!
     }
-}*/
+}
