@@ -1,4 +1,4 @@
-/*package com.epfl.esl.a1_c_green_red_light
+package com.epfl.esl.a1_c_green_red_light
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -48,4 +48,4 @@ class ItemAdapterFriends(val context: Context, val items: ArrayList<String>) :
         // Holds the TextView that will add each item to
         var tvItem = view.findViewById<TextView>(R.id.friend)!!
     }
-}*/
+}
