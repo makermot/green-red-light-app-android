@@ -32,6 +32,8 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var heartBeatTimer: Timer? = null
     var startTime: Long? = null
     var stopTime: Long? = null
+    var playWithFriends : Int = 0
+    var friendsWePlayWith : ArrayList<String> = ArrayList<String>()
 
     private var mHandler: Handler = object : Handler(){}
 
@@ -62,6 +64,17 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     private val _shouldSendUserInfoToWear = MutableLiveData<Boolean>()
     val shouldSendUserInfoToWear: LiveData<Boolean>
         get() = _shouldSendUserInfoToWear
+
+    // String to check how far we are in the playing with Friend process : It can take the value :
+    // send play request successfully added, send request already sent, Friend profile don't exist, you can't play with yourself, null
+    private val _playWithFriendStatus = MutableLiveData<String?>()
+    val playWithFriendStatus: LiveData<String?>
+        get() = _playWithFriendStatus
+
+    // Count the number of friends response
+    private val _friendsResponse = MutableLiveData<Int?>()
+    val friendsResponse: LiveData<Int?>
+        get() = _friendsResponse
 
     // Localisation of beginning of the race
     var goalPosition: LatLng = LatLng(46.520444, 6.567717)
@@ -392,5 +405,61 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             heartBeatTimer!!.purge()
             heartBeatTimer = null
         }
+    }
+
+
+    // Send Request to friend to play with
+    fun requestFriendToPlayWith(friendUserName : String){
+        if(username == friendUserName){
+            _playWithFriendStatus.value = "you can't play with yourself"
+            return
+        }
+        // Profile ref -> branche profile de la realtime database
+        profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if(dataSnapshot.hasChild(friendUserName)){
+                    println("Friend's profile Found")
+                    if(dataSnapshot.child(friendUserName).child("play request").hasChildren() &&
+                        username == dataSnapshot.child(friendUserName).child("play request").child("request").getValue(String::class.java)!!){
+                        println("Oh no... You're already asked him to play with you")
+                        _playWithFriendStatus.value = "send request already sent"
+                    }
+                    else{
+                        println("Let's send play request to your friend")
+                        profileRef.child(friendUserName).child("play request").child("request").setValue(username)
+                        _playWithFriendStatus.value = "send play request successfully added"
+                    }
+                }
+                else{
+                    println("Oh no... friend's profile not found")
+                    _playWithFriendStatus.value = "Friend profile don't exist"
+                }
+            }
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
+    }
+
+
+    // Get the number of friends whom accepted the play request
+    fun getFriendsResponse(){
+        println("Get friends response")
+        // Profile ref -> branche profile de la realtime database
+        profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if(dataSnapshot.hasChild(username)){
+                    if(dataSnapshot.child(username).child("accepted request").hasChildren()){
+                        var count : Int = 0
+                        for (playerReady in dataSnapshot.child(username).child("accepted request").children){
+                            count += 1
+                        }
+                        _friendsResponse.value = count
+                    }
+                    else{
+                        _friendsResponse.value = 0
+                    }
+                }
+            }
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
     }
 }

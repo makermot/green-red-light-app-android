@@ -59,6 +59,45 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
             viewModel.sendStateMachineToWear(dataClient, "logged")
         })
 
+        // Initialise friends response observer to navigate to fragment when all friend responded
+        viewModel.friendsResponse.observe(viewLifecycleOwner, Observer { friendsResponse ->
+            if(viewModel.playWithFriends == friendsResponse){
+                // Save the position of the goal and the position of the player
+                viewModel.goalPosition = markerGoal.position
+                println(markerGoal.position)
+
+                // Navigate to race fragment
+                Navigation.findNavController(requireView()).navigate(R.id.action_loungeFragment_to_inProgressFragment)
+            }else{
+                Toast.makeText(
+                    this.requireActivity(),
+                    "Oupsi... Not All Friend responded",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        })
+
+        // Initialise friends response observer to navigate to fragment when all friend responded
+        viewModel.playWithFriendStatus.observe(viewLifecycleOwner, Observer { status ->
+            when (status) {
+                "send play request successfully added" -> {
+                    Toast.makeText(context,"play request successfully sent", Toast.LENGTH_SHORT).show()
+                }
+                "send request already sent" -> {
+                    Toast.makeText(context,"You already asked him to play...", Toast.LENGTH_SHORT).show()
+                }
+                "Friend profile don't exist" -> {
+                    Toast.makeText(context,"Friend profile don't exist", Toast.LENGTH_SHORT).show()
+                }
+                "you can't play with yourself" -> {
+                    Toast.makeText(context,"you can't play with yourself", Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    Toast.makeText(context,"Oupsi...", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+
         // Start timer for heartBeat
         viewModel.startHeartBeatTimer()
 
@@ -67,7 +106,6 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
 
         // Start race functionality
         binding.gotoWearButton.setOnClickListener{view: View ->
-
             // Check if localisation permission was granted
             permission.value = ActivityCompat.checkSelfPermission(
                 this.requireActivity(),
@@ -91,18 +129,29 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
             }
             //Else navigate to race fragment
             else{
-                // Save the position of the goal and the position of the player
-                viewModel.goalPosition = markerGoal.position
-                println(markerGoal.position)
+                if(viewModel.playWithFriends > 0){
+                    viewModel.getFriendsResponse()
+                }else{
+                    // Save the position of the goal and the position of the player
+                    viewModel.goalPosition = markerGoal.position
+                    println(markerGoal.position)
 
-                // Navigate to race fragment
-                Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
+                    // Navigate to race fragment
+                    Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
+                }
             }
         }
 
         // Add Friend to race functionality
         binding.playWithFriend.setOnClickListener{view: View ->
-
+            if(binding.friendUsername.text.toString() != "Friend's username"){
+                viewModel.playWithFriends = viewModel.playWithFriends + 1
+                viewModel.friendsWePlayWith.add(binding.friendUsername.text.toString())
+                viewModel.requestFriendToPlayWith(binding.friendUsername.text.toString())
+            }
+            else{
+                Toast.makeText(context,"Enter friend's username", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Add observer on userImage
