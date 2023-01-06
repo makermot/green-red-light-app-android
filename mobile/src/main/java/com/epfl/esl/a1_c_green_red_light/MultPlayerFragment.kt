@@ -30,14 +30,18 @@ class MultPlayerFragment : Fragment() {
         // Initialise viewModel
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
-        // Inflate the layout for this fragment
+        // Set title
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : MultiPlayer"
 
         viewModel.getPlayRequest()
 
         // Initialise heart beat observer to keep sync with wear
         viewModel.gameOwner.observe(viewLifecycleOwner, Observer { owner ->
-            println(" Game requested !!")
+            if(owner != null){
+                println(" Game requested !!")
+                binding.noFriendsLayout.visibility = View.GONE
+                binding.ownerLayout.visibility = View.VISIBLE
+            }
         })
 
 
