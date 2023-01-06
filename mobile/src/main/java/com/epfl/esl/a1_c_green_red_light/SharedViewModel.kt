@@ -219,11 +219,10 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 profileRef.child(key).child("/races").child(activityKey).child("date").setValue(formattedDate)
                 profileRef.child(key).child("/races").child(activityKey).child("elapsed time").setValue(elapse.toString())
-                profileRef.child(key).child("/races").child(activityKey).child("finish coordinates").setValue(goalPosition.toString().toFloat().toString())
-                profileRef.child(key).child("/races").child(activityKey).child("start coordinates").setValue(playerPosition.toString().toFloat().toString())
+                profileRef.child(key).child("/races").child(activityKey).child("finish coordinates").setValue(goalPosition.toString())
+                profileRef.child(key).child("/races").child(activityKey).child("start coordinates").setValue(playerPosition.toString())
                 profileRef.child(key).child("/races").child(activityKey).child("/players").child(key).setValue(key)
                 profileRef.child(key).child("/races").child(activityKey).child("winner").setValue(winner)
-
             }
             override fun onCancelled(error: DatabaseError) {}
         })
