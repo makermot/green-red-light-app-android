@@ -28,7 +28,8 @@ tools:context=".StatFragment">
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="30sp"
-                android:textColor="@android:color/black"
+                android:background="@color/black"
+                android:textColor="@android:color/white"
                 android:text="@string/date_time_stat" />
 
         </LinearLayout>
