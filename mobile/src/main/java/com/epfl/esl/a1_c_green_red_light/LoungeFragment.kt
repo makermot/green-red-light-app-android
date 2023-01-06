@@ -42,6 +42,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
         permission.value = false
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -77,11 +78,15 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
             }
         })
 
+        // setup player display
+        binding.player.text = binding.player.text.toString() +  viewModel.username
+
         // Initialise friends response observer to navigate to fragment when all friend responded
         viewModel.playWithFriendStatus.observe(viewLifecycleOwner, Observer { status ->
             when (status) {
                 "send play request successfully added" -> {
                     Toast.makeText(context,"play request successfully sent", Toast.LENGTH_SHORT).show()
+                    binding.player.text = binding.player.text.toString() + ", " + binding.friendUsername.text.toString()
                 }
                 "send request already sent" -> {
                     Toast.makeText(context,"You already asked him to play...", Toast.LENGTH_SHORT).show()
@@ -100,6 +105,14 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
 
         // Start timer for heartBeat
         viewModel.startHeartBeatTimer()
+
+        // add an observer to the shouldSendUserInfoRequest Image
+        viewModel.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
+            // Send data to wear
+            println("We observed should send request !!!")
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendUserNameAndImageToWear(dataClient)
+        })
 
         // Set title on the Top Bar
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Lounge"
@@ -144,7 +157,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
 
         // Add Friend to race functionality
         binding.playWithFriend.setOnClickListener{view: View ->
-            if(viewModel.playWithFriends < 7){
+            if(viewModel.playWithFriends < 6){
                 if(binding.friendUsername.text.toString() != "Friend's username"){
                     viewModel.requestFriendToPlayWith(binding.friendUsername.text.toString())
                 }

@@ -47,7 +47,7 @@ class ResultFragment : Fragment() {
             Navigation.findNavController(view).navigate(R.id.action_resultFragment_to_mySpaceFragment)
         }
 
-        binding.winner.text = viewModel.winner
+        binding.winner.text = viewModel.winner.value
         val elapse = viewModel.stopTime?.minus(viewModel.startTime!!)
         binding.time.text = elapse.toString()
 

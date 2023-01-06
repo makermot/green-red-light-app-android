@@ -90,9 +90,6 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                 // Save stop time to compute elapse time
                 viewModel.stopTime = System.currentTimeMillis() / 1000
 
-                // Set the name of the winner
-                viewModel.winner = viewModel.username
-
                 // Save game data to firebase
                 viewModel.addRaceToDataBase()
 
@@ -147,6 +144,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         return binding.root
     }
 
+
+    // Find random number for timer
     private fun findRand(): Long {
         return ((3..7).random())*1000.toLong()
     }
@@ -264,21 +263,9 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                 .visible(true)
         )
 
-        hasWon(playerPosition)
+        hasWon(playerPosition, viewModel.username)
 
     }
-
-
-    /*
-    override fun onResume() {
-        super.onResume()
-        //Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        //Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
-    }*/
 
 
     override fun onDestroy() {
@@ -319,7 +306,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     }
 
 
-    private fun hasWon(position: LatLng) {
+    // Check for winning condition and set winner livedata
+    private fun hasWon(position: LatLng, user : String) {
         var tolerance = 10.0
         tolerance = tolerance.pow(-9)
         val latitudeGoal = viewModel.goalPosition.latitude
@@ -331,6 +319,11 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         println("circle = $circle")
         if (circle <= tolerance){
+            // Set the name of the winner
+            viewModel.setWinner(user)
+            viewModel.setWinnerMultiPlayer(user)
+
+            // Call the observer to navigate
             winner.value = true
         }
     }
@@ -349,6 +342,9 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
             mMap.clear()
 
             for (friendPos in viewModel.friendsPos){
+                // Check for winning condition
+                hasWon(friendPos, viewModel.friendsName.elementAt(increment))
+
                 // add player position to Map
                 var markerMulti: Marker = mMap.addMarker(
                     MarkerOptions()
@@ -358,7 +354,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                         .visible(true)
                 )
                 //markers.add(increment, markerMulti)
-                increment += increment
+                increment += 1
             }
 
             if(viewModel.receivedPosition.value != null){

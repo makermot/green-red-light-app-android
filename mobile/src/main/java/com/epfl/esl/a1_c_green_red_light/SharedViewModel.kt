@@ -87,15 +87,17 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     val newFriendsPos: LiveData<Int?>
         get() = _newFriendsPos
 
+    // Winner of the game
+    private val _winner = MutableLiveData<String>()
+    val winner: LiveData<String>
+        get() = _winner
+
 
     // Localisation of beginning of the race
     var goalPosition: LatLng = LatLng(46.520444, 6.567717)
 
     // Localisation of the goal of the race
     var playerPosition: LatLng = LatLng(46.520444, 6.567717)
-
-    // Winner of the game
-    var winner: String = "winner"
 
     //localisation of the wear
     private val _heartBeat = MutableLiveData<Int>()
@@ -115,6 +117,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         _shouldSendUserInfoToWear.value = false
         _gameOwner.value = null
         _newFriendsPos.value = 0
+        _winner.value = "winner"
     }
 
 
@@ -231,7 +234,10 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                 profileRef.child(key).child("/races").child(activityKey).child("finish coordinates").setValue(goalPosition.toString())
                 profileRef.child(key).child("/races").child(activityKey).child("start coordinates").setValue(playerPosition.toString())
                 profileRef.child(key).child("/races").child(activityKey).child("/players").child(key).setValue(key)
-                profileRef.child(key).child("/races").child(activityKey).child("winner").setValue(winner)
+                for (user in friendsWePlayWith){
+                    profileRef.child(key).child("/races").child(activityKey).child("/players").child(user).setValue(user)
+                }
+                profileRef.child(key).child("/races").child(activityKey).child("winner").setValue(_winner.value)
             }
             override fun onCancelled(error: DatabaseError) {}
         })
@@ -388,6 +394,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         _addFriendStatus.value = null
     }
 
+
     fun resetPlayWithFriendStatus(){
         _playWithFriendStatus.value = null
     }
@@ -520,6 +527,10 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                             }
                         }
                     }
+                    if(dataSnapshot.child(username).hasChild("currentRacePosition")){
+                        // TODO UNCOMMENT FOR FINAL EVALUATION
+                        //profileRef.child(username).child("currentRacePosition").setValue(null)
+                    }
                 }
             }
             override fun onCancelled(databaseError: DatabaseError) {}
@@ -541,6 +552,26 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     }
 
 
+    // Find winning condition in multiplayer game has request a game with you
+    fun getWinnerMultiPlayer(){
+        profileRef.addValueEventListener(object :ValueEventListener{
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if( dataSnapshot.hasChild(_gameOwner.value!!) &&
+                    dataSnapshot.child(_gameOwner.value!!).hasChild("currentRacePosition") &&
+                    dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").hasChild("winner")){
+                    _winner.value = dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").child("winner").getValue(String::class.java)
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+    // write winning condition in multiplayer game has request a game with you
+    fun setWinnerMultiPlayer(winner : String){
+        profileRef.child(username).child("currentRacePosition").child("winner").setValue(winner)
+    }
+
+
     // Send current position while multiplayer
     fun addPositionMultiplayer(){
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener{
@@ -552,6 +583,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     }
 
 
+    // Set a permanent listener to update the player data
     fun getFriendUpdatePosition(){
         profileRef.addValueEventListener(object :ValueEventListener{
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -561,11 +593,13 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                     friendsPos.clear()
                     friendsName.clear()
                     for (player in dataSnapshot.child(username).child("currentRacePosition").children){
-                        val latitude = player.child("latitude").getValue(Double::class.java)
-                        val longitude = player.child("longitude").getValue(Double::class.java)
-                        LatLng(latitude!!, longitude!!)
-                        friendsPos.add(LatLng(latitude!!, longitude!!))
-                        friendsName.add(player.getKey()!!)
+                        if(player.hasChild("latitude") && player.hasChild("latitude")){
+                            val latitude = player.child("latitude").getValue(Double::class.java)
+                            val longitude = player.child("longitude").getValue(Double::class.java)
+                            LatLng(latitude!!, longitude!!)
+                            friendsPos.add(LatLng(latitude!!, longitude!!))
+                            friendsName.add(player.getKey()!!)
+                        }
                     }
                     _newFriendsPos.value = _newFriendsPos.value?.plus(1)
                 }
@@ -576,6 +610,8 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         })
     }
 
+
+    // Accept play request in Firebase
     fun acceptPlayRequest(){
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener{
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -583,5 +619,11 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             }
             override fun onCancelled(error: DatabaseError) {}
         })
+    }
+
+
+    // Setter function for winner
+    fun setWinner(winner : String){
+        _winner.value = winner
     }
 }

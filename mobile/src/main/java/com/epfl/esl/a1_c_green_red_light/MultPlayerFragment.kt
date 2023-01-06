@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -57,17 +58,31 @@ class MultPlayerFragment : Fragment() {
         })
 
         binding.acceptButton.setOnClickListener{view : View ->
+
+            binding.noFriendsLayout.visibility = View.GONE
+            binding.ownerLayout.visibility = View.GONE
+            binding.playing.visibility = View.VISIBLE
+
+            // change status to racing
+            racing = true
+
+            // Add observer to winner in order to get winning condition
+            viewModel.winner.observe(viewLifecycleOwner, Observer { winner ->
+                if(winner != "winner"){
+                    Navigation.findNavController(view).navigate(R.id.action_multPlayerFragment_to_resultFragment)
+                }
+            })
+
             // Add listener to dataclient to be able to recieve data from wear
             Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
 
             viewModel.acceptPlayRequest()
 
+            viewModel.getWinnerMultiPlayer()
+
             // Start timer for heartBeat : private timer not from view model and Initialise heart beat to keep sync with wear
             viewModel.stopHeartBeatTimer()
             startHeartBeatTimer()
-
-            // change status to racing
-            racing = true
 
             // Observer on the received position
             viewModel.receivedPosition.observe(viewLifecycleOwner, Observer { newPosition ->
@@ -85,6 +100,9 @@ class MultPlayerFragment : Fragment() {
         println("In progress : Everything destroyed")
         stopHeartBeatTimer()
         racing = false
+        if(viewModel.winner.value == "winner"){
+            Toast.makeText(context,"Oh no !! It seem you're cheating !", Toast.LENGTH_SHORT).show()
+        }
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
     }
 
