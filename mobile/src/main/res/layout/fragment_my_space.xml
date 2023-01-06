@@ -81,6 +81,22 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/friendsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+            <Button
+                android:id="@+id/friendsButton"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:adjustViewBounds="true"
+                android:text="@string/friends_button"/>
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/loungeLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -97,19 +113,19 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/friendsLayout"
+            android:id="@+id/multiplayerLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
             <Button
-                android:id="@+id/friendsButton"
+                android:id="@+id/multiButton"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
                 android:adjustViewBounds="true"
-                android:text="@string/friends_button"/>
+                android:text="Join a race"/>
         </LinearLayout>
 
     </LinearLayout>

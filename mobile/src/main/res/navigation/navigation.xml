@@ -51,6 +51,9 @@
         <action
             android:id="@+id/action_mySpaceFragment_to_friendsFragment"
             app:destination="@id/friendsFragment" />
+        <action
+            android:id="@+id/action_mySpaceFragment_to_multPlayerFragment"
+            app:destination="@id/multPlayerFragment" />
     </fragment>
     <fragment
         android:id="@+id/inProgressFragment"
@@ -67,4 +70,12 @@
         android:name="com.epfl.esl.a1_c_green_red_light.FriendsFragment"
         android:label="fragment_friends"
         tools:layout="@layout/fragment_friends" />
+    <fragment
+        android:id="@+id/multPlayerFragment"
+        android:name="com.epfl.esl.a1_c_green_red_light.MultPlayerFragment"
+        android:label="MultPlayerFragment" >
+        <action
+            android:id="@+id/action_multPlayerFragment_to_resultFragment"
+            app:destination="@id/resultFragment" />
+    </fragment>
 </navigation>

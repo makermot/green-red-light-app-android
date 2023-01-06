@@ -93,6 +93,15 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         winner.observe(viewLifecycleOwner) { win ->
             if(win) {
+                // Save stop time to compute elapse time
+                viewModel.stopTime = System.currentTimeMillis() / 1000
+
+                // Set the name of the winner
+                viewModel.winner = viewModel.username
+
+                // Save game data to firebase
+                viewModel.addRaceToDataBase()
+
                 Navigation.findNavController(binding.root).navigate(R.id.action_inProgressFragment_to_resultFragment)
             }
         }

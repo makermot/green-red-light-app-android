@@ -98,6 +98,13 @@ class MySpaceFragment : Fragment() {
             }
         }
 
+        binding.multiButton.setOnClickListener{view: View ->
+            view.let {
+                Navigation.findNavController(it)
+                    .navigate(R.id.action_mySpaceFragment_to_multPlayerFragment)
+            }
+        }
+
         binding.loungeButton.setOnClickListener{view: View ->
             view.let {
                 Navigation.findNavController(it)

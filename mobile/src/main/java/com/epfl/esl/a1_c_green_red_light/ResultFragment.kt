@@ -27,16 +27,8 @@ class ResultFragment : Fragment() {
         // Initialise viewModel
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
-        // Save stop time to compute elapse time
-        viewModel.stopTime = System.currentTimeMillis() / 1000
-
-        viewModel.addRaceToDataBase()
-
         // Inflate the layout for this fragment
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Results"
-
-        // Set the name of the winner
-        viewModel.winner = viewModel.username
 
         binding.ReturnHome.setOnClickListener { view: View ->
             Navigation.findNavController(view).navigate(R.id.action_resultFragment_to_mySpaceFragment)
