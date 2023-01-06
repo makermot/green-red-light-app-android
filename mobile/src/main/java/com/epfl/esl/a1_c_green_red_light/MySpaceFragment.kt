@@ -75,17 +75,19 @@ class MySpaceFragment : Fragment() {
             print("addFriendStatus changed : status :")
             println(status)
 
-            if(status == "Friend already present"){
-                Toast.makeText(context,"Oupsi... You're already friends", Toast.LENGTH_LONG).show()
-                viewModel.resetAddFriendStatus()
-            }
-            else if (status == "Friend profile don't exist"){
-                Toast.makeText(context,"Oupsi... We don't find your friend's profile...", Toast.LENGTH_LONG).show()
-                viewModel.resetAddFriendStatus()
-            }
-            else if (status == "Friend successfully added"){
-                Toast.makeText(context,"Friend successfully added", Toast.LENGTH_LONG).show()
-                viewModel.resetAddFriendStatus()
+            when (status) {
+                "Friend already present" -> {
+                    Toast.makeText(context,"Oupsi... You're already friends", Toast.LENGTH_LONG).show()
+                    viewModel.resetAddFriendStatus()
+                }
+                "Friend profile don't exist" -> {
+                    Toast.makeText(context,"Oupsi... We don't find your friend's profile...", Toast.LENGTH_LONG).show()
+                    viewModel.resetAddFriendStatus()
+                }
+                "Friend successfully added" -> {
+                    Toast.makeText(context,"Friend successfully added", Toast.LENGTH_LONG).show()
+                    viewModel.resetAddFriendStatus()
+                }
             }
         })
 
@@ -103,11 +105,11 @@ class MySpaceFragment : Fragment() {
             }
         }
 
-        binding.refreshWatchButton.setOnClickListener{view: View ->
+        binding.friendsButton.setOnClickListener{view: View ->
             view.let {
-                // Send data to wear
-                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-                viewModel.sendUserNameAndImageToWear(dataClient)
+                // Go to friends fragment
+                Navigation.findNavController(it)
+                    .navigate(R.id.action_mySpaceFragment_to_friendsFragment)
             }
         }
 

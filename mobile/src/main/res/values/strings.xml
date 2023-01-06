@@ -27,4 +27,7 @@
     <string name="finish_title">"Finish coordinates: "</string>
     <string name="winner_title">"Winner: "</string>
     <string name="players_title">"Players: "</string>
+    <string name="current_username">Current username</string>
+    <string name="friend_username">Friend username</string>
+    <string name="friends_button">Friends</string>
 </resources>

@@ -98,19 +98,19 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/watchLayout"
+            android:id="@+id/friendsLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
             <Button
-                android:id="@+id/refreshWatchButton"
+                android:id="@+id/friendsButton"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
                 android:adjustViewBounds="true"
-                android:text="Refresh Watch"/>
+                android:text="@string/friends_button"/>
         </LinearLayout>
 
     </LinearLayout>

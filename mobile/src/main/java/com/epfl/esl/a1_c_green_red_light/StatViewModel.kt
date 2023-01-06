@@ -16,7 +16,7 @@ class StatViewModel: ViewModel() {
     val profileRef: DatabaseReference = database.getReference("Profiles")
 
 
-    var itemAdapter: ItemAdapter? = null
+    var itemAdapter: ItemAdapterStat? = null
 
     private val _statUpdate = MutableLiveData<Boolean?>()
     val statUpdate: LiveData<Boolean?>
@@ -89,7 +89,7 @@ class StatViewModel: ViewModel() {
 
                     // Adapter class is initialized and list is passed in the param.
                     itemAdapter = context?.let {
-                        ItemAdapter(
+                        ItemAdapterStat(
                             context = it,
                             items = dateTimeList,
                             items_2 = coordinatesStartList,
