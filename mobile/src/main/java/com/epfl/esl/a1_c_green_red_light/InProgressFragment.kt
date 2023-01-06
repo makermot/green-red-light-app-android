@@ -143,7 +143,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun findRand(): Long {
-        return ((1..5).random())*1000.toLong()
+        return ((3..8).random())*1000.toLong()
     }
 
 
