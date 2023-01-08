@@ -24,6 +24,9 @@ class MultPlayerFragment : Fragment() {
     private lateinit var viewModel: SharedViewModel
 
     private var timerHeartBeat: Timer? = null
+    private var timerRace: Timer? = null
+    private var rand: Long = 0
+    private var lightColor: String = "red"
     private var racing : Boolean = false
 
 
@@ -36,6 +39,8 @@ class MultPlayerFragment : Fragment() {
         // Initialise viewModel
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
+        viewModel.setWinner("winner")
+
         // Set title
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : MultiPlayer"
 
@@ -47,9 +52,20 @@ class MultPlayerFragment : Fragment() {
 
         viewModel.getPlayRequest()
 
+        // Add listener to dataclient to be able to recieve data from wear
+        Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
+
+        // add an observer to the shouldSendUserInfoRequest Image
+        viewModel.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
+            // Send data to wear
+            println("We observed should send request !!!")
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendUserNameAndImageToWear(dataClient)
+        })
+
         // Initialise heart beat observer to keep sync with wear
         viewModel.gameOwner.observe(viewLifecycleOwner, Observer { owner ->
-            if(owner != null){
+            if(owner != null && !racing){
                 println(" Game requested !!")
                 binding.noFriendsLayout.visibility = View.GONE
                 binding.ownerName.text = owner
@@ -73,12 +89,19 @@ class MultPlayerFragment : Fragment() {
                 }
             })
 
-            // Add listener to dataclient to be able to recieve data from wear
-            Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
+            // add an observer to the shouldSendUserInfoRequest Image
+            viewModel.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
+                // Send data to wear
+                println("We observed should send request !!!")
+                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+                viewModel.sendUserNameAndImageToWear(dataClient)
+            })
 
             viewModel.acceptPlayRequest()
 
             viewModel.getWinnerMultiPlayer()
+
+            timerCeption()
 
             // Start timer for heartBeat : private timer not from view model and Initialise heart beat to keep sync with wear
             viewModel.stopHeartBeatTimer()
@@ -99,8 +122,9 @@ class MultPlayerFragment : Fragment() {
         super.onDestroy()
         println("In progress : Everything destroyed")
         stopHeartBeatTimer()
+        stopTimerCeption()
         racing = false
-        if(viewModel.winner.value == "winner"){
+        if(viewModel.winner.value == "winner" && racing == true){
             Toast.makeText(context,"Oh no !! It seem you're cheating !", Toast.LENGTH_SHORT).show()
         }
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
@@ -148,6 +172,55 @@ class MultPlayerFragment : Fragment() {
             timerHeartBeat!!.cancel()
             timerHeartBeat!!.purge()
             timerHeartBeat = null
+        }
+    }
+
+
+
+    // Find random number for timer
+    private fun findRand(): Long {
+        return ((3..7).random())*1000.toLong()
+    }
+
+
+    // launch a random timer to send green and red command
+    private fun timerCeption(){
+        // reset timer if present
+        if(timerRace != null) {
+            timerRace!!.cancel()
+            timerRace!!.purge()
+            timerRace = null
+        }
+
+        // find random period
+        rand = findRand()
+        //print("je print le rand : ")
+        //println(rand)
+
+        // Launch timer with random period
+        timerRace = Timer()
+        timerRace!!.schedule(timerTask {
+            println("Timer Race")
+
+            lightColor = if (lightColor == "red"){"green"} else {"red"}
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendCommandToWear(dataClient, lightColor)
+
+
+            timerCeption()
+        }, rand, 1000)
+
+    }
+
+
+    // Stop and destroy random timer for green and red light
+    fun stopTimerCeption(){
+        // reset timer if present
+        if(timerRace != null) {
+            println("TimerRace in tablet is stopped")
+            timerRace!!.cancel()
+            timerRace!!.purge()
+            timerRace = null
         }
     }
 

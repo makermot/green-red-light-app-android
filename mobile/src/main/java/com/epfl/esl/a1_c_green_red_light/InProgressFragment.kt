@@ -87,11 +87,10 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         //Check for winner condition
         winner.observe(viewLifecycleOwner) { win ->
             if(win) {
-                // Save stop time to compute elapse time
-                viewModel.stopTime = System.currentTimeMillis() / 1000
-
                 // Save game data to firebase
                 viewModel.addRaceToDataBase()
+
+                viewModel.elapse = viewModel.stopTime?.minus(viewModel.startTime!!)!!
 
                 Navigation.findNavController(binding.root).navigate(R.id.action_inProgressFragment_to_resultFragment)
                 onDestroy()
@@ -319,9 +318,12 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         println("circle = $circle")
         if (circle <= tolerance){
+            // Save stop time to compute elapse time
+            viewModel.stopTime = System.currentTimeMillis() / 1000
+
             // Set the name of the winner
             viewModel.setWinner(user)
-            viewModel.setWinnerMultiPlayer(user)
+            viewModel.setWinnerAndTimeMultiPlayer(user)
 
             // Call the observer to navigate
             winner.value = true

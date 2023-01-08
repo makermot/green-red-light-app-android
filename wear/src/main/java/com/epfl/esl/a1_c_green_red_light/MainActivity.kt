@@ -195,7 +195,11 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                 // To handle null case -> should never happen btw
                 if(receivedStatemachine != null){
                     print("received state :")
-                    println(receivedStatemachine)
+                    print(receivedStatemachine)
+                    print(", While actual state is :")
+                    print(stateMachine.value)
+                    print(", User name is :")
+                    println(username.value)
 
                     // to avoid call the observer each time the value is reasigned
                     if(stateMachine.value != receivedStatemachine){
@@ -273,6 +277,10 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         // References:
         //  - http://jasonmcreynolds.com/?p=388
         //  - http://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
+        if(stateMachine.value != "racing"){
+            return
+        }
+
         val now = System.currentTimeMillis()
         //println("I am in detectShake")
         if (now - mShakeTime > SHAKE_WAIT_TIME_MS) {

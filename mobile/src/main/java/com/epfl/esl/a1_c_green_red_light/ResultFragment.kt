@@ -1,12 +1,12 @@
 package com.epfl.esl.a1_c_green_red_light
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
@@ -14,7 +14,6 @@ import com.epfl.esl.a1_c_green_red_light.databinding.FragmentResultBinding
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.Wearable
 import java.util.*
-import kotlin.concurrent.timerTask
 
 
 class ResultFragment : Fragment() {
@@ -47,8 +46,16 @@ class ResultFragment : Fragment() {
             Navigation.findNavController(view).navigate(R.id.action_resultFragment_to_mySpaceFragment)
         }
 
+        // add an observer to the shouldSendUserInfoRequest Image
+        viewModel.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
+            // Send data to wear
+            println("We observed should send request !!!")
+            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+            viewModel.sendUserNameAndImageToWear(dataClient)
+        })
+
         binding.winner.text = viewModel.winner.value
-        val elapse = viewModel.stopTime?.minus(viewModel.startTime!!)
+        val elapse = viewModel.elapse
         binding.time.text = elapse.toString()
 
 
@@ -71,5 +78,4 @@ class ResultFragment : Fragment() {
         viewModel.stopHeartBeatTimer()
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
     }
-
 }

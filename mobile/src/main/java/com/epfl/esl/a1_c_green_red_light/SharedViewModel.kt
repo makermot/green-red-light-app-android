@@ -14,6 +14,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wearable.*
 import com.google.firebase.database.*
+import com.google.firebase.database.ktx.getValue
 import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
@@ -36,6 +37,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var friendsWePlayWith : ArrayList<String> = ArrayList<String>()
     var friendsPos : ArrayList<LatLng> = ArrayList<LatLng>()
     var friendsName : ArrayList<String> = ArrayList<String>()
+    var elapse : Long = 0
 
     private var mHandler: Handler = object : Handler(){}
 
@@ -370,7 +372,8 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             .forEach { event ->
                 println("We received info request from wear :")
                 val timestamp = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
-                _shouldSendUserInfoToWear.value = true
+
+                _shouldSendUserInfoToWear.value = _shouldSendUserInfoToWear.value != true
             }
 
     }
@@ -559,6 +562,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                 if( dataSnapshot.hasChild(_gameOwner.value!!) &&
                     dataSnapshot.child(_gameOwner.value!!).hasChild("currentRacePosition") &&
                     dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").hasChild("winner")){
+                    elapse = dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").child("elapse").getValue(Long::class.java)!!
                     _winner.value = dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").child("winner").getValue(String::class.java)
                 }
             }
@@ -567,7 +571,9 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     }
 
     // write winning condition in multiplayer game has request a game with you
-    fun setWinnerMultiPlayer(winner : String){
+    fun setWinnerAndTimeMultiPlayer(winner : String){
+        val elapse = stopTime?.minus(startTime!!)
+        profileRef.child(username).child("currentRacePosition").child("elapse").setValue(elapse)
         profileRef.child(username).child("currentRacePosition").child("winner").setValue(winner)
     }
 
@@ -623,7 +629,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
 
     // Setter function for winner
-    fun setWinner(winner : String){
+    fun setWinner(winner : String?){
         _winner.value = winner
     }
 }
