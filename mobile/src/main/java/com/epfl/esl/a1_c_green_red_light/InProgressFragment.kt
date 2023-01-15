@@ -1,16 +1,13 @@
 package com.epfl.esl.a1_c_green_red_light
 
 import android.annotation.SuppressLint
-import android.content.Context.VIBRATOR_SERVICE
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Vibrator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
@@ -36,6 +33,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private lateinit var viewModel: SharedViewModel
     private lateinit var mMap: GoogleMap
     private val LOCATION_REQUEST_CODE = 101
+    private var startTime: Long = 0
 
     private var markerPlayer: Marker? = null
     private lateinit var markers: MutableList<Marker>
@@ -71,6 +69,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         // Initialise viewModel
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+        // Save start time to compute elapsed time
+        startTime = System.currentTimeMillis() / 1000
 
         // Set title on the Top Bar
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Race"
@@ -90,7 +90,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                 // Save game data to firebase
                 viewModel.addRaceToDataBase()
 
-                viewModel.elapse = viewModel.stopTime?.minus(viewModel.startTime!!)!!
+                viewModel.elapse_end = cleanElapse()
 
                 Navigation.findNavController(binding.root).navigate(R.id.action_inProgressFragment_to_resultFragment)
                 onDestroy()
@@ -145,8 +145,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
 
     // Find random number for timer
-    private fun findRand(): Long {
-        return ((3..7).random())*1000.toLong()
+    private fun findRand(min_frequency: Int, max_frequency: Int): Long {
+        return ((min_frequency..max_frequency).random())*1000.toLong()
     }
 
 
@@ -159,8 +159,12 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
             timerRace = null
         }
 
+        // get frequency of changing light
+        val minFrequency = viewModel.minFreq
+        val maxFrequency = viewModel.maxFreq
+
         // find random period
-        rand = findRand()
+        rand = findRand(minFrequency, maxFrequency)
         //print("je print le rand : ")
         //println(rand)
 
@@ -379,7 +383,22 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         }
     }
+
+    // Get cleaner elapsed time
+    fun cleanElapse(): String {
+        //val elapsed_time = System.currentTimeMillis() / 1000 - startTime
+        val elapsed_time_fun = System.currentTimeMillis() / 1000 - startTime
+        val seconds = (elapsed_time_fun.rem(60))?.toInt()
+        val minutes = (elapsed_time_fun/60)?.toInt()
+        var time_string: String = ""
+        if (seconds != null) {
+            if (seconds < 10){time_string = ("00.0$minutes.0$seconds")}
+            else{ time_string = ("00.0$minutes.$seconds") }
+        }
+        return time_string
+    }
 }
+
 
 
 

@@ -31,4 +31,7 @@
     <string name="friend_username">Friend username</string>
     <string name="friends_button">My Friends</string>
     <string name="timeAnnouncement">With a time of : </string>
+    <string name="Min">Min</string>
+    <string name="Max">Max</string>
+    <string name="change_frequency">Change frequency</string>
 </resources>

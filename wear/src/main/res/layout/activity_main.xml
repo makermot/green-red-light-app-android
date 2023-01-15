@@ -7,6 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/white"
+        android:keepScreenOn="true"
         tools:deviceIds="wear">
 
         <LinearLayout
@@ -101,7 +102,7 @@
             android:gravity="center"
             android:layout_margin="16dp"
             android:orientation="vertical"
-            android:background="@color/green"
+            android:background="@color/red"
             android:visibility="gone">
             <TextView
                 android:id="@+id/elapsed_time_text"
@@ -141,7 +142,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
-                android:text="@string/elapsed_time"
+                android:text="@string/return_to_start"
                 android:textColor="@android:color/black"
                 app:layout_constraintTop_toBottomOf="@id/cheating_text"
                 app:layout_constraintLeft_toLeftOf="parent"

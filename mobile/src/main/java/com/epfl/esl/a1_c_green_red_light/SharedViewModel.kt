@@ -7,6 +7,7 @@ import android.graphics.Matrix
 import android.net.Uri
 import android.os.Handler
 import android.provider.MediaStore
+import android.text.Editable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -37,7 +38,10 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var friendsWePlayWith : ArrayList<String> = ArrayList<String>()
     var friendsPos : ArrayList<LatLng> = ArrayList<LatLng>()
     var friendsName : ArrayList<String> = ArrayList<String>()
-    var elapse : Long = 0
+    var elapse_winner : String = ""
+    var elapse_end : String = ""
+    var minFreq : Int = 3
+    var maxFreq : Int = 7
 
     private var mHandler: Handler = object : Handler(){}
 
@@ -224,15 +228,16 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // Add parameters of the race to the database
     fun addRaceToDataBase(){
+        elapse_end = cleanElapse()
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener{
             val rightNow = Calendar.getInstance()
             val df = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.FRANCE)
             val formattedDate: String = df.format(rightNow.time)
             var activityKey: String = Random().nextInt().toString()
-            val elapse = stopTime?.minus(startTime!!)
+
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 profileRef.child(key).child("/races").child(activityKey).child("date").setValue(formattedDate)
-                profileRef.child(key).child("/races").child(activityKey).child("elapsed time").setValue(elapse.toString())
+                profileRef.child(key).child("/races").child(activityKey).child("elapsed time").setValue(elapse_end)
                 profileRef.child(key).child("/races").child(activityKey).child("finish coordinates").setValue(goalPosition.toString())
                 profileRef.child(key).child("/races").child(activityKey).child("start coordinates").setValue(playerPosition.toString())
                 profileRef.child(key).child("/races").child(activityKey).child("/players").child(key).setValue(key)
@@ -353,7 +358,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // Function that receive GPS command from wear
     override fun onDataChanged(dataEvents: DataEventBuffer) {
-        //print("We recceived data from wear :")
+        //print("We received data from wear :")
 
         dataEvents
             .filter {it.dataItem.uri.path == "/GPS_data" }
@@ -562,7 +567,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                 if( dataSnapshot.hasChild(_gameOwner.value!!) &&
                     dataSnapshot.child(_gameOwner.value!!).hasChild("currentRacePosition") &&
                     dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").hasChild("winner")){
-                    elapse = dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").child("elapse").getValue(Long::class.java)!!
+                    elapse_winner = dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").child("elapse").getValue(String::class.java)!!
                     _winner.value = dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").child("winner").getValue(String::class.java)
                 }
             }
@@ -572,7 +577,8 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // write winning condition in multiplayer game has request a game with you
     fun setWinnerAndTimeMultiPlayer(winner : String){
-        val elapse = stopTime?.minus(startTime!!)
+        //val elapse_ = stopTime?.minus(startTime!!)
+        val elapse = cleanElapse()
         profileRef.child(username).child("currentRacePosition").child("elapse").setValue(elapse)
         profileRef.child(username).child("currentRacePosition").child("winner").setValue(winner)
     }
@@ -630,6 +636,28 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // Setter function for winner
     fun setWinner(winner : String?){
-        _winner.value = winner
+        _winner.value = winner!!
+    }
+
+    // Get cleaner elapsed time
+    fun cleanElapse(): String {
+        //val elapsed_time = System.currentTimeMillis() / 1000 - startTime
+        val elapsed_time_fun = stopTime?.minus(startTime!!)
+        val seconds = (elapsed_time_fun?.rem(60))?.toInt()
+        val minutes = (elapsed_time_fun?.div(60))?.toInt()
+        var time_string: String = ""
+        if (seconds != null) {
+            if (seconds < 10){time_string = ("00.0$minutes.0$seconds")}
+            else{ time_string = ("00.0$minutes.$seconds") }
+        }
+        return time_string
+    }
+
+    // Change frequency of red/green lights
+    fun changeFrequency(minFrequency: String?, maxFrequency: String?) {
+        if (minFrequency == null){minFreq = 3}
+        if (maxFrequency == null){maxFreq = 7}
+        minFreq = minFrequency!!.toInt()
+        maxFreq = maxFrequency!!.toInt()
     }
 }

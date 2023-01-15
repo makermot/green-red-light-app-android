@@ -55,8 +55,8 @@ class ResultFragment : Fragment() {
         })
 
         binding.winner.text = viewModel.winner.value
-        val elapse = viewModel.elapse
-        binding.time.text = elapse.toString()
+        val elapse = viewModel.elapse_end
+        binding.time.text = elapse
 
 
         return binding.root

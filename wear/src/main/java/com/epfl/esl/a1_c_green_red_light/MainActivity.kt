@@ -58,7 +58,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     }
 
     // Constants
-    private val SHAKE_THRESHOLD = 1.1f
+    private val SHAKE_THRESHOLD = 1.1f                         // reference value : 1.1f
     private val SHAKE_WAIT_TIME_MS = 250
     private val LOCATION_REQUEST_CODE = 101
 
@@ -132,6 +132,8 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
                 when (color) {
                     "green" -> {
+                        binding.cheatingView.visibility = View.GONE
+                        binding.startView.visibility = View.VISIBLE
                         binding.container.setBackgroundColor(
                             ContextCompat.getColor(applicationContext, R.color.green)
                         )
@@ -246,10 +248,12 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             "racing" -> {
                 // Set up view visibility
                 binding.container.setBackgroundColor(
-                    ContextCompat.getColor(applicationContext, R.color.green))
+                    ContextCompat.getColor(applicationContext, R.color.red))
                 binding.startView.visibility = View.VISIBLE
+                binding.startView.setBackgroundColor(
+                    ContextCompat.getColor(applicationContext, R.color.red))
 
-                // Save start time to compute elapse time
+                // Save start time to compute elapsed time
                 startTime = System.currentTimeMillis() / 1000
 
                 // start timer to send GPS position and update elapse time
@@ -417,7 +421,11 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     // update elapse time display
     private fun updateTime(){
-        binding.elapsedTimeText.text = (System.currentTimeMillis() / 1000 - startTime).toString()
+        val elapsed_time = System.currentTimeMillis() / 1000 - startTime
+        val seconds = (elapsed_time % 60).toInt()
+        val minutes = (elapsed_time/60).toInt()
+        if (seconds < 10){binding.elapsedTimeText.text = ("00.0$minutes.0$seconds")}
+        else{ binding.elapsedTimeText.text = ("00.0$minutes.$seconds") }
     }
 
 

@@ -11,7 +11,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
-import com.epfl.esl.a1_c_green_red_light.databinding.FragmentLoginBinding
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentMySpaceBinding
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.Wearable
@@ -117,6 +116,23 @@ class MySpaceFragment : Fragment() {
                 // Go to friends fragment
                 Navigation.findNavController(it)
                     .navigate(R.id.action_mySpaceFragment_to_friendsFragment)
+            }
+        }
+
+        binding.changeFrequencyButton.setOnClickListener{view: View ->
+            view.let {
+                if(binding.changeFrequencyMin.text.toString() != "Min" &&
+                    binding.changeFrequencyMax.text.toString() != "Max" &&
+                    binding.changeFrequencyMin.text.toString() != "" &&
+                    binding.changeFrequencyMin.text.toString() != ""){
+                    viewModel.changeFrequency(binding.changeFrequencyMin.text.toString(),
+                        binding.changeFrequencyMax.text.toString())
+                    Toast.makeText(context,"Frequency changed", Toast.LENGTH_SHORT).show()
+                }
+                else{
+                    println("no number entered for min and max")
+                    Toast.makeText(context,"Enter min and max", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
