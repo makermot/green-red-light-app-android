@@ -87,6 +87,10 @@ class MySpaceFragment : Fragment() {
                     Toast.makeText(context,"Friend successfully added", Toast.LENGTH_LONG).show()
                     viewModel.resetAddFriendStatus()
                 }
+                "Cannot add yourself" -> {
+                    Toast.makeText(context,"Oupsi... You cannot add yourself", Toast.LENGTH_LONG).show()
+                    viewModel.resetAddFriendStatus()
+                }
             }
         })
 
@@ -134,15 +138,12 @@ class MySpaceFragment : Fragment() {
                     if (minFrequency <= maxFrequency){
                         viewModel.changeFrequency(minFrequencyInt, maxFrequencyInt)
                         Toast.makeText(context,"Frequency changed", Toast.LENGTH_SHORT).show()
-                        println("User is alright")
                     }
                     else{
-                        Toast.makeText(context,"Are you stupid? I'm genuinely concerned", Toast.LENGTH_SHORT).show()
-                        println("User is stupid")
+                        Toast.makeText(context,"Min cannot be greater than max", Toast.LENGTH_SHORT).show()
                     }
                 }
                 else{
-                    println("Missing value for min and/or max")
                     Toast.makeText(context,"Missing value for min and/or max", Toast.LENGTH_SHORT).show()
                 }
             }

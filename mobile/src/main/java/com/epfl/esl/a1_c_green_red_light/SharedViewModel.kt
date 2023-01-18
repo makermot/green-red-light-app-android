@@ -254,7 +254,10 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         // Profile ref -> branche profile de la realtime database
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if(dataSnapshot.hasChild(friendUsername)){
+                if(username == friendUsername){
+                    _addFriendStatus.value = "Cannot add yourself"
+                }
+                else if(dataSnapshot.hasChild(friendUsername)){
                     println("Friend's profile Found")
                     if(dataSnapshot.child(key).child("friend").hasChild(friendUsername)){
                         println("Oh no... You're already friends")
