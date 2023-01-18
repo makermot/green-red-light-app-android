@@ -34,6 +34,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private val LOCATION_REQUEST_CODE = 101
     private var startTime: Long = 0
+    private var alreadyTakenLaMer : Boolean = false
 
     private var markerPlayer: Marker? = null
     private lateinit var markers: MutableList<Marker>
@@ -86,13 +87,16 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         //Check for winner condition
         winner.observe(viewLifecycleOwner) { win ->
-            if(win) {
+            if(win && !alreadyTakenLaMer) {
                 // Save game data to firebase
                 viewModel.addRaceToDataBase()
 
                 viewModel.elapse_end = cleanElapse()
 
+                alreadyTakenLaMer = true
+                println("!!! WE NAVIGATE !!!")
                 Navigation.findNavController(binding.root).navigate(R.id.action_inProgressFragment_to_resultFragment)
+
                 onDestroy()
             }
         }
