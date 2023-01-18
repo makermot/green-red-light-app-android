@@ -24,12 +24,10 @@ Android application for playing the 1-2-3 soleil game
 ### Navigation  
 - NavigationHostFragment (mobile) hosted by activity_main.xml (mobile)  
 ![Alt text](/image/FlowChartMobile.jpg  "Mobile flowchart")
-  
-
-### FireBase
+ 
 
 ### DataFlow
-![Alt text](/image/dataFlowGreenRedLight.drawio.png "data Flow")
+![Alt text](/image/DataFlow.jpg "data Flow")
 
 
 # Fragment
@@ -74,6 +72,11 @@ Android application for playing the 1-2-3 soleil game
     <img width="30%" src=/image/Results.png> 
     <img width="30%" src=/image/MyStatistics.png> 
     <img width="30%" src=/image/MyFriends.png> 
+</p>
+
+<p align="center" width="100%">
+    <img width="30%" src=/image/Multiplayer.png> 
+    <img width="30%" src=/image/Multiplayer_map.png> 
 </p>
 
 
