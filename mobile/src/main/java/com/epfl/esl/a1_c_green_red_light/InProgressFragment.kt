@@ -43,6 +43,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private var timerRace: Timer? = null
     private var rand: Long = 0
     private var lightColor: String = "red"
+    private var starthasBeenDrawn : Boolean = false
 
     // Variable has won or not
     private var winner = MutableLiveData<Boolean>()
@@ -139,16 +140,18 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                 isTheFirst = false
                 //println("la position du player is " + viewModel.playerPosition )
                 //println("la position sauvegardée is " + viewModel.receivedPosition.value)
-
-                mMap.addMarker(
-                    MarkerOptions()
-                        .position(viewModel.playerPosition)
-                        .title("Start Location")
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
-                )
             }
             if (mapInitialised.value == true) {
                 updatePlayerLocation(newPosition)
+                if(starthasBeenDrawn == false){
+                    mMap.addMarker(
+                        MarkerOptions()
+                            .position(viewModel.playerPosition)
+                            .title("Start Location")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
+                    )
+                    starthasBeenDrawn=true
+                }
             }
             if (viewModel.cheating) {
                 hasReturnedToStart(newPosition)
