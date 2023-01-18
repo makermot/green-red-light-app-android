@@ -661,10 +661,10 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     }
 
     // Change frequency of red/green lights
-    fun changeFrequency(minFrequency: String?, maxFrequency: String?) {
+    fun changeFrequency(minFrequency: Int?, maxFrequency: Int?) {
         if (minFrequency == null){minFreq = 3}
         if (maxFrequency == null){maxFreq = 7}
-        minFreq = minFrequency!!.toInt()
-        maxFreq = maxFrequency!!.toInt()
+        minFreq = minFrequency!!
+        maxFreq = maxFrequency!!
     }
 }

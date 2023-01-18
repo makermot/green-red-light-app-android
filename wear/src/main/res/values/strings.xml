@@ -7,6 +7,8 @@
     <string name="cheating">CHEATING !</string>
     <string name="elapsed_time">00.00.00</string>
     <string name="return_to_start">Return to start !</string>
+    <string name="winner">winner</string>
+    <string name="win_text">"And the winner is : "</string>
     <!--
     This string is used for square devices and overridden by hello_world in
     values-round/strings.xml for round devices.
