@@ -21,12 +21,10 @@ Android application for playing the 1-2-3 soleil game
 ### Main activity : Wear
 - MainActivity
 
-### navigation  
+### Navigation  
 - NavigationHostFragment (mobile) hosted by activity_main.xml (mobile)  
-![Alt text](/image/MobileNavigaton.drawio.png "Mobile")
+![Alt text](/image/FlowChartMobile.jpg  "Mobile flowchart")
   
-- NavigationHostFragment (wear) hosted by activity_main.xml (wear)  
-![Alt text](/image/WearNavigaton.drawio.png "Wear")  
 
 ### FireBase
 
@@ -45,14 +43,38 @@ Android application for playing the 1-2-3 soleil game
 - Sign in button
 
 ### MySpaceFragment
-- Stat button
+- Add friends button
+- My statistics button
+- My friends button
 - Lounge button
+- Join a race button
 
 ### LoungeFragment
+- Map with your location and the goal location
+- Start race button
+- Add friend to race button
+- Change the location of the goal 
+
 
 ### ResultFragment
+- Display winner name and elapse time
+
 
 ### StatFragment
+- Display your previous races
+
+
+<p align="center" width="100%">
+    <img width="30%" src=/image/Login.png> 
+    <img width="30%" src=/image/myspace.png> 
+    <img width="30%" src=/image/Lounge.png> 
+</p>
+
+<p align="center" width="100%">
+    <img width="30%" src=/image/Results.png> 
+    <img width="30%" src=/image/MyStatistics.png> 
+    <img width="30%" src=/image/MyFriends.png> 
+</p>
 
 ## Wear
 
