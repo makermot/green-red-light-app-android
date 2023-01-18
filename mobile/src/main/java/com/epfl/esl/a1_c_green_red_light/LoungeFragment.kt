@@ -35,9 +35,9 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
 
     private val LOCATION_REQUEST_CODE = 101
     private lateinit var mMap: GoogleMap
-    //private var permission: Boolean = false
 
     private var permission = MutableLiveData<Boolean>()
+
     init {
         permission.value = false
     }
@@ -62,43 +62,50 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
 
         // Initialise friends response observer to navigate to fragment when all friend responded
         viewModel.friendsResponse.observe(viewLifecycleOwner, Observer { friendsResponse ->
-            if(viewModel.playWithFriends == friendsResponse){
+            if (viewModel.playWithFriends == friendsResponse) {
                 // Save the position of the goal and the position of the player
                 viewModel.goalPosition = markerGoal.position
                 println(markerGoal.position)
 
                 // Navigate to race fragment
-                Navigation.findNavController(requireView()).navigate(R.id.action_loungeFragment_to_inProgressFragment)
-            }else{
+                Navigation.findNavController(requireView())
+                    .navigate(R.id.action_loungeFragment_to_inProgressFragment)
+            } else {
                 Toast.makeText(
                     this.requireActivity(),
-                    "Oupsi... Not All Friend responded",
+                    "Oupsi... Not All Friends responded",
                     Toast.LENGTH_LONG
                 ).show()
             }
         })
 
         // setup player display
-        binding.player.text = binding.player.text.toString() +  viewModel.username
+        binding.player.text = binding.player.text.toString() + viewModel.username
 
         // Initialise friends response observer to navigate to fragment when all friend responded
         viewModel.playWithFriendStatus.observe(viewLifecycleOwner, Observer { status ->
             when (status) {
                 "send play request successfully added" -> {
-                    Toast.makeText(context,"play request successfully sent", Toast.LENGTH_SHORT).show()
-                    binding.player.text = binding.player.text.toString() + ", " + binding.friendUsername.text.toString()
+                    Toast.makeText(context, "play request successfully sent", Toast.LENGTH_SHORT)
+                        .show()
+                    binding.player.text =
+                        binding.player.text.toString() + ", " + binding.friendUsername.text.toString()
                 }
                 "send request already sent" -> {
-                    Toast.makeText(context,"You already asked him to play...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "You already asked him to play...", Toast.LENGTH_SHORT)
+                        .show()
                 }
                 "Friend profile don't exist" -> {
-                    Toast.makeText(context,"Friend profile don't exist", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Friend's profile doesn't exist", Toast.LENGTH_SHORT)
+                        .show()
                 }
                 "you can't play with yourself" -> {
-                    Toast.makeText(context,"you can't play with yourself", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "You cannot play with yourself", Toast.LENGTH_SHORT)
+                        .show()
                 }
                 "you're not friends" -> {
-                    Toast.makeText(context,"Oupsi... you're not friends", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Oupsi... you're not friends", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         })
@@ -115,10 +122,11 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
         })
 
         // Set title on the Top Bar
-        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Lounge"
+        (activity as AppCompatActivity).supportActionBar?.title =
+            getString(R.string.name_app) + " : Lounge"
 
         // Start race functionality
-        binding.gotoWearButton.setOnClickListener{view: View ->
+        binding.gotoWearButton.setOnClickListener { view: View ->
             // Check if localisation permission was granted
             permission.value = ActivityCompat.checkSelfPermission(
                 this.requireActivity(),
@@ -129,7 +137,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
             ) == PackageManager.PERMISSION_GRANTED
 
             // If not -> request it again
-            if(permission.value == false){
+            if (permission.value == false) {
                 Toast.makeText(
                     this.requireActivity(),
                     "Oupsi... Localisation permission required",
@@ -138,41 +146,46 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
 
                 ActivityCompat.requestPermissions(
                     this.requireActivity(),
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE)
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE
+                )
             }
             //Else navigate to race fragment
-            else{
-                if(viewModel.playWithFriends > 0){
+            else {
+                if (viewModel.playWithFriends > 0) {
                     viewModel.getFriendsResponse()
-                }else{
+                } else {
                     // Save the position of the goal and the position of the player
                     viewModel.goalPosition = markerGoal.position
                     println(markerGoal.position)
 
                     // Navigate to race fragment
-                    Navigation.findNavController(view).navigate(R.id.action_loungeFragment_to_inProgressFragment)
+                    Navigation.findNavController(view)
+                        .navigate(R.id.action_loungeFragment_to_inProgressFragment)
                 }
             }
         }
 
         // Add Friend to race functionality
-        binding.playWithFriend.setOnClickListener{view: View ->
-            if(viewModel.playWithFriends < 6){
-                if(binding.friendUsername.text.toString() != "Friend's username"){
+        binding.playWithFriend.setOnClickListener { view: View ->
+            if (viewModel.playWithFriends < 6) {
+                if (binding.friendUsername.text.toString() != "Friend's username") {
                     viewModel.requestFriendToPlayWith(binding.friendUsername.text.toString())
+                } else {
+                    Toast.makeText(context, "Enter friend's username", Toast.LENGTH_SHORT).show()
                 }
-                else{
-                    Toast.makeText(context,"Enter friend's username", Toast.LENGTH_SHORT).show()
-                }
-            }else{
-                Toast.makeText(context,"You've reached max player for this race", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(
+                    context,
+                    "You've reached max players for this race",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
         }
 
         // Add observer on userImage
         permission.observe(viewLifecycleOwner) { permissionGranted ->
-            if(permissionGranted == true){
+            if (permissionGranted == true) {
                 inflateMap(viewModel.goalPosition)
             }
         }
@@ -211,7 +224,11 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
     }
 
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             LOCATION_REQUEST_CODE -> {
                 if (grantResults.isEmpty() || grantResults[0] !=
@@ -237,7 +254,7 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
 
     //Creation of the map with the goal position
     @SuppressLint("MissingPermission", "SuspiciousIndentation")
-    private fun inflateMap(goalPosition : LatLng){
+    private fun inflateMap(goalPosition: LatLng) {
         mMap.clear()
 
         // Add goal position to Map
@@ -258,12 +275,11 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
             .build()
         mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
     }
-    
+
 
     // Start HeartBeatTime
     override fun onStart() {
         super.onStart()
-        println("Lounge started")
         viewModel.startHeartBeatTimer()
         Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
         viewModel.resetFriendsPlayDemand()
@@ -273,7 +289,6 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
     // Stop and destroy HeartBeatTimer
     override fun onStop() {
         super.onStop()
-        println("Lounge stopped")
         viewModel.stopHeartBeatTimer()
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
         viewModel.resetPlayWithFriendStatus()
@@ -287,12 +302,9 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
     override fun onMarkerDrag(marker: Marker) {
     }
 
-        
+
     override fun onMarkerDragEnd(p0: Marker) {
-        println("onMarkerDrag.  Current Position: " + p0.position)
         viewModel.goalPosition = p0.position
-        print("saved position in view model is : ")
-        println(viewModel.goalPosition)
     }
 
 }

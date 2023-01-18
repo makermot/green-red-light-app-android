@@ -10,14 +10,14 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 
-class FriendsViewModel: ViewModel() {
+class FriendsViewModel : ViewModel() {
 
     // FIREBASE
     var storageRef = FirebaseStorage.getInstance().reference
     val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     val profileRef: DatabaseReference = database.getReference("Profiles")
 
-    var numberFriends:Int = 0
+    var numberFriends: Int = 0
     var itemAdapterFriends: ItemAdapterFriends? = null
 
     private val _friendsUpdate = MutableLiveData<Boolean?>()
@@ -35,33 +35,40 @@ class FriendsViewModel: ViewModel() {
         _friendsUpdate.value = false
     }
 
-    fun listenForFriends(context:Context?, username: String?) {
+    fun listenForFriends(context: Context?, username: String?) {
         _nbFriends.value = 0
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 print("user :")
                 println(username)
 
-                if(dataSnapshot.hasChild(username!!)) {
+                if (dataSnapshot.hasChild(username!!)) {
 
                     friendsList.clear()
                     var counter = 0
                     numberFriends = 0
 
                     // count how many friends user has
-                    for (friend in dataSnapshot.child("/"+username).child("/friend").children){
+                    for (friend in dataSnapshot.child("/" + username).child("/friend").children) {
                         numberFriends += 1
                     }
 
-                    for (friend in dataSnapshot.child("/"+username).child("/friend").children){
+                    for (friend in dataSnapshot.child("/" + username).child("/friend").children) {
                         val friendsDatabase = friend
                             .getValue(String::class.java)!!
                         println(friendsDatabase)
-                        val imageFriend = storageRef.child("ProfileImages/" + friendsDatabase + ".jpg")
+                        val imageFriend =
+                            storageRef.child("ProfileImages/" + friendsDatabase + ".jpg")
                         val ONE_MEGABYTE: Long = 1024 * 1024
                         imageFriend.getBytes(ONE_MEGABYTE).addOnSuccessListener { receivedImage ->
                             // Data for "ProfileImages/username.jpg" is returned, use this as needed
-                            imagesList.add(BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size))
+                            imagesList.add(
+                                BitmapFactory.decodeByteArray(
+                                    receivedImage,
+                                    0,
+                                    receivedImage.size
+                                )
+                            )
                             friendsList.add(friendsDatabase)
                             counter = counter.plus(1)
                             //print("counter is: ")
@@ -71,14 +78,16 @@ class FriendsViewModel: ViewModel() {
                             _nbFriends.value = counter
                         }
                     }
+                } else {
+                    println("I can't recover the current username in FriendsViewModel")
                 }
-                else{println("I can't recover the current username in FriendsViewModel")}
             }
+
             override fun onCancelled(databaseError: DatabaseError) {}
         })
     }
 
-    fun sendToItemAdapter(context:Context?){
+    fun sendToItemAdapter(context: Context?) {
         // Adapter class is initialized and list is passed in the param.
         itemAdapterFriends = context?.let {
             ItemAdapterFriends(
@@ -90,5 +99,7 @@ class FriendsViewModel: ViewModel() {
         _friendsUpdate.value = true
     }
 
-    fun resetUpdate(){_friendsUpdate.value = false}
+    fun resetUpdate() {
+        _friendsUpdate.value = false
+    }
 }

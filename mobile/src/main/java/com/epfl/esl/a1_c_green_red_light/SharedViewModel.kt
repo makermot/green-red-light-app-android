@@ -34,15 +34,15 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var heartBeatTimer: Timer? = null
     var startTime: Long? = null
     var stopTime: Long? = null
-    var playWithFriends : Int = 0
-    var friendsWePlayWith : ArrayList<String> = ArrayList<String>()
-    var friendsPos : ArrayList<LatLng> = ArrayList<LatLng>()
-    var friendsName : ArrayList<String> = ArrayList<String>()
-    var elapse_end : String = ""
-    var minFreq : Int = 3
-    var maxFreq : Int = 7
-    var cheating : Boolean = true
-    private var mHandler: Handler = object : Handler(){}
+    var playWithFriends: Int = 0
+    var friendsWePlayWith: ArrayList<String> = ArrayList<String>()
+    var friendsPos: ArrayList<LatLng> = ArrayList<LatLng>()
+    var friendsName: ArrayList<String> = ArrayList<String>()
+    var elapse_end: String = ""
+    var minFreq: Int = 3
+    var maxFreq: Int = 7
+    var cheating: Boolean = true
+    private var mHandler: Handler = object : Handler() {}
 
     // Live data
     // String to check how far we are in the authentification process : It can take the value :
@@ -126,7 +126,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
 
     // Fetch profile in the FireBase
-    fun fetchProfile()  {
+    fun fetchProfile() {
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (user in dataSnapshot.children) {
@@ -138,22 +138,28 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                             key = user.key.toString()
 
                             // Fetch image : find reference then fetch it in cloud storage
-                            val imageReference = storageRef.child("ProfileImages/" + username + ".jpg")
+                            val imageReference =
+                                storageRef.child("ProfileImages/" + username + ".jpg")
                             val ONE_MEGABYTE: Long = 1024 * 1024
-                            imageReference.getBytes(ONE_MEGABYTE).addOnSuccessListener { receivedImage ->
-                                // Data for "ProfileImages/username.jpg" is returned, use this as needed
-                                _imageBitmap.value = BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
-                                _authentification.value = "Valid login"
-                            }.addOnFailureListener {
+                            imageReference.getBytes(ONE_MEGABYTE)
+                                .addOnSuccessListener { receivedImage ->
+                                    // Data for "ProfileImages/username.jpg" is returned, use this as needed
+                                    _imageBitmap.value = BitmapFactory.decodeByteArray(
+                                        receivedImage,
+                                        0,
+                                        receivedImage.size
+                                    )
+                                    _authentification.value = "Valid login"
+                                }.addOnFailureListener {
                                 _authentification.value = "Exception"
                             }
                             return
                         }
                     }
                 }
-                //println("boucle for terminée")
                 _authentification.value = "Invalid login"
             }
+
             override fun onCancelled(databaseError: DatabaseError) {}
         })
     }
@@ -161,14 +167,12 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // Check if Profile is already taken in the FireBase
     fun checkProfile() {
-        println("checkProfile")
         // Check if username is already taken in the database
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (user in dataSnapshot.children) {
                     val usernameDatabase = user.child("username").getValue(String::class.java)!!
-                    println("profile Fetched")
-                    println(usernameDatabase)
+
                     if (username == usernameDatabase) {
                         //Username is already taken -> abort profile creation
                         println("Existing Profile found")
@@ -176,9 +180,9 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                         return
                     }
                 }
-                println("boucle for terminée")
                 _authentification.value = "Ready to create profile"
             }
+
             override fun onCancelled(databaseError: DatabaseError) {
                 println("An error in create profile -> on datachanged occured")
             }
@@ -188,7 +192,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // Create Profile in the FireBase
     fun createProfile(context: Context?) {
-        println("Start creating profile")
         // Create key and push name and password to realtime database
         key = username
         profileRef.child(key).child("username").setValue(username)
@@ -225,54 +228,57 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     }
 
     // Add parameters of the race to the database
-    fun addRaceToDataBase(){
+    fun addRaceToDataBase() {
         elapse_end = cleanElapse()
-        profileRef.addListenerForSingleValueEvent(object : ValueEventListener{
+        profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             val rightNow = Calendar.getInstance()
             val df = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.FRANCE)
             val formattedDate: String = df.format(rightNow.time)
             var activityKey: String = Random().nextInt().toString()
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                profileRef.child(key).child("/races").child(activityKey).child("date").setValue(formattedDate)
-                profileRef.child(key).child("/races").child(activityKey).child("elapsed time").setValue(elapse_end)
-                profileRef.child(key).child("/races").child(activityKey).child("finish coordinates").setValue(goalPosition.toString())
-                profileRef.child(key).child("/races").child(activityKey).child("start coordinates").setValue(playerPosition.toString())
-                profileRef.child(key).child("/races").child(activityKey).child("/players").child(key).setValue(key)
-                for (user in friendsWePlayWith){
-                    profileRef.child(key).child("/races").child(activityKey).child("/players").child(user).setValue(user)
+                profileRef.child(key).child("/races").child(activityKey).child("date")
+                    .setValue(formattedDate)
+                profileRef.child(key).child("/races").child(activityKey).child("elapsed time")
+                    .setValue(elapse_end)
+                profileRef.child(key).child("/races").child(activityKey).child("finish coordinates")
+                    .setValue(goalPosition.toString())
+                profileRef.child(key).child("/races").child(activityKey).child("start coordinates")
+                    .setValue(playerPosition.toString())
+                profileRef.child(key).child("/races").child(activityKey).child("/players")
+                    .child(key).setValue(key)
+                for (user in friendsWePlayWith) {
+                    profileRef.child(key).child("/races").child(activityKey).child("/players")
+                        .child(user).setValue(user)
                 }
-                profileRef.child(key).child("/races").child(activityKey).child("winner").setValue(_winner.value)
+                profileRef.child(key).child("/races").child(activityKey).child("winner")
+                    .setValue(_winner.value)
             }
+
             override fun onCancelled(error: DatabaseError) {}
         })
     }
 
     // Add friend to profile
-    fun addFriend(friendUsername : String) {
+    fun addFriend(friendUsername: String) {
         // Profile ref -> branche profile de la realtime database
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if(username == friendUsername){
+                if (username == friendUsername) {
                     _addFriendStatus.value = "Cannot add yourself"
-                }
-                else if(dataSnapshot.hasChild(friendUsername)){
-                    println("Friend's profile Found")
-                    if(dataSnapshot.child(key).child("friend").hasChild(friendUsername)){
-                        println("Oh no... You're already friends")
+                } else if (dataSnapshot.hasChild(friendUsername)) {
+                    if (dataSnapshot.child(key).child("friend").hasChild(friendUsername)) {
                         _addFriendStatus.value = "Friend already present"
-                    }
-                    else{
-                        println("Let's add your friend")
-                        profileRef.child(key).child("friend").child(friendUsername).setValue(friendUsername)
+                    } else {
+                        profileRef.child(key).child("friend").child(friendUsername)
+                            .setValue(friendUsername)
                         _addFriendStatus.value = "Friend successfully added"
                     }
-                }
-                else{
-                    println("Oh no... friend's profile not found")
+                } else {
                     _addFriendStatus.value = "Friend profile don't exist"
                 }
             }
+
             override fun onCancelled(databaseError: DatabaseError) {}
         })
     }
@@ -281,12 +287,11 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     // Send image and user name to wear
     fun sendUserNameAndImageToWear(dataClient: DataClient) {
         // Add a timestamp to the message, so its truly different each time !
-        println("We are in send User Image and name to wear")
         val tsLong = System.currentTimeMillis() / 1000
         val timestamp = tsLong.toString()
 
         val stream = ByteArrayOutputStream()
-        var imageBitmap = imageBitmap.value
+        val imageBitmap = imageBitmap.value
         imageBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream)
         val imageByteArray = stream.toByteArray()
 
@@ -306,7 +311,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
 
     // Send string command to Wear
-    fun sendCommandToWear(dataClient: DataClient, command : String) {
+    fun sendCommandToWear(dataClient: DataClient, command: String) {
         // Add a timestamp to the message, so its truly different each time !
         val tsLong = System.currentTimeMillis() / 1000
         val timestamp = tsLong.toString()
@@ -317,8 +322,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             asPutDataRequest()
         }
 
-        print("We try to send the command to wear :")
-        println(command)
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
@@ -329,7 +332,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
 
     // Send wear state machine status to Wear
-    fun sendStateMachineToWear(dataClient: DataClient, wearStateMachine : String) {
+    fun sendStateMachineToWear(dataClient: DataClient, wearStateMachine: String) {
         // Add a timestamp to the message, so its truly different each time !
         val tsLong = System.currentTimeMillis() / 1000
         val timestamp = tsLong.toString()
@@ -364,38 +367,42 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         //print("We received data from wear :")
 
         dataEvents
-            .filter {it.dataItem.uri.path == "/GPS_data" }
+            .filter { it.dataItem.uri.path == "/GPS_data" }
             .forEach { event ->
                 //print("We received location from wear :")
 
-                val latitude = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("latitude")
-                val longitude = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("longitude")
+                val latitude =
+                    DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("latitude")
+                val longitude =
+                    DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("longitude")
 
                 _receivedPosition.value = LatLng(latitude, longitude)
                 //println(_receivedPosition.value)
             }
 
         dataEvents
-            .filter {it.dataItem.uri.path == "/request_user_info" }
+            .filter { it.dataItem.uri.path == "/request_user_info" }
             .forEach { event ->
                 println("We received info request from wear :")
-                val timestamp = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
+                val timestamp =
+                    DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
 
                 _shouldSendUserInfoToWear.value = _shouldSendUserInfoToWear.value != true
             }
 
         dataEvents
-            .filter {it.dataItem.uri.path == "/cheating" }
+            .filter { it.dataItem.uri.path == "/cheating" }
             .forEach { event ->
                 println("We received cheating command from wear")
-                val timestamp = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
+                val timestamp =
+                    DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
                 cheating = true
             }
 
     }
 
 
-    fun resetUserData(){
+    fun resetUserData() {
         username = ""
         password = ""
         imageUri = null
@@ -404,25 +411,25 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     }
 
 
-    fun resetAuthentification(){
+    fun resetAuthentification() {
         _authentification.value = null
     }
 
 
-    fun resetAddFriendStatus(){
+    fun resetAddFriendStatus() {
         _addFriendStatus.value = null
     }
 
 
-    fun resetPlayWithFriendStatus(){
+    fun resetPlayWithFriendStatus() {
         _playWithFriendStatus.value = null
     }
 
 
     // Start thread to update heart beat
-    fun startHeartBeatTimer(){
+    fun startHeartBeatTimer() {
         // reset timer if present
-        if(heartBeatTimer != null) {
+        if (heartBeatTimer != null) {
             heartBeatTimer!!.cancel()
             heartBeatTimer!!.purge()
             heartBeatTimer = null
@@ -431,7 +438,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         heartBeatTimer = Timer()
         heartBeatTimer?.schedule(timerTask {
             //println("Heart Beat")
-            mHandler.post( Runnable() {
+            mHandler.post(Runnable() {
                 run {
                     _heartBeat.value = _heartBeat.value?.plus(1)
                 }
@@ -441,9 +448,9 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
 
     // Stop heart beat thread
-    fun stopHeartBeatTimer(){
+    fun stopHeartBeatTimer() {
         // reset timer if present
-        if(heartBeatTimer != null) {
+        if (heartBeatTimer != null) {
             heartBeatTimer!!.cancel()
             heartBeatTimer!!.purge()
             heartBeatTimer = null
@@ -452,142 +459,165 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
 
     // Send Request to friend to play with
-    fun requestFriendToPlayWith(friendUserName : String){
-        if(username == friendUserName){
+    fun requestFriendToPlayWith(friendUserName: String) {
+        if (username == friendUserName) {
             _playWithFriendStatus.value = "you can't play with yourself"
             return
         }
         // Profile ref -> branche profile de la realtime database
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if(!dataSnapshot.child(username).child("friend").hasChild(friendUserName)){
+                if (!dataSnapshot.child(username).child("friend").hasChild(friendUserName)) {
                     _playWithFriendStatus.value = "you're not friends"
                     return
                 }
-                if(dataSnapshot.hasChild(friendUserName)){
+                if (dataSnapshot.hasChild(friendUserName)) {
                     println("Friend's profile Found")
-                    if(dataSnapshot.child(friendUserName).child("play request").hasChildren() &&
-                        username == dataSnapshot.child(friendUserName).child("play request").child("request").getValue(String::class.java)!!){
+                    if (dataSnapshot.child(friendUserName).child("play request").hasChildren() &&
+                        username == dataSnapshot.child(friendUserName).child("play request")
+                            .child("request").getValue(String::class.java)!!
+                    ) {
                         println("Oh no... You're already asked him to play with you")
                         _playWithFriendStatus.value = "send request already sent"
-                    }
-                    else{
+                    } else {
                         println("Let's send play request to your friend")
-                        profileRef.child(username).child("accepted request").child(friendUserName).setValue("no")
-                        profileRef.child(friendUserName).child("play request").child("request").setValue(username)
+                        profileRef.child(username).child("accepted request").child(friendUserName)
+                            .setValue("no")
+                        profileRef.child(friendUserName).child("play request").child("request")
+                            .setValue(username)
                         playWithFriends += 1
                         friendsWePlayWith.add(friendUserName)
                         _playWithFriendStatus.value = "send play request successfully added"
                     }
-                }
-                else{
+                } else {
                     println("Oh no... friend's profile not found")
                     _playWithFriendStatus.value = "Friend profile don't exist"
                 }
             }
+
             override fun onCancelled(databaseError: DatabaseError) {}
         })
     }
 
 
     // Get the number of friends whom accepted the play request
-    fun getFriendsResponse(){
+    fun getFriendsResponse() {
         println("Get friends response")
         // Profile ref -> branche profile de la realtime database
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 println("On dataChange")
-                if(dataSnapshot.hasChild(username)){
+                if (dataSnapshot.hasChild(username)) {
                     println("Found user")
-                    if(dataSnapshot.child(username).child("accepted request").hasChildren()){
+                    if (dataSnapshot.child(username).child("accepted request").hasChildren()) {
                         println("Request has children")
-                        var count : Int = 0
-                        for (playerReady in dataSnapshot.child(username).child("accepted request").children){
+                        var count: Int = 0
+                        for (playerReady in dataSnapshot.child(username)
+                            .child("accepted request").children) {
                             val playerName: String? = playerReady.getKey()
                             print("Player name : ")
                             println(playerName)
-                            if(friendsWePlayWith.contains(playerName) && playerReady.getValue(String::class.java) == "yes"){
+                            if (friendsWePlayWith.contains(playerName) && playerReady.getValue(
+                                    String::class.java
+                                ) == "yes"
+                            ) {
                                 println("sucessfully increment counter")
                                 count += 1
                             }
                         }
                         _friendsResponse.value = count
-                    }
-                    else{
+                    } else {
                         _friendsResponse.value = 0
                     }
                 }
             }
+
             override fun onCancelled(databaseError: DatabaseError) {}
         })
     }
 
 
     // Reset the friends demand in firebase
-    fun resetFriendsPlayDemand(){
+    fun resetFriendsPlayDemand() {
         playWithFriends = 0
         friendsWePlayWith.clear()
 
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if(dataSnapshot.hasChild(username)){
-                    if(dataSnapshot.child(username).child("accepted request").hasChildren()){
-                        for (playerReady in dataSnapshot.child(username).child("accepted request").children){
+                if (dataSnapshot.hasChild(username)) {
+                    if (dataSnapshot.child(username).child("accepted request").hasChildren()) {
+                        for (playerReady in dataSnapshot.child(username)
+                            .child("accepted request").children) {
                             // Get friends name
                             val playerName: String? = playerReady.getKey()
 
                             // Reset accepted demand in our user profil
-                            profileRef.child(username).child("accepted request").child(playerName!!).setValue(null)
+                            profileRef.child(username).child("accepted request").child(playerName!!)
+                                .setValue(null)
 
                             // Reset play demand in friend profil
-                            if( dataSnapshot.child(playerName!!).hasChild("play request") &&
-                                dataSnapshot.child(playerName!!).child("play request").child("request").getValue(String::class.java) == username){
-                                profileRef.child(playerName!!).child("play request").child("request").setValue(null)
+                            if (dataSnapshot.child(playerName!!).hasChild("play request") &&
+                                dataSnapshot.child(playerName!!).child("play request")
+                                    .child("request").getValue(String::class.java) == username
+                            ) {
+                                profileRef.child(playerName!!).child("play request")
+                                    .child("request").setValue(null)
                             }
                         }
                     }
-                    if(dataSnapshot.child(username).hasChild("currentRacePosition")){
+                    if (dataSnapshot.child(username).hasChild("currentRacePosition")) {
                         // TODO UNCOMMENT FOR FINAL EVALUATION
                         //profileRef.child(username).child("currentRacePosition").setValue(null)
                     }
                 }
             }
+
             override fun onCancelled(databaseError: DatabaseError) {}
         })
     }
 
 
     // Find if a player has request a game with you
-    fun getPlayRequest(){
-        profileRef.addValueEventListener(object :ValueEventListener{
+    fun getPlayRequest() {
+        profileRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if( dataSnapshot.hasChild(username) &&
-                    dataSnapshot.child(username).hasChild("play request")){
-                    _gameOwner.value = dataSnapshot.child(username).child("play request").child("request").getValue(String::class.java)
+                if (dataSnapshot.hasChild(username) &&
+                    dataSnapshot.child(username).hasChild("play request")
+                ) {
+                    _gameOwner.value =
+                        dataSnapshot.child(username).child("play request").child("request")
+                            .getValue(String::class.java)
                 }
             }
+
             override fun onCancelled(error: DatabaseError) {}
         })
     }
 
 
     // Find winning condition in multiplayer game has request a game with you
-    fun getWinnerMultiPlayer(){
-        profileRef.addValueEventListener(object :ValueEventListener{
+    fun getWinnerMultiPlayer() {
+        profileRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if( dataSnapshot.hasChild(_gameOwner.value!!) &&
+                if (dataSnapshot.hasChild(_gameOwner.value!!) &&
                     dataSnapshot.child(_gameOwner.value!!).hasChild("currentRacePosition") &&
-                    dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").hasChild("winner")){
-                    elapse_end = dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").child("elapse").getValue(String::class.java)!!
-                    _winner.value = dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").child("winner").getValue(String::class.java)
+                    dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition")
+                        .hasChild("winner")
+                ) {
+                    elapse_end = dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition")
+                        .child("elapse").getValue(String::class.java)!!
+                    _winner.value =
+                        dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition")
+                            .child("winner").getValue(String::class.java)
                 }
             }
+
             override fun onCancelled(error: DatabaseError) {}
         })
     }
 
     // Write winning condition in multiplayer game has request a game with you
-    fun setWinnerAndTimeMultiPlayer(winner : String){
+    fun setWinnerAndTimeMultiPlayer(winner: String) {
         //val elapse_ = stopTime?.minus(startTime!!)
         val elapse = cleanElapse()
         profileRef.child(username).child("currentRacePosition").child("elapse").setValue(elapse)
@@ -596,27 +626,31 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
 
     // Send current position while multiplayer
-    fun addPositionMultiplayer(){
-        profileRef.addListenerForSingleValueEvent(object : ValueEventListener{
+    fun addPositionMultiplayer() {
+        profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                profileRef.child(_gameOwner.value!!).child("/currentRacePosition").child(username).setValue(playerPosition)
+                profileRef.child(_gameOwner.value!!).child("/currentRacePosition").child(username)
+                    .setValue(playerPosition)
             }
+
             override fun onCancelled(error: DatabaseError) {}
         })
     }
 
 
     // Set a permanent listener to update the player data
-    fun getFriendUpdatePosition(){
-        profileRef.addValueEventListener(object :ValueEventListener{
+    fun getFriendUpdatePosition() {
+        profileRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 println(" We have friend updated position call !!!!")
-                if( dataSnapshot.child(username).hasChild("currentRacePosition") &&
-                    dataSnapshot.child(username).child("currentRacePosition").hasChildren()){
+                if (dataSnapshot.child(username).hasChild("currentRacePosition") &&
+                    dataSnapshot.child(username).child("currentRacePosition").hasChildren()
+                ) {
                     friendsPos.clear()
                     friendsName.clear()
-                    for (player in dataSnapshot.child(username).child("currentRacePosition").children){
-                        if(player.hasChild("latitude") && player.hasChild("latitude")){
+                    for (player in dataSnapshot.child(username)
+                        .child("currentRacePosition").children) {
+                        if (player.hasChild("latitude") && player.hasChild("latitude")) {
                             val latitude = player.child("latitude").getValue(Double::class.java)
                             val longitude = player.child("longitude").getValue(Double::class.java)
                             LatLng(latitude!!, longitude!!)
@@ -627,6 +661,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                     _newFriendsPos.value = _newFriendsPos.value?.plus(1)
                 }
             }
+
             override fun onCancelled(error: DatabaseError) {
                 TODO("Not yet implemented")
             }
@@ -635,18 +670,20 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
 
     // Accept play request in Firebase
-    fun acceptPlayRequest(){
-        profileRef.addListenerForSingleValueEvent(object : ValueEventListener{
+    fun acceptPlayRequest() {
+        profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                profileRef.child(_gameOwner.value!!).child("accepted request").child(username).setValue("yes")
+                profileRef.child(_gameOwner.value!!).child("accepted request").child(username)
+                    .setValue("yes")
             }
+
             override fun onCancelled(error: DatabaseError) {}
         })
     }
 
 
     // Setter function for winner
-    fun setWinner(winner : String?){
+    fun setWinner(winner: String?) {
         _winner.value = winner!!
     }
 
@@ -658,16 +695,23 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         val minutes = (elapsed_time_fun?.div(60))?.toInt()
         var time_string: String = ""
         if (seconds != null) {
-            if (seconds < 10){time_string = ("00.0$minutes.0$seconds")}
-            else{ time_string = ("00.0$minutes.$seconds") }
+            if (seconds < 10) {
+                time_string = ("00.0$minutes.0$seconds")
+            } else {
+                time_string = ("00.0$minutes.$seconds")
+            }
         }
         return time_string
     }
 
     // Change frequency of red/green lights
     fun changeFrequency(minFrequency: Int?, maxFrequency: Int?) {
-        if (minFrequency == null){minFreq = 3}
-        if (maxFrequency == null){maxFreq = 7}
+        if (minFrequency == null) {
+            minFreq = 3
+        }
+        if (maxFrequency == null) {
+            maxFreq = 7
+        }
         minFreq = minFrequency!!
         maxFreq = maxFrequency!!
     }

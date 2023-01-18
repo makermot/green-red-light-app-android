@@ -42,7 +42,8 @@ class LoginFragment : Fragment() {
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
         // Set title on the Top Bar
-        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Login page"
+        (activity as AppCompatActivity).supportActionBar?.title =
+            getString(R.string.name_app) + " : Login page"
 
         // Reset authentification variable when page is recreated
         viewModel.resetAuthentification()
@@ -59,46 +60,45 @@ class LoginFragment : Fragment() {
         binding.SignUp.setOnClickListener { view: View ->
             // Check internet connection
             if (!checkForInternet(context)) {
-                Toast.makeText(context, "Internet connection is off, please connect your device", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Internet connection is off, please connect your device",
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
             if (binding.Username.text.toString() == "") {
-                Toast.makeText(context,"Enter username", Toast.LENGTH_SHORT).show()
-            }
-            else if (binding.Password.text.toString() == "") {
-                Toast.makeText(context,"Enter password", Toast.LENGTH_SHORT).show()
-            }
-            else if (viewModel.imageUri == null) {
-                Toast.makeText(context,"Pick an image", Toast.LENGTH_SHORT).show()
-            }
-            else {
-                println("Signing up with image, password and username")
+                Toast.makeText(context, "Enter username", Toast.LENGTH_SHORT).show()
+            } else if (binding.Password.text.toString() == "") {
+                Toast.makeText(context, "Enter password", Toast.LENGTH_SHORT).show()
+            } else if (viewModel.imageUri == null) {
+                Toast.makeText(context, "Pick an image", Toast.LENGTH_SHORT).show()
+            } else {
                 viewModel.username = binding.Username.text.toString()
                 viewModel.password = binding.Password.text.toString()
-                println("checkprofile Call")
                 viewModel.checkProfile()
-                println("checkprofile End")
             }
         }
 
-        binding.SignIn.setOnClickListener { view : View ->
+        binding.SignIn.setOnClickListener { view: View ->
             // Check internet connection
             if (!checkForInternet(context)) {
-                Toast.makeText(context, "Internet connection is off, please connect your device", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Internet connection is off, please connect your device",
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
             if (binding.Username.text.toString() == "") {
-                Toast.makeText(context,"Enter username", Toast.LENGTH_SHORT).show()
-            }
-            else if (binding.Password.text.toString() == "") {
-                Toast.makeText(context,"Enter password dumbass", Toast.LENGTH_SHORT).show()
-            }
-            else {
+                Toast.makeText(context, "Enter username", Toast.LENGTH_SHORT).show()
+            } else if (binding.Password.text.toString() == "") {
+                Toast.makeText(context, "Enter password", Toast.LENGTH_SHORT).show()
+            } else {
                 viewModel.username = binding.Username.text.toString()
                 viewModel.password = binding.Password.text.toString()
-
                 viewModel.fetchProfile()
             }
         }
@@ -110,40 +110,33 @@ class LoginFragment : Fragment() {
         }
 
         viewModel.authentification.observe(viewLifecycleOwner, Observer { code ->
-            print("Authentification changed : code :")
-            println(code)
 
-            if(code == "Invalid login"){
-                Toast.makeText(context,"Incorrect password/username", Toast.LENGTH_LONG).show()
+            if (code == "Invalid login") {
+                Toast.makeText(context, "Incorrect password/username", Toast.LENGTH_LONG).show()
                 viewModel.resetUserData()
-            }
-            else if (code == "Valid login"){
+            } else if (code == "Valid login") {
                 // Send data to wear
                 val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
                 viewModel.sendUserNameAndImageToWear(dataClient)
 
                 // Navigate to my space
-                Navigation.findNavController(binding.root).navigate(R.id.action_loginFragment_to_mySpaceFragment)
-            }
-            else if (code == "Profile already existing"){
-                Toast.makeText(context,"Profile already existing", Toast.LENGTH_LONG).show()
+                Navigation.findNavController(binding.root)
+                    .navigate(R.id.action_loginFragment_to_mySpaceFragment)
+            } else if (code == "Profile already existing") {
+                Toast.makeText(context, "Profile already existing", Toast.LENGTH_LONG).show()
                 viewModel.resetUserData()
-            }
-            else if (code == "Ready to create profile"){
-                println("createprofile Call")
+            } else if (code == "Ready to create profile") {
                 viewModel.createProfile(activity?.applicationContext)
-                println("creatprofile End")
-            }
-            else if (code == "Profile created"){
+            } else if (code == "Profile created") {
                 // Send data to wear
                 val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
                 viewModel.sendUserNameAndImageToWear(dataClient)
 
                 // Navigate to my space
-                Navigation.findNavController(binding.root).navigate(R.id.action_loginFragment_to_mySpaceFragment)
-            }
-            else if (code == "Exception"){
-                Toast.makeText(context,"Oupsi, something went wrong", Toast.LENGTH_LONG).show()
+                Navigation.findNavController(binding.root)
+                    .navigate(R.id.action_loginFragment_to_mySpaceFragment)
+            } else if (code == "Exception") {
+                Toast.makeText(context, "Oupsi, something went wrong", Toast.LENGTH_LONG).show()
                 viewModel.resetUserData()
             }
         })
@@ -166,7 +159,6 @@ class LoginFragment : Fragment() {
     // Start HeartBeatTime
     override fun onStart() {
         super.onStart()
-        println("Login started")
         viewModel.startHeartBeatTimer()
     }
 
@@ -174,25 +166,23 @@ class LoginFragment : Fragment() {
     // Stop and destroy HeartBeatTimer
     override fun onStop() {
         super.onStop()
-        println("Login stopped")
         viewModel.stopHeartBeatTimer()
     }
 
-     private fun checkForInternet(context: Context?): Boolean {
+    private fun checkForInternet(context: Context?): Boolean {
 
         // register activity with the connectivity manager service
-        val connectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         // if the android version is equal to M
         // or greater we need to use the
         // NetworkCapabilities to check what type of
         // network has the internet connection
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
             // Returns a Network object corresponding to
             // the currently active default data network.
             val network = connectivityManager.activeNetwork ?: return false
-
             // Representation of the capabilities of an active network.
             val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
 

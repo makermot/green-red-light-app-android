@@ -40,7 +40,8 @@ class MySpaceFragment : Fragment() {
         viewModel.startHeartBeatTimer()
 
         // Set title on the Top Bar
-        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : My Space"
+        (activity as AppCompatActivity).supportActionBar?.title =
+            getString(R.string.name_app) + " : My Space"
 
         // add an observer to the profile Image
         viewModel.imageBitmap.observe(viewLifecycleOwner, Observer { newImageBitmap ->
@@ -48,74 +49,77 @@ class MySpaceFragment : Fragment() {
             binding.welcomeUsername.text = buildString {
                 append("Welcome ")
                 append(viewModel.username)
-                append(" !") }
+                append(" !")
+            }
         })
 
         // add an observer to the shouldSendUserInfoRequest Image
         viewModel.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
             // Send data to wear
-            println("We observed should send request !!!")
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
             viewModel.sendUserNameAndImageToWear(dataClient)
         })
 
-        binding.addFriendButton.setOnClickListener{view: View ->
+        binding.addFriendButton.setOnClickListener { view: View ->
             view.let {
-                if(binding.friendUsername.text.toString() != "Friend's username"){
+                if (binding.friendUsername.text.toString() != "Friend's username") {
                     viewModel.addFriend(binding.friendUsername.text.toString())
-                }
-                else{
-                    Toast.makeText(context,"Enter friend's username", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Enter friend's username", Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
         viewModel.addFriendStatus.observe(viewLifecycleOwner, Observer { status ->
-            print("addFriendStatus changed : status :")
-            println(status)
 
             when (status) {
                 "Friend already present" -> {
-                    Toast.makeText(context,"Oupsi... You're already friends", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Oupsi... You're already friends", Toast.LENGTH_LONG)
+                        .show()
                     viewModel.resetAddFriendStatus()
                 }
                 "Friend profile don't exist" -> {
-                    Toast.makeText(context,"Oupsi... We don't find your friend's profile...", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        context,
+                        "Oupsi... We don't find your friend's profile...",
+                        Toast.LENGTH_LONG
+                    ).show()
                     viewModel.resetAddFriendStatus()
                 }
                 "Friend successfully added" -> {
-                    Toast.makeText(context,"Friend successfully added", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Friend successfully added", Toast.LENGTH_LONG).show()
                     viewModel.resetAddFriendStatus()
                 }
                 "Cannot add yourself" -> {
-                    Toast.makeText(context,"Oupsi... You cannot add yourself", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Oupsi... You cannot add yourself", Toast.LENGTH_LONG)
+                        .show()
                     viewModel.resetAddFriendStatus()
                 }
             }
         })
 
-        binding.statButton.setOnClickListener{view: View ->
+        binding.statButton.setOnClickListener { view: View ->
             view.let {
                 Navigation.findNavController(it)
                     .navigate(R.id.action_mySpaceFragment_to_statFragment)
             }
         }
 
-        binding.multiButton.setOnClickListener{view: View ->
+        binding.multiButton.setOnClickListener { view: View ->
             view.let {
                 Navigation.findNavController(it)
                     .navigate(R.id.action_mySpaceFragment_to_multPlayerFragment)
             }
         }
 
-        binding.loungeButton.setOnClickListener{view: View ->
+        binding.loungeButton.setOnClickListener { view: View ->
             view.let {
                 Navigation.findNavController(it)
                     .navigate(R.id.action_mySpaceFragment_to_loungeFragment)
             }
         }
 
-        binding.friendsButton.setOnClickListener{view: View ->
+        binding.friendsButton.setOnClickListener { view: View ->
             view.let {
                 // Go to friends fragment
                 Navigation.findNavController(it)
@@ -123,32 +127,33 @@ class MySpaceFragment : Fragment() {
             }
         }
 
-        binding.changeFrequencyButton.setOnClickListener{view: View ->
+        binding.changeFrequencyButton.setOnClickListener { view: View ->
             view.let {
-                if(binding.changeFrequencyMin.text.toString() != "Min" &&
+                if (binding.changeFrequencyMin.text.toString() != "Min" &&
                     binding.changeFrequencyMax.text.toString() != "Max" &&
                     binding.changeFrequencyMin.text.toString() != "" &&
                     binding.changeFrequencyMax.text.toString() != "" &&
                     binding.changeFrequencyMin.text.toString() != null &&
-                    binding.changeFrequencyMax.text.toString() != null){
+                    binding.changeFrequencyMax.text.toString() != null
+                ) {
                     val minFrequency: String = binding.changeFrequencyMin.text.toString()
                     val maxFrequency: String = binding.changeFrequencyMax.text.toString()
                     val minFrequencyInt: Int = minFrequency.toInt()
                     val maxFrequencyInt: Int = maxFrequency.toInt()
-                    print("max frequency is: ")
-                    println(maxFrequencyInt)
-                    print("min frequency is :")
-                    println(minFrequencyInt)
-                    if (minFrequencyInt <= maxFrequencyInt){
+
+                    if (minFrequencyInt <= maxFrequencyInt) {
                         viewModel.changeFrequency(minFrequencyInt, maxFrequencyInt)
-                        Toast.makeText(context,"Frequency changed", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Frequency changed", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Min cannot be greater than max",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-                    else{
-                        Toast.makeText(context,"Min cannot be greater than max", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                else{
-                    Toast.makeText(context,"Missing value for min and/or max", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Missing value for min and/or max", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
@@ -159,7 +164,6 @@ class MySpaceFragment : Fragment() {
     // Start HeartBeatTime
     override fun onStart() {
         super.onStart()
-        println("My space started")
         viewModel.startHeartBeatTimer()
         Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
     }
@@ -168,7 +172,6 @@ class MySpaceFragment : Fragment() {
     // Stop and destroy HeartBeatTimer
     override fun onStop() {
         super.onStop()
-        println("My space stopped")
         viewModel.stopHeartBeatTimer()
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
     }

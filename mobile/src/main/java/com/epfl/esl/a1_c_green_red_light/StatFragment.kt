@@ -31,11 +31,13 @@ class StatFragment : Fragment() {
         )
 
         // Set title on the Top Bar
-        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : My statistics"
+        (activity as AppCompatActivity).supportActionBar?.title =
+            getString(R.string.name_app) + " : My statistics"
 
         // Set the LayoutManager that this RecyclerView will use.
         //binding.recyclerViewItems.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerViewItems.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        binding.recyclerViewItems.layoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
         // Instantiate the viewModels
         viewModelStat = ViewModelProvider(this).get(StatViewModel::class.java)
@@ -50,7 +52,6 @@ class StatFragment : Fragment() {
         // add an observer to the shouldSendUserInfoRequest Image
         viewModelShared.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
             // Send data to wear
-            println("We observed should send request !!!")
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
             viewModelShared.sendUserNameAndImageToWear(dataClient)
         })
@@ -59,10 +60,10 @@ class StatFragment : Fragment() {
         username = viewModelShared.username
 
         // Retrieve stat for that user
-        viewModelStat.listenForStat(context,username)
+        viewModelStat.listenForStat(context, username)
 
         viewModelStat.statUpdate.observe(viewLifecycleOwner, Observer { statUpdate ->
-            if(statUpdate == true){
+            if (statUpdate == true) {
                 binding.recyclerViewItems.adapter = viewModelStat.itemAdapter
                 viewModelStat.resetUpdate()
             }
@@ -74,7 +75,6 @@ class StatFragment : Fragment() {
     // Start HeartBeatTime
     override fun onStart() {
         super.onStart()
-        println("My space started")
         viewModelShared.startHeartBeatTimer()
         Wearable.getDataClient(activity as MainActivity).addListener(viewModelShared)
     }
@@ -83,7 +83,6 @@ class StatFragment : Fragment() {
     // Stop and destroy HeartBeatTimer
     override fun onStop() {
         super.onStop()
-        println("My space stopped")
         viewModelShared.stopHeartBeatTimer()
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModelShared)
     }

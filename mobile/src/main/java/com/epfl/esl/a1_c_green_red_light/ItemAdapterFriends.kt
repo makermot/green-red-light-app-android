@@ -9,10 +9,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ItemAdapterFriends(val context: Context, val items: ArrayList<String>,
-                         val items_2: ArrayList<Bitmap>) :
-    RecyclerView.Adapter<ItemAdapterFriends.ViewHolder>()
-{
+class ItemAdapterFriends(
+    val context: Context, val items: ArrayList<String>,
+    val items_2: ArrayList<Bitmap>
+) :
+    RecyclerView.Adapter<ItemAdapterFriends.ViewHolder>() {
     /**
      * Inflates the item views which is designed in xml layout file
      */
@@ -25,6 +26,7 @@ class ItemAdapterFriends(val context: Context, val items: ArrayList<String>,
             )
         )
     }
+
     /**
      * Binds each item in the ArrayList to a view
      *
@@ -35,7 +37,6 @@ class ItemAdapterFriends(val context: Context, val items: ArrayList<String>,
      * layout file.
      */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        println("is in OnBindViewHolder")
         val item_position = items.get(position)
         val item_2_position = items_2.get(position)
         holder.tvItem.text = item_position
@@ -46,7 +47,9 @@ class ItemAdapterFriends(val context: Context, val items: ArrayList<String>,
      * Gets the number of items in the list
      */
     override fun getItemCount(): Int {
-        return items.size}
+        return items.size
+    }
+
     /**
      * A ViewHolder describes an item view and metadata about
     its place within the RecyclerView.

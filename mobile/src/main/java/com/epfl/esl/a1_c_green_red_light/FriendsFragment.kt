@@ -32,11 +32,13 @@ class FriendsFragment : Fragment() {
         )
 
         // Set title on the Top Bar
-        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : My friends"
+        (activity as AppCompatActivity).supportActionBar?.title =
+            getString(R.string.name_app) + " : My friends"
 
         // Set the LayoutManager that this RecyclerView will use.
         //binding.recyclerViewItems.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerViewItems.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        binding.recyclerViewItems.layoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
         // Instantiate the viewModels
         viewModelFriends = ViewModelProvider(this).get(FriendsViewModel::class.java)
@@ -60,10 +62,10 @@ class FriendsFragment : Fragment() {
         username = viewModelShared.username
 
         // Retrieve stat for that user
-        viewModelFriends.listenForFriends(context,username)
+        viewModelFriends.listenForFriends(context, username)
 
         viewModelFriends.friendsUpdate.observe(viewLifecycleOwner, Observer { friendsUpdate ->
-            if(friendsUpdate == true){
+            if (friendsUpdate == true) {
                 binding.recyclerViewItems.adapter = viewModelFriends.itemAdapterFriends
                 viewModelFriends.resetUpdate()
             }
@@ -81,7 +83,6 @@ class FriendsFragment : Fragment() {
     // Start HeartBeatTime
     override fun onStart() {
         super.onStart()
-        println("My space started")
         viewModelShared.startHeartBeatTimer()
         Wearable.getDataClient(activity as MainActivity).addListener(viewModelShared)
     }
@@ -90,7 +91,6 @@ class FriendsFragment : Fragment() {
     // Stop and destroy HeartBeatTimer
     override fun onStop() {
         super.onStop()
-        println("My space stopped")
         viewModelShared.stopHeartBeatTimer()
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModelShared)
     }

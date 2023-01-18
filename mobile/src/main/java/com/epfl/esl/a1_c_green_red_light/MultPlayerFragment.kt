@@ -27,11 +27,12 @@ class MultPlayerFragment : Fragment() {
     private var timerRace: Timer? = null
     private var rand: Long = 0
     private var lightColor: String = "red"
-    private var racing : Boolean = false
+    private var racing: Boolean = false
 
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         // Initialise Binding
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_mult_player, container, false)
@@ -42,7 +43,8 @@ class MultPlayerFragment : Fragment() {
         viewModel.setWinner("winner")
 
         // Set title
-        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : MultiPlayer"
+        (activity as AppCompatActivity).supportActionBar?.title =
+            getString(R.string.name_app) + " : MultiPlayer"
 
         // Initialise heart beat observer to keep sync with wear
         viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
@@ -52,28 +54,26 @@ class MultPlayerFragment : Fragment() {
 
         viewModel.getPlayRequest()
 
-        // Add listener to dataclient to be able to recieve data from wear
+        // Add listener to dataclient to be able to receive data from wear
         Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
 
         // add an observer to the shouldSendUserInfoRequest Image
         viewModel.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
             // Send data to wear
-            println("We observed should send request !!!")
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
             viewModel.sendUserNameAndImageToWear(dataClient)
         })
 
         // Initialise heart beat observer to keep sync with wear
         viewModel.gameOwner.observe(viewLifecycleOwner, Observer { owner ->
-            if(owner != null && !racing){
-                println(" Game requested !!")
+            if (owner != null && !racing) {
                 binding.noFriendsLayout.visibility = View.GONE
                 binding.ownerName.text = owner
                 binding.ownerLayout.visibility = View.VISIBLE
             }
         })
 
-        binding.acceptButton.setOnClickListener{view : View ->
+        binding.acceptButton.setOnClickListener { view: View ->
 
             binding.noFriendsLayout.visibility = View.GONE
             binding.ownerLayout.visibility = View.GONE
@@ -84,15 +84,15 @@ class MultPlayerFragment : Fragment() {
 
             // Add observer to winner in order to get winning condition
             viewModel.winner.observe(viewLifecycleOwner, Observer { winner ->
-                if(winner != "winner"){
-                    Navigation.findNavController(view).navigate(R.id.action_multPlayerFragment_to_resultFragment)
+                if (winner != "winner") {
+                    Navigation.findNavController(view)
+                        .navigate(R.id.action_multPlayerFragment_to_resultFragment)
                 }
             })
 
             // add an observer to the shouldSendUserInfoRequest Image
             viewModel.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
                 // Send data to wear
-                println("We observed should send request !!!")
                 val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
                 viewModel.sendUserNameAndImageToWear(dataClient)
             })
@@ -120,12 +120,12 @@ class MultPlayerFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        println("In progress : Everything destroyed")
         stopHeartBeatTimer()
         stopTimerCeption()
         racing = false
-        if(viewModel.winner.value == "winner" && racing == true){
-            Toast.makeText(context,"Oh no !! It seem you're cheating !", Toast.LENGTH_SHORT).show()
+        if (viewModel.winner.value == "winner" && racing == true) {
+            Toast.makeText(context, "Oh no !! It seems you're cheating !", Toast.LENGTH_SHORT)
+                .show()
         }
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
     }
@@ -133,7 +133,7 @@ class MultPlayerFragment : Fragment() {
     // Start HeartBeatTime
     override fun onStart() {
         super.onStart()
-        if(!racing){
+        if (!racing) {
             viewModel.startHeartBeatTimer()
         }
     }
@@ -142,15 +142,15 @@ class MultPlayerFragment : Fragment() {
     // Stop and destroy HeartBeatTimer
     override fun onStop() {
         super.onStop()
-        if(!racing){
+        if (!racing) {
             viewModel.stopHeartBeatTimer()
         }
     }
 
     // Start thread to update heart beat
-    fun startHeartBeatTimer(){
+    fun startHeartBeatTimer() {
         // reset timer if present
-        if(timerHeartBeat != null) {
+        if (timerHeartBeat != null) {
             timerHeartBeat!!.cancel()
             timerHeartBeat!!.purge()
             timerHeartBeat = null
@@ -158,7 +158,6 @@ class MultPlayerFragment : Fragment() {
 
         timerHeartBeat = Timer()
         timerHeartBeat?.schedule(timerTask {
-            println("Heart Beat")
             val dataClient2: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
             viewModel.sendStateMachineToWear(dataClient2, "racing")
         }, 0, 3000)
@@ -166,9 +165,9 @@ class MultPlayerFragment : Fragment() {
 
 
     // Stop heart beat thread
-    fun stopHeartBeatTimer(){
+    fun stopHeartBeatTimer() {
         // reset timer if present
-        if(timerHeartBeat != null) {
+        if (timerHeartBeat != null) {
             timerHeartBeat!!.cancel()
             timerHeartBeat!!.purge()
             timerHeartBeat = null
@@ -176,17 +175,16 @@ class MultPlayerFragment : Fragment() {
     }
 
 
-
     // Find random number for timer
     private fun findRand(): Long {
-        return ((3..7).random())*1000.toLong()
+        return ((3..7).random()) * 1000.toLong()
     }
 
 
     // launch a random timer to send green and red command
-    private fun timerCeption(){
+    private fun timerCeption() {
         // reset timer if present
-        if(timerRace != null) {
+        if (timerRace != null) {
             timerRace!!.cancel()
             timerRace!!.purge()
             timerRace = null
@@ -200,9 +198,12 @@ class MultPlayerFragment : Fragment() {
         // Launch timer with random period
         timerRace = Timer()
         timerRace!!.schedule(timerTask {
-            println("Timer Race")
 
-            lightColor = if (lightColor == "red"){"green"} else {"red"}
+            lightColor = if (lightColor == "red") {
+                "green"
+            } else {
+                "red"
+            }
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
             viewModel.sendCommandToWear(dataClient, lightColor)
 
@@ -214,10 +215,9 @@ class MultPlayerFragment : Fragment() {
 
 
     // Stop and destroy random timer for green and red light
-    fun stopTimerCeption(){
+    fun stopTimerCeption() {
         // reset timer if present
-        if(timerRace != null) {
-            println("TimerRace in tablet is stopped")
+        if (timerRace != null) {
             timerRace!!.cancel()
             timerRace!!.purge()
             timerRace = null

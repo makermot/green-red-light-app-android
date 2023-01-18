@@ -14,30 +14,32 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="16dp">
+
             <ImageView
                 android:id="@+id/welcomeImage"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:adjustViewBounds="true"
-                android:layout_gravity="center"
                 android:src="@drawable/sun" />
+
             <TextView
                 android:id="@+id/welcomeUsername"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:textSize="26dp"
                 android:layout_gravity="center"
+                android:layout_weight="2"
                 android:padding="80dp"
-                android:text="Welcome!"/>
+                android:text="Welcome!"
+                android:textSize="26dp" />
         </LinearLayout>
 
         <!-- Black line -->
         <View
             android:layout_width="match_parent"
             android:layout_height="5dp"
-            android:background="@color/black"/>
+            android:background="@color/black" />
 
         <LinearLayout
             android:id="@+id/statLayout"
@@ -50,10 +52,10 @@
                 android:id="@+id/friendUsername"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:textSize="24sp"
-                android:hint="Friend's username"
                 android:gravity="center"
-                android:inputType="textPersonName" />
+                android:hint="Friend's username"
+                android:inputType="textPersonName"
+                android:textSize="24sp" />
 
         </LinearLayout>
 
@@ -63,13 +65,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
+
             <Button
                 android:id="@+id/addFriendButton"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:adjustViewBounds="true"
-                android:text="Add friend"/>
+                android:text="Add friend" />
 
         </LinearLayout>
 
@@ -79,13 +82,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
+
             <Button
                 android:id="@+id/statButton"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:adjustViewBounds="true"
-                android:text="My statistics"/>
+                android:text="My statistics" />
 
         </LinearLayout>
 
@@ -95,13 +99,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
+
             <Button
                 android:id="@+id/friendsButton"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:adjustViewBounds="true"
-                android:text="@string/friends_button"/>
+                android:text="@string/friends_button" />
         </LinearLayout>
 
         <LinearLayout
@@ -110,13 +115,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
+
             <Button
                 android:id="@+id/loungeButton"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:adjustViewBounds="true"
-                android:text="lounge"/>
+                android:text="lounge" />
         </LinearLayout>
 
         <LinearLayout
@@ -125,13 +131,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
+
             <Button
                 android:id="@+id/multiButton"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:adjustViewBounds="true"
-                android:text="Join a race"/>
+                android:text="Join a race" />
         </LinearLayout>
 
         <LinearLayout
@@ -144,22 +151,22 @@
             <EditText
                 android:id="@+id/changeFrequencyMin"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="50dp"
-                android:textSize="20sp"
-                android:hint="@string/Min"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:inputType="number" />
+                android:hint="@string/Min"
+                android:inputType="number"
+                android:textSize="20sp" />
 
             <EditText
                 android:id="@+id/changeFrequencyMax"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="50dp"
-                android:textSize="20sp"
-                android:hint="@string/Max"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:inputType="number" />
+                android:hint="@string/Max"
+                android:inputType="number"
+                android:textSize="20sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -168,13 +175,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
+
             <Button
                 android:id="@+id/changeFrequencyButton"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:adjustViewBounds="true"
-                android:text="@string/change_frequency"/>
+                android:text="@string/change_frequency" />
 
         </LinearLayout>
 

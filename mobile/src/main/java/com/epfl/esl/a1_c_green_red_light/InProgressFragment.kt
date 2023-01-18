@@ -34,25 +34,26 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private val LOCATION_REQUEST_CODE = 101
     private var startTime: Long = 0
-    private var alreadyTakenLaMer : Boolean = false
+    private var alreadyTakenLaMer: Boolean = false
 
     private var markerPlayer: Marker? = null
     private lateinit var markers: MutableList<Marker>
 
     private var timerHeartBeat: Timer? = null
     private var timerRace: Timer? = null
-    //private var timerRaceDeconection: Timer? = null
     private var rand: Long = 0
     private var lightColor: String = "red"
 
     // Variable has won or not
     private var winner = MutableLiveData<Boolean>()
+
     init {
         winner.value = false
     }
 
     // Live data and Init Live data variable
     private var mapInitialised = MutableLiveData<Boolean>()
+
     init {
         mapInitialised.value = false
     }
@@ -61,8 +62,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     private var isTheFirst: Boolean = true
 
 
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Initialise Binding
@@ -74,7 +75,8 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         startTime = System.currentTimeMillis() / 1000
 
         // Set title on the Top Bar
-        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Race"
+        (activity as AppCompatActivity).supportActionBar?.title =
+            getString(R.string.name_app) + " : Race"
 
         // Start timer for heartBeat : private timer not from view model and Initialise heart beat to keep sync with wear
         startHeartBeatTimer()
@@ -87,7 +89,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         //Check for winner condition
         winner.observe(viewLifecycleOwner) { win ->
-            if(win && !alreadyTakenLaMer) {
+            if (win && !alreadyTakenLaMer) {
                 // Save game data to firebase
                 viewModel.addRaceToDataBase()
 
@@ -95,14 +97,15 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
                 alreadyTakenLaMer = true
                 println("!!! WE NAVIGATE !!!")
-                Navigation.findNavController(binding.root).navigate(R.id.action_inProgressFragment_to_resultFragment)
+                Navigation.findNavController(binding.root)
+                    .navigate(R.id.action_inProgressFragment_to_resultFragment)
 
                 onDestroy()
             }
         }
 
         // Check for multiple player and add listener to change position
-        if(viewModel.playWithFriends > 0){
+        if (viewModel.playWithFriends > 0) {
             println("Game with multiple friends !!!")
             viewModel.getFriendUpdatePosition()
             viewModel.newFriendsPos.observe(viewLifecycleOwner) { newPosInt ->
@@ -114,7 +117,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         // Add observer on username
         mapInitialised.observe(viewLifecycleOwner) { isInitialised ->
-            if(isInitialised){
+            if (isInitialised) {
                 print("We've initialised the map !, saved pos is :")
                 println(viewModel.goalPosition)
                 // Add goal position to Map
@@ -131,16 +134,16 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
             //print("new position :")
             //println(newPosition)
             //println("is the first " + isTheFirst)
-            if(isTheFirst){
+            if (isTheFirst) {
                 viewModel.playerPosition = viewModel.receivedPosition.value!!
                 isTheFirst = false
                 //println("la position du player is " + viewModel.playerPosition )
                 //println("la position sauvegardée is " + viewModel.receivedPosition.value)
             }
-            if(mapInitialised.value == true){
+            if (mapInitialised.value == true) {
                 updatePlayerLocation(newPosition)
             }
-            if(viewModel.cheating == true){
+            if (viewModel.cheating) {
                 hasReturnedToStart(newPosition)
             }
 
@@ -155,14 +158,14 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
     // Find random number for timer
     private fun findRand(min_frequency: Int, max_frequency: Int): Long {
-        return ((min_frequency..max_frequency).random())*1000.toLong()
+        return ((min_frequency..max_frequency).random()) * 1000.toLong()
     }
 
 
     // launch a random timer to send green and red command
-    private fun timerCeption(){
+    private fun timerCeption() {
         // reset timer if present
-        if(timerRace != null) {
+        if (timerRace != null) {
             timerRace!!.cancel()
             timerRace!!.purge()
             timerRace = null
@@ -178,24 +181,25 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         // Launch timer with random period
         timerRace = Timer()
         timerRace!!.schedule(timerTask {
-            //println("Timer Race")
-
-            if(!viewModel.cheating){
-                lightColor = if (lightColor == "red"){"green"} else {"red"}
+            if (!viewModel.cheating) {
+                lightColor = if (lightColor == "red") {
+                    "green"
+                } else {
+                    "red"
+                }
                 val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
                 viewModel.sendCommandToWear(dataClient, lightColor)
             }
 
             timerCeption()
         }, rand, 1000)
-
     }
 
 
     // Stop and destroy random timer for green and red light
-    fun stopTimerCeption(){
+    fun stopTimerCeption() {
         // reset timer if present
-        if(timerRace != null) {
+        if (timerRace != null) {
             println("TimerRace in tablet is stopped")
             timerRace!!.cancel()
             timerRace!!.purge()
@@ -211,7 +215,11 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
     }
 
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             LOCATION_REQUEST_CODE -> {
                 if (grantResults.isEmpty() || grantResults[0] !=
@@ -234,11 +242,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
 
     // Add marker to goal position and center map around goal
-    private fun inflateMap(goalPosition : LatLng){
-        print("We infalte the map with goal position : ")
-        println(goalPosition)
-        print("While goal pos is : ")
-        println(viewModel.goalPosition)
+    private fun inflateMap(goalPosition: LatLng) {
         // add goal position to Map
         mMap.addMarker(
             MarkerOptions()
@@ -246,7 +250,6 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                 .title("Goal Location")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA))
         )
-
         // Move Camera to goal
         val cameraPosition = CameraPosition.Builder()
             .target(goalPosition)
@@ -258,11 +261,11 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     // Update player location on Map
-    private fun updatePlayerLocation(playerPosition : LatLng) {
+    private fun updatePlayerLocation(playerPosition: LatLng) {
         // remove the last marker
         if (markerPlayer != null) {
             markerPlayer!!.remove()
-            markerPlayer=null
+            markerPlayer = null
         }
 
         // add player position to Map
@@ -281,7 +284,6 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        println("In progress : Everything destroyed")
         stopHeartBeatTimer()
         stopTimerCeption()
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
@@ -289,14 +291,13 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
 
     // Start thread to update heart beat
-    fun startHeartBeatTimer(){
+    fun startHeartBeatTimer() {
         // reset timer if present
-        if(timerHeartBeat != null) {
+        if (timerHeartBeat != null) {
             timerHeartBeat!!.cancel()
             timerHeartBeat!!.purge()
             timerHeartBeat = null
         }
-
         timerHeartBeat = Timer()
         timerHeartBeat?.schedule(timerTask {
             //println("Heart Beat")
@@ -307,9 +308,9 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
 
     // Stop heart beat thread
-    fun stopHeartBeatTimer(){
+    fun stopHeartBeatTimer() {
         // reset timer if present
-        if(timerHeartBeat != null) {
+        if (timerHeartBeat != null) {
             timerHeartBeat!!.cancel()
             timerHeartBeat!!.purge()
             timerHeartBeat = null
@@ -318,18 +319,19 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
 
     // Check for winning condition and set winner livedata
-    private fun hasWon(position: LatLng, user : String) {
+    private fun hasWon(position: LatLng, user: String) {
         var tolerance = 10.0
         tolerance = tolerance.pow(-9)
         val latitudeGoal = viewModel.goalPosition.latitude
         val longitudeGoal = viewModel.goalPosition.longitude
-        val latitudeCurrent= position.latitude
-        val longitudeCurrent= position.longitude
+        val latitudeCurrent = position.latitude
+        val longitudeCurrent = position.longitude
 
-        val circle = (latitudeCurrent - latitudeGoal).pow(2) + (longitudeCurrent - longitudeGoal).pow(2)
+        val circle =
+            (latitudeCurrent - latitudeGoal).pow(2) + (longitudeCurrent - longitudeGoal).pow(2)
 
         //println("circle = $circle")
-        if (circle <= tolerance){
+        if (circle <= tolerance) {
             // Save stop time to compute elapse time
             viewModel.stopTime = System.currentTimeMillis() / 1000
 
@@ -344,20 +346,18 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
     // Check for winning condition and set winner livedata
     private fun hasReturnedToStart(position: LatLng) {
-        println(" We check if the player returned to start")
         var tolerance = 10.0
         tolerance = tolerance.pow(-9)
         val latitudeStart = viewModel.playerPosition.latitude
         val longitudeStart = viewModel.playerPosition.longitude
-        val latitudeCurrent= position.latitude
-        val longitudeCurrent= position.longitude
+        val latitudeCurrent = position.latitude
+        val longitudeCurrent = position.longitude
 
-        val circle = (latitudeCurrent - latitudeStart).pow(2) + (longitudeCurrent - longitudeStart).pow(2)
+        val circle =
+            (latitudeCurrent - latitudeStart).pow(2) + (longitudeCurrent - longitudeStart).pow(2)
 
-        //println("circle = $circle")
-        if (circle <= tolerance){
+        if (circle <= tolerance) {
             // Call the observer to navigate
-            println("The player returned to start : cheating = false")
             viewModel.cheating = false
         }
     }
@@ -365,17 +365,19 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
     // Add the marker of the friends during multiplayer race
     fun addMarkersOfFriends() {
-        val colors = listOf(BitmapDescriptorFactory.HUE_BLUE, BitmapDescriptorFactory.HUE_CYAN,
+        val colors = listOf(
+            BitmapDescriptorFactory.HUE_BLUE, BitmapDescriptorFactory.HUE_CYAN,
             BitmapDescriptorFactory.HUE_GREEN, BitmapDescriptorFactory.HUE_ORANGE,
             BitmapDescriptorFactory.HUE_ROSE, BitmapDescriptorFactory.HUE_VIOLET,
-            BitmapDescriptorFactory.HUE_YELLOW);
+            BitmapDescriptorFactory.HUE_YELLOW
+        );
 
-        var increment : Int = 0
+        var increment: Int = 0
 
-        if(mapInitialised.value == true){
+        if (mapInitialised.value == true) {
             mMap.clear()
 
-            for (friendPos in viewModel.friendsPos){
+            for (friendPos in viewModel.friendsPos) {
                 // Check for winning condition
                 hasWon(friendPos, viewModel.friendsName.elementAt(increment))
 
@@ -391,7 +393,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                 increment += 1
             }
 
-            if(viewModel.receivedPosition.value != null){
+            if (viewModel.receivedPosition.value != null) {
                 markerPlayer = mMap.addMarker(
                     MarkerOptions()
                         .position(viewModel.receivedPosition.value!!)
@@ -418,11 +420,14 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         //val elapsed_time = System.currentTimeMillis() / 1000 - startTime
         val elapsed_time_fun = System.currentTimeMillis() / 1000 - startTime
         val seconds = (elapsed_time_fun.rem(60))?.toInt()
-        val minutes = (elapsed_time_fun/60)?.toInt()
+        val minutes = (elapsed_time_fun / 60)?.toInt()
         var time_string: String = ""
         if (seconds != null) {
-            if (seconds < 10){time_string = ("00.0$minutes.0$seconds")}
-            else{ time_string = ("00.0$minutes.$seconds") }
+            if (seconds < 10) {
+                time_string = ("00.0$minutes.0$seconds")
+            } else {
+                time_string = ("00.0$minutes.$seconds")
+            }
         }
         return time_string
     }

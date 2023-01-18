@@ -7,12 +7,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ItemAdapterStat(val context: Context, val items: ArrayList<String>,
-                  val items_2: ArrayList<String>, val items_3: ArrayList<String>,
-                  val items_4: ArrayList<String>, val items_5: ArrayList<String>,
-                  val items_6: ArrayList<String>) :
-    RecyclerView.Adapter<ItemAdapterStat.ViewHolder>()
-{
+class ItemAdapterStat(
+    val context: Context, val items: ArrayList<String>,
+    val items_2: ArrayList<String>, val items_3: ArrayList<String>,
+    val items_4: ArrayList<String>, val items_5: ArrayList<String>,
+    val items_6: ArrayList<String>
+) :
+    RecyclerView.Adapter<ItemAdapterStat.ViewHolder>() {
     /**
      * Inflates the item views which is designed in xml layout file
      */
@@ -25,6 +26,7 @@ class ItemAdapterStat(val context: Context, val items: ArrayList<String>,
             )
         )
     }
+
     /**
      * Binds each item in the ArrayList to a view
      *
@@ -48,11 +50,14 @@ class ItemAdapterStat(val context: Context, val items: ArrayList<String>,
         holder.tvItem_5.text = item_5_position
         holder.tvItem_6.text = item_6_position
     }
+
     /**
      * Gets the number of items in the list
      */
     override fun getItemCount(): Int {
-        return items.size}
+        return items.size
+    }
+
     /**
      * A ViewHolder describes an item view and metadata about
     its place within the RecyclerView.

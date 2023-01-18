@@ -24,7 +24,8 @@ class ResultFragment : Fragment() {
     private var timerHeartBeat: Timer? = null
 
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Initialise Binding
@@ -34,7 +35,8 @@ class ResultFragment : Fragment() {
         viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
 
         // Inflate the layout for this fragment
-        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.name_app) + " : Results"
+        (activity as AppCompatActivity).supportActionBar?.title =
+            getString(R.string.name_app) + " : Results"
 
         // Initialise heart beat observer to keep sync with wear
         viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
@@ -43,23 +45,19 @@ class ResultFragment : Fragment() {
         })
 
         binding.ReturnHome.setOnClickListener { view: View ->
-            Navigation.findNavController(view).navigate(R.id.action_resultFragment_to_mySpaceFragment)
+            Navigation.findNavController(view)
+                .navigate(R.id.action_resultFragment_to_mySpaceFragment)
         }
 
         // add an observer to the shouldSendUserInfoRequest Image
         viewModel.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
             // Send data to wear
-            println("We observed should send request !!!")
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
             viewModel.sendUserNameAndImageToWear(dataClient)
         })
 
-        print("elapsed time is : ")
-        println(viewModel.elapse_end)
-
         binding.winner.text = viewModel.winner.value
         binding.time.text = viewModel.elapse_end
-
 
         return binding.root
     }
@@ -67,7 +65,6 @@ class ResultFragment : Fragment() {
     // Start HeartBeatTime
     override fun onStart() {
         super.onStart()
-        println("Result started")
         viewModel.startHeartBeatTimer()
         Wearable.getDataClient(activity as MainActivity).addListener(viewModel)
     }
@@ -76,7 +73,6 @@ class ResultFragment : Fragment() {
     // Stop and destroy HeartBeatTimer
     override fun onStop() {
         super.onStop()
-        println("Result stopped")
         viewModel.stopHeartBeatTimer()
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
     }

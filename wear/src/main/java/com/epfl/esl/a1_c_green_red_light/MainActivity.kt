@@ -6,6 +6,7 @@ import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color.blue
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -39,15 +40,16 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
-    private lateinit var dataClient : DataClient
+    private lateinit var dataClient: DataClient
     private lateinit var lifecycleRegistry: LifecycleRegistry
 
     // Live data
     private var stateMachine = MutableLiveData<String>()
-    private var username  = MutableLiveData<String?>()
+    private var username = MutableLiveData<String?>()
     private var userImage = MutableLiveData<Bitmap?>()
     private var light = MutableLiveData<String>()
     private var shouldSendInfoRequest = MutableLiveData<Boolean>()
+
     // Init Live data variable
     init {
         stateMachine.value = "unlogged"
@@ -70,8 +72,8 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private var raceTimer: Timer? = null
     private var watchdogTimer: Timer? = null
     private var startTime: Long = 0
-    private var mHandler: Handler = object : Handler(){}
-    private var cheating : Boolean = false
+    private var mHandler: Handler = object : Handler() {}
+    private var cheating: Boolean = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,8 +96,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             Log.d(TAG, "This hardware doesn't have GPS.")
             // Fall back to functionality that doesn't use location or
             // warn the user that location function isn't available.
-        }
-        else{
+        } else {
             Log.d(TAG, "This hardware has GPS.")
         }
 
@@ -122,13 +123,13 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
         // Add observer on shouldSendInfoRequest
         shouldSendInfoRequest.observe(this) { request ->
-            if(request){
+            if (request) {
                 sendUserInfoRequestToMobile()
             }
         }
 
         light.observe(this) { color ->
-            if((stateMachine.value == "racing") && (cheating == false)){
+            if ((stateMachine.value == "racing") && (cheating == false)) {
 
                 vibrateWear(this)
 
@@ -166,20 +167,24 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         //print(" On Data Changed Called : ")
 
         dataEvents
-            .filter {it.dataItem.uri.path == "/userInfo" }
+            .filter { it.dataItem.uri.path == "/userInfo" }
             .forEach { event ->
                 //println("with User Info Event")
-                val receivedImage: ByteArray = DataMapItem.fromDataItem(event.dataItem).dataMap.getByteArray("profileImage")
-                username.value = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("username")
-                userImage.value = BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
+                val receivedImage: ByteArray =
+                    DataMapItem.fromDataItem(event.dataItem).dataMap.getByteArray("profileImage")
+                username.value =
+                    DataMapItem.fromDataItem(event.dataItem).dataMap.getString("username")
+                userImage.value =
+                    BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
                 //screen = "waiting"
             }
 
         dataEvents
-            .filter {it.dataItem.uri.path == "/command" }
+            .filter { it.dataItem.uri.path == "/command" }
             .forEach { event ->
                 println(" Light change command event : ")
-                val receivedCommand: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("command")
+                val receivedCommand: String =
+                    DataMapItem.fromDataItem(event.dataItem).dataMap.getString("command")
 
                 when (receivedCommand) {
                     "green" -> {
@@ -192,12 +197,13 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             }
 
         dataEvents
-            .filter {it.dataItem.uri.path == "/state" }
+            .filter { it.dataItem.uri.path == "/state" }
             .forEach { event ->
                 //print(" with Heart beat received :")
-                val receivedStatemachine: String? = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("state")
+                val receivedStatemachine: String? =
+                    DataMapItem.fromDataItem(event.dataItem).dataMap.getString("state")
                 // To handle null case -> should never happen btw
-                if(receivedStatemachine != null){
+                if (receivedStatemachine != null) {
                     //print("received state :")
                     //print(receivedStatemachine)
                     //print(", While actual state is :")
@@ -206,11 +212,11 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                     //println(username.value)
 
                     // to avoid call the observer each time the value is reasigned
-                    if(stateMachine.value != receivedStatemachine){
+                    if (stateMachine.value != receivedStatemachine) {
                         stateMachine.value = receivedStatemachine!!
                     }
 
-                    if(stateMachine.value == "logged" && username.value == null){
+                    if (stateMachine.value == "logged" && username.value == null) {
                         shouldSendInfoRequest.value = true
                     }
 
@@ -221,7 +227,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     }
 
 
-    private fun updateState(){
+    private fun updateState() {
         print("We update the state machine with state :")
         println(stateMachine.value)
 
@@ -231,18 +237,19 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         binding.startView.visibility = View.GONE
         binding.resultView.visibility = View.GONE
         binding.container.setBackgroundColor(
-            ContextCompat.getColor(applicationContext, R.color.white))
+            ContextCompat.getColor(applicationContext, R.color.white)
+        )
 
         stopRaceTimer()
 
         when (stateMachine.value) {
             "unlogged" -> {
                 username.value = null
-                userImage.value = BitmapFactory.decodeResource(this.resources,R.drawable.ic_logo)
+                userImage.value = BitmapFactory.decodeResource(this.resources, R.drawable.ic_logo)
                 binding.waitingView.visibility = View.VISIBLE
             }
             "logged" -> {
-                if(username.value == null){
+                if (username.value == null) {
                     // request user info to mobile
                     sendUserInfoRequestToMobile()
                 }
@@ -251,10 +258,12 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             "racing" -> {
                 // Set up view visibility
                 binding.container.setBackgroundColor(
-                    ContextCompat.getColor(applicationContext, R.color.red))
+                    ContextCompat.getColor(applicationContext, R.color.red)
+                )
                 binding.startView.visibility = View.VISIBLE
                 binding.startView.setBackgroundColor(
-                    ContextCompat.getColor(applicationContext, R.color.red))
+                    ContextCompat.getColor(applicationContext, R.color.red)
+                )
 
                 // Save start time to compute elapsed time
                 startTime = System.currentTimeMillis() / 1000
@@ -292,7 +301,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         //  - http://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
 
         // Return if we are not in racing or if we already cheating
-        if(stateMachine.value != "racing" || cheating ){
+        if (stateMachine.value != "racing" || cheating) {
             return
         }
 
@@ -308,12 +317,13 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             val gForce: Float = sqrt(gX * gX + gY * gY + gZ * gZ)
 
             // Change boolean value if gForce exceeds threshold;
-            if (light.value == "red"){
+            if (light.value == "red") {
                 if (gForce > SHAKE_THRESHOLD) {
                     binding.startView.visibility = View.GONE
                     binding.cheatingView.visibility = View.VISIBLE
                     binding.container.setBackgroundColor(
-                        ContextCompat.getColor(applicationContext, R.color.yellow))
+                        ContextCompat.getColor(applicationContext, R.color.yellow)
+                    )
                     cheating = true
                     sendCheatingCommandToMobile()
                 }
@@ -334,7 +344,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
 
     // Get GPS position from wear and all sendGPSToMobile func if success
-    private fun getGPSPositionAndCallSendGPSToMobile(){
+    private fun getGPSPositionAndCallSendGPSToMobile() {
         //println("We are getGPSPositionAndCallSendGPSToMobile")
 
         val permission: Boolean = ActivityCompat.checkSelfPermission(
@@ -345,11 +355,12 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
         if (permission) {
-            mFusedLocationClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener { position ->
-                //print("We find the position : ")
-                //println(position)
-                sendGPSToMobile(position)
-            }
+            mFusedLocationClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener { position ->
+                    //print("We find the position : ")
+                    //println(position)
+                    sendGPSToMobile(position)
+                }
         } else {
             ActivityCompat.requestPermissions(
                 this,
@@ -360,7 +371,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
 
     // Send GPS coordonate to mobile
-    fun sendGPSToMobile(position : Location) {
+    fun sendGPSToMobile(position: Location) {
         //println("We are in send GPS to Mobile")
         // Add a timestamp to the message, so its truly different each time !
         val tsLong = System.currentTimeMillis() / 1000
@@ -401,7 +412,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
             //println("Great Succes! : Command request user info sent to wear")
-            shouldSendInfoRequest.value=false
+            shouldSendInfoRequest.value = false
         }.addOnFailureListener {
             println("Oupsi... On a pas envoyé les données request user info")
         }
@@ -431,7 +442,11 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
 
     // Function to request permision to position
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             LOCATION_REQUEST_CODE -> {
                 if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
@@ -449,18 +464,21 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
 
     // Verify if hardware has GPS capabilities
-    private fun hasGps(context : Context1): Boolean{
+    private fun hasGps(context: Context1): Boolean {
         return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
     }
 
 
     // update elapse time display
-    private fun updateTime(){
+    private fun updateTime() {
         val elapsed_time = System.currentTimeMillis() / 1000 - startTime
         val seconds = (elapsed_time % 60).toInt()
-        val minutes = (elapsed_time/60).toInt()
-        if (seconds < 10){binding.elapsedTimeText.text = ("00.0$minutes.0$seconds")}
-        else{ binding.elapsedTimeText.text = ("00.0$minutes.$seconds") }
+        val minutes = (elapsed_time / 60).toInt()
+        if (seconds < 10) {
+            binding.elapsedTimeText.text = ("00.0$minutes.0$seconds")
+        } else {
+            binding.elapsedTimeText.text = ("00.0$minutes.$seconds")
+        }
     }
 
 
@@ -473,9 +491,9 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
 
     // Restart race timer
-    private fun startRaceTimer(){
+    private fun startRaceTimer() {
         // reset timer if present : should never be the case
-        if(raceTimer != null) {
+        if (raceTimer != null) {
             raceTimer!!.cancel()
             raceTimer!!.purge()
             raceTimer = null
@@ -486,7 +504,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         raceTimer!!.schedule(timerTask {
             //println("race Timer timeout")
             getGPSPositionAndCallSendGPSToMobile()
-            mHandler.post( Runnable() {
+            mHandler.post(Runnable() {
                 runOnUiThread() {
                     updateTime()
                 }
@@ -496,9 +514,9 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
 
     // Destroy race timer
-    private fun stopRaceTimer(){
+    private fun stopRaceTimer() {
         // reset timer if present
-        if(raceTimer != null) {
+        if (raceTimer != null) {
             raceTimer!!.cancel()
             raceTimer!!.purge()
             raceTimer = null
@@ -507,9 +525,9 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
 
     // Restart watchdog timer
-    private fun startWatchDogTimer(){
+    private fun startWatchDogTimer() {
         // reset timer if present
-        if(watchdogTimer != null) {
+        if (watchdogTimer != null) {
             watchdogTimer!!.cancel()
             watchdogTimer!!.purge()
             watchdogTimer = null
@@ -519,7 +537,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         watchdogTimer = Timer()
         watchdogTimer!!.schedule(timerTask {
             println("Watch Dog Timer")
-            mHandler.post( Runnable() {
+            mHandler.post(Runnable() {
                 runOnUiThread() {
                     stateMachine.value = "unlogged"
                 }
@@ -529,9 +547,9 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
 
     // Destroy watchdog timer
-    private fun stopWatchDogTimer(){
+    private fun stopWatchDogTimer() {
         // reset timer if present
-        if(watchdogTimer != null) {
+        if (watchdogTimer != null) {
             watchdogTimer!!.cancel()
             watchdogTimer!!.purge()
             watchdogTimer = null
@@ -601,7 +619,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     }
 
     // vibrator function
-    private fun vibrateWear(context : Context1) {
+    private fun vibrateWear(context: Context1) {
         val vibrator = context.getSystemService(Context1.VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= 26) {
             vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
