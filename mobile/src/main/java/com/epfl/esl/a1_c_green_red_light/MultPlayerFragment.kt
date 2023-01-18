@@ -176,8 +176,8 @@ class MultPlayerFragment : Fragment() {
 
 
     // Find random number for timer
-    private fun findRand(): Long {
-        return ((3..7).random()) * 1000.toLong()
+    private fun findRand(min_frequency: Int, max_frequency: Int): Long {
+        return ((min_frequency..max_frequency).random()) * 1000.toLong()
     }
 
 
@@ -190,10 +190,12 @@ class MultPlayerFragment : Fragment() {
             timerRace = null
         }
 
+        // get frequency of changing light
+        val minFrequency = viewModel.minFreq
+        val maxFrequency = viewModel.maxFreq
+
         // find random period
-        rand = findRand()
-        //print("je print le rand : ")
-        //println(rand)
+        rand = findRand(minFrequency, maxFrequency)
 
         // Launch timer with random period
         timerRace = Timer()
@@ -206,7 +208,6 @@ class MultPlayerFragment : Fragment() {
             }
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
             viewModel.sendCommandToWear(dataClient, lightColor)
-
 
             timerCeption()
         }, rand, 1000)
