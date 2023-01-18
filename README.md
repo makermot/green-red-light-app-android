@@ -3,16 +3,23 @@ Android application for playing the 1-2-3 soleil game
 
 # Structure
 ### Main activity : Mobile
+- MainActivity
+- FriendsFragment
+- FriendsViewModel
+- InProgressFragment
+- ItemAdapterFragment
+- ItemAdapterStat
 - LoginFragment
 - MySpaceFragment
 - LoungeFragment
 - ResultFragment
+- MultPlayerFragment
+- SharedViewModel
 - StatFragment
+- StatViewModel
 
 ### Main activity : Wear
-- StartFragment
-- RaceFragment
-- EndFragment
+- MainActivity
 
 ### navigation  
 - NavigationHostFragment (mobile) hosted by activity_main.xml (mobile)  
