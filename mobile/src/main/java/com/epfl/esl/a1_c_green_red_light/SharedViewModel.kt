@@ -38,7 +38,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var friendsWePlayWith : ArrayList<String> = ArrayList<String>()
     var friendsPos : ArrayList<LatLng> = ArrayList<LatLng>()
     var friendsName : ArrayList<String> = ArrayList<String>()
-    var elapse_winner : String = ""
     var elapse_end : String = ""
     var minFreq : Int = 3
     var maxFreq : Int = 7
@@ -152,7 +151,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                         }
                     }
                 }
-                println("boucle for terminée")
+                //println("boucle for terminée")
                 _authentification.value = "Invalid login"
             }
             override fun onCancelled(databaseError: DatabaseError) {}
@@ -254,7 +253,10 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         // Profile ref -> branche profile de la realtime database
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if(dataSnapshot.hasChild(friendUsername)){
+                if(username == friendUsername){
+                    _addFriendStatus.value = "Cannot add yourself"
+                }
+                else if(dataSnapshot.hasChild(friendUsername)){
                     println("Friend's profile Found")
                     if(dataSnapshot.child(key).child("friend").hasChild(friendUsername)){
                         println("Oh no... You're already friends")
@@ -315,6 +317,8 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             asPutDataRequest()
         }
 
+        print("We try to send the command to wear :")
+        println(command)
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
@@ -339,7 +343,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
-            println("Great Succes! : Heart beat sent to wear")
+            //println("Great Succes! : Heart beat sent to wear")
         }.addOnFailureListener {
             println("Fuck! : drop the Heart beat")
         }.addOnCanceledListener {
@@ -362,13 +366,13 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         dataEvents
             .filter {it.dataItem.uri.path == "/GPS_data" }
             .forEach { event ->
-                print("We received location from wear :")
+                //print("We received location from wear :")
 
                 val latitude = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("latitude")
                 val longitude = DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("longitude")
 
                 _receivedPosition.value = LatLng(latitude, longitude)
-                println(_receivedPosition.value)
+                //println(_receivedPosition.value)
             }
 
         dataEvents
@@ -426,7 +430,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
         heartBeatTimer = Timer()
         heartBeatTimer?.schedule(timerTask {
-            println("Heart Beat")
+            //println("Heart Beat")
             mHandler.post( Runnable() {
                 run {
                     _heartBeat.value = _heartBeat.value?.plus(1)
@@ -574,7 +578,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                 if( dataSnapshot.hasChild(_gameOwner.value!!) &&
                     dataSnapshot.child(_gameOwner.value!!).hasChild("currentRacePosition") &&
                     dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").hasChild("winner")){
-                    elapse_winner = dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").child("elapse").getValue(String::class.java)!!
+                    elapse_end = dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").child("elapse").getValue(String::class.java)!!
                     _winner.value = dataSnapshot.child(_gameOwner.value!!).child("currentRacePosition").child("winner").getValue(String::class.java)
                 }
             }

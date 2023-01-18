@@ -124,14 +124,14 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         // Add observer to playerPosition
         viewModel.receivedPosition.observe(viewLifecycleOwner, Observer { newPosition ->
-            print("new position :")
-            println(newPosition)
-            println("is the first " + isTheFirst)
+            //print("new position :")
+            //println(newPosition)
+            //println("is the first " + isTheFirst)
             if(isTheFirst){
                 viewModel.playerPosition = viewModel.receivedPosition.value!!
                 isTheFirst = false
-                println("la position du player is " + viewModel.playerPosition )
-                println("la position sauvegardée is " + viewModel.receivedPosition.value)
+                //println("la position du player is " + viewModel.playerPosition )
+                //println("la position sauvegardée is " + viewModel.receivedPosition.value)
             }
             if(mapInitialised.value == true){
                 updatePlayerLocation(newPosition)
@@ -176,7 +176,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         // Launch timer with random period
         timerRace = Timer()
         timerRace!!.schedule(timerTask {
-            println("Timer Race")
+            //println("Timer Race")
 
             if(viewModel.cheating == false){
                 lightColor = if (lightColor == "red"){"green"} else {"red"}
@@ -297,7 +297,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         timerHeartBeat = Timer()
         timerHeartBeat?.schedule(timerTask {
-            println("Heart Beat")
+            //println("Heart Beat")
             val dataClient2: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
             viewModel.sendStateMachineToWear(dataClient2, "racing")
         }, 0, 3000)
@@ -326,7 +326,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         val circle = (latitudeCurrent - latitudeGoal).pow(2) + (longitudeCurrent - longitudeGoal).pow(2)
 
-        println("circle = $circle")
+        //println("circle = $circle")
         if (circle <= tolerance){
             // Save stop time to compute elapse time
             viewModel.stopTime = System.currentTimeMillis() / 1000
@@ -342,6 +342,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
     // Check for winning condition and set winner livedata
     private fun hasReturnedToStart(position: LatLng) {
+        println(" We check if the player returned to start")
         var tolerance = 10.0
         tolerance = tolerance.pow(-9)
         val latitudeStart = viewModel.playerPosition.latitude
@@ -351,9 +352,10 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         val circle = (latitudeCurrent - latitudeStart).pow(2) + (longitudeCurrent - longitudeStart).pow(2)
 
-        println("circle = $circle")
+        //println("circle = $circle")
         if (circle <= tolerance){
             // Call the observer to navigate
+            println("The player returned to start : cheating = false")
             viewModel.cheating = false
         }
     }
