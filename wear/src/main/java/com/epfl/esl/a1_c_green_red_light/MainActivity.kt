@@ -71,6 +71,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private var watchdogTimer: Timer? = null
     private var startTime: Long = 0
     private var mHandler: Handler = object : Handler(){}
+    private var cheating : Boolean = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -126,7 +127,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         }
 
         light.observe(this) { color ->
-            if(stateMachine.value == "racing"){
+            if((stateMachine.value == "racing") && (cheating == false)){
 
                 vibrateWear(this)
 
@@ -259,6 +260,9 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                 // start timer to send GPS position and update elapse time
                 startRaceTimer()
             }
+            "result" -> {
+
+            }
             else -> {
                 println("0h oh... wrong state machine")
             }
@@ -281,7 +285,9 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         // References:
         //  - http://jasonmcreynolds.com/?p=388
         //  - http://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
-        if(stateMachine.value != "racing"){
+
+        // Return if we are not in racing or if we already cheating
+        if(stateMachine.value != "racing" || cheating ){
             return
         }
 
@@ -303,8 +309,10 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                     binding.cheatingView.visibility = View.VISIBLE
                     binding.container.setBackgroundColor(
                         ContextCompat.getColor(applicationContext, R.color.yellow))
+                    cheating = true
+                    sendCheatingCommandToMobile()
                 }
-                else{
+                /*else{
                     binding.cheatingView.visibility = View.GONE
                     binding.startView.visibility = View.VISIBLE
                     if (light.value == "green"){
@@ -314,15 +322,15 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                         binding.container.setBackgroundColor(
                             ContextCompat.getColor(applicationContext, R.color.red))
                     }
-                }
+                }*/
             }
         }
     }
 
 
     // Get GPS position from wear and all sendGPSToMobile func if success
-    private fun getGPSPositionandCallSendGPSToMobile(){
-        //println("We are getGPSPositionandCallSendGPSToMobile")
+    private fun getGPSPositionAndCallSendGPSToMobile(){
+        //println("We are getGPSPositionAndCallSendGPSToMobile")
 
         val permission: Boolean = ActivityCompat.checkSelfPermission(
             this,
@@ -394,6 +402,28 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         }
     }
 
+    // request  userInfo to mobile to mobile
+    fun sendCheatingCommandToMobile() {
+        println("We are in send sendCheatingCommandToMobile")
+        // Add a timestamp to the message, so its truly different each time !
+        val tsLong = System.currentTimeMillis() / 1000
+        val timestamp = tsLong.toString()
+
+        val request: PutDataRequest = PutDataMapRequest.create("/cheating").run {
+            dataMap.putString("timeStamp", timestamp)
+            asPutDataRequest()
+        }
+
+        request.setUrgent()
+        val putTask: Task<DataItem> = dataClient.putDataItem(request)
+        putTask.addOnSuccessListener {
+            println("Great Succes! : cheating request successfuly send to mobile")
+            cheating = false
+        }.addOnFailureListener {
+            println("Oupsi... On a pas envoyé la cheatimg request...")
+        }
+    }
+
 
     // Function to request permision to position
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -450,7 +480,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         raceTimer = Timer()
         raceTimer!!.schedule(timerTask {
             println("race Timer timeout")
-            getGPSPositionandCallSendGPSToMobile()
+            getGPSPositionAndCallSendGPSToMobile()
             mHandler.post( Runnable() {
                 runOnUiThread() {
                     updateTime()

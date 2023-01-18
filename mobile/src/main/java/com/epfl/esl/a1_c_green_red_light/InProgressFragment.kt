@@ -107,6 +107,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         }
 
+
         // Add observer on username
         mapInitialised.observe(viewLifecycleOwner) { isInitialised ->
             if(isInitialised){
@@ -135,6 +136,10 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
             if(mapInitialised.value == true){
                 updatePlayerLocation(newPosition)
             }
+            if(viewModel.cheating == true){
+                hasReturnedToStart(newPosition)
+            }
+
         })
 
         // Launch random timer to send green and red command
@@ -173,10 +178,11 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         timerRace!!.schedule(timerTask {
             println("Timer Race")
 
-            lightColor = if (lightColor == "red"){"green"} else {"red"}
-            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            viewModel.sendCommandToWear(dataClient, lightColor)
-
+            if(viewModel.cheating == false){
+                lightColor = if (lightColor == "red"){"green"} else {"red"}
+                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+                viewModel.sendCommandToWear(dataClient, lightColor)
+            }
 
             timerCeption()
         }, rand, 1000)
@@ -334,6 +340,24 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    // Check for winning condition and set winner livedata
+    private fun hasReturnedToStart(position: LatLng) {
+        var tolerance = 10.0
+        tolerance = tolerance.pow(-9)
+        val latitudeStart = viewModel.playerPosition.latitude
+        val longitudeStart = viewModel.playerPosition.longitude
+        val latitudeCurrent= position.latitude
+        val longitudeCurrent= position.longitude
+
+        val circle = (latitudeCurrent - latitudeStart).pow(2) + (longitudeCurrent - longitudeStart).pow(2)
+
+        println("circle = $circle")
+        if (circle <= tolerance){
+            // Call the observer to navigate
+            viewModel.cheating = false
+        }
+    }
+
 
     // Add the marker of the friends during multiplayer race
     fun addMarkersOfFriends() {
@@ -383,6 +407,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         }
     }
+
 
     // Get cleaner elapsed time
     fun cleanElapse(): String {

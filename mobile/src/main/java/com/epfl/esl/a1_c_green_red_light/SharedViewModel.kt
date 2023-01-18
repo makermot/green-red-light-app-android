@@ -42,7 +42,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     var elapse_end : String = ""
     var minFreq : Int = 3
     var maxFreq : Int = 7
-
+    var cheating : Boolean = true
     private var mHandler: Handler = object : Handler(){}
 
     // Live data
@@ -97,7 +97,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     private val _winner = MutableLiveData<String>()
     val winner: LiveData<String>
         get() = _winner
-
 
     // Localisation of beginning of the race
     var goalPosition: LatLng = LatLng(46.520444, 6.567717)
@@ -379,6 +378,14 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                 val timestamp = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
 
                 _shouldSendUserInfoToWear.value = _shouldSendUserInfoToWear.value != true
+            }
+
+        dataEvents
+            .filter {it.dataItem.uri.path == "/cheating" }
+            .forEach { event ->
+                println("We received cheating command from wear")
+                val timestamp = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
+                cheating = true
             }
 
     }
