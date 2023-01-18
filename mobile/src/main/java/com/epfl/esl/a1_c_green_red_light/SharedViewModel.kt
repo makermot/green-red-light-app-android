@@ -227,6 +227,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         }
     }
 
+
     // Add parameters of the race to the database
     fun addRaceToDataBase() {
         elapse_end = cleanElapse()
@@ -258,6 +259,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             override fun onCancelled(error: DatabaseError) {}
         })
     }
+
 
     // Add friend to profile
     fun addFriend(friendUsername: String) {
@@ -687,6 +689,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         _winner.value = winner!!
     }
 
+
     // Get cleaner elapsed time
     fun cleanElapse(): String {
         //val elapsed_time = System.currentTimeMillis() / 1000 - startTime
@@ -703,6 +706,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         }
         return time_string
     }
+
 
     // Change frequency of red/green lights
     fun changeFrequency(minFrequency: Int?, maxFrequency: Int?) {

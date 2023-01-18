@@ -234,6 +234,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         // clearing everything on the screen
         binding.waitingView.visibility = View.GONE
         binding.loggedView.visibility = View.GONE
+        binding.cheatingView.visibility = View.GONE
         binding.startView.visibility = View.GONE
         binding.resultView.visibility = View.GONE
         binding.container.setBackgroundColor(

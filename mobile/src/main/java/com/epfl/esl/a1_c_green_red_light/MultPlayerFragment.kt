@@ -12,10 +12,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.epfl.esl.a1_c_green_red_light.databinding.FragmentMultPlayerBinding
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.Wearable
 import java.util.*
 import kotlin.concurrent.timerTask
+import kotlin.math.pow
 
 
 class MultPlayerFragment : Fragment() {
@@ -28,6 +30,9 @@ class MultPlayerFragment : Fragment() {
     private var rand: Long = 0
     private var lightColor: String = "red"
     private var racing: Boolean = false
+    private var isFirstPosReceived : Boolean = true
+    private var startPos : LatLng = LatLng(46.520444, 6.567717)
+    private var alreadyTakenLaMer: Boolean = false
 
 
     override fun onCreateView(
@@ -84,7 +89,8 @@ class MultPlayerFragment : Fragment() {
 
             // Add observer to winner in order to get winning condition
             viewModel.winner.observe(viewLifecycleOwner, Observer { winner ->
-                if (winner != "winner") {
+                if (winner != "winner" && !alreadyTakenLaMer) {
+                    alreadyTakenLaMer = true
                     Navigation.findNavController(view)
                         .navigate(R.id.action_multPlayerFragment_to_resultFragment)
                 }
@@ -109,6 +115,16 @@ class MultPlayerFragment : Fragment() {
 
             // Observer on the received position
             viewModel.receivedPosition.observe(viewLifecycleOwner, Observer { newPosition ->
+
+                if(isFirstPosReceived){
+                    startPos = newPosition
+                    isFirstPosReceived = false
+                }
+
+                if (viewModel.cheating) {
+                    hasReturnedToStart(newPosition)
+                }
+
                 viewModel.playerPosition = newPosition
                 //viewModel.playerPosition = viewModel.receivedPosition.value!!
                 viewModel.addPositionMultiplayer()
@@ -200,14 +216,15 @@ class MultPlayerFragment : Fragment() {
         // Launch timer with random period
         timerRace = Timer()
         timerRace!!.schedule(timerTask {
-
-            lightColor = if (lightColor == "red") {
-                "green"
-            } else {
-                "red"
+            if (!viewModel.cheating) {
+                lightColor = if (lightColor == "red") {
+                    "green"
+                } else {
+                    "red"
+                }
+                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
+                viewModel.sendCommandToWear(dataClient, lightColor)
             }
-            val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            viewModel.sendCommandToWear(dataClient, lightColor)
 
             timerCeption()
         }, rand, 1000)
@@ -222,6 +239,24 @@ class MultPlayerFragment : Fragment() {
             timerRace!!.cancel()
             timerRace!!.purge()
             timerRace = null
+        }
+    }
+
+
+    // Check if player has effectively returned to start pos
+    private fun hasReturnedToStart(position: LatLng) {
+        var tolerance = 10.0
+        tolerance = tolerance.pow(-9)
+        val latitudeStart = startPos.latitude
+        val longitudeStart = startPos.longitude
+        val latitudeCurrent = position.latitude
+        val longitudeCurrent = position.longitude
+
+        val circle =
+            (latitudeCurrent - latitudeStart).pow(2) + (longitudeCurrent - longitudeStart).pow(2)
+
+        if (circle <= tolerance) {
+            viewModel.cheating = false
         }
     }
 

@@ -139,6 +139,13 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
                 isTheFirst = false
                 //println("la position du player is " + viewModel.playerPosition )
                 //println("la position sauvegardée is " + viewModel.receivedPosition.value)
+
+                mMap.addMarker(
+                    MarkerOptions()
+                        .position(viewModel.playerPosition)
+                        .title("Start Location")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
+                )
             }
             if (mapInitialised.value == true) {
                 updatePlayerLocation(newPosition)
@@ -344,7 +351,7 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    // Check for winning condition and set winner livedata
+    // Check if player has effectively returned to start pos
     private fun hasReturnedToStart(position: LatLng) {
         var tolerance = 10.0
         tolerance = tolerance.pow(-9)
@@ -357,7 +364,6 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
             (latitudeCurrent - latitudeStart).pow(2) + (longitudeCurrent - longitudeStart).pow(2)
 
         if (circle <= tolerance) {
-            // Call the observer to navigate
             viewModel.cheating = false
         }
     }
