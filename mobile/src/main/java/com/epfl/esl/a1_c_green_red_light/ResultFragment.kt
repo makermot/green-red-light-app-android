@@ -54,9 +54,11 @@ class ResultFragment : Fragment() {
             viewModel.sendUserNameAndImageToWear(dataClient)
         })
 
+        print("elapsed time is : ")
+        println(viewModel.elapse_end)
+
         binding.winner.text = viewModel.winner.value
-        val elapse = viewModel.elapse_end
-        binding.time.text = elapse
+        binding.time.text = viewModel.elapse_end
 
 
         return binding.root

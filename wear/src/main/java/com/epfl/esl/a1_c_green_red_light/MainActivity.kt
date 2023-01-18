@@ -161,14 +161,14 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     // receive Message from mobile
     override fun onDataChanged(dataEvents: DataEventBuffer) {
-        print(" User name : ")
-        println(username.value)
-        print(" On Data Changed Called : ")
+        //print(" User name : ")
+        //println(username.value)
+        //print(" On Data Changed Called : ")
 
         dataEvents
             .filter {it.dataItem.uri.path == "/userInfo" }
             .forEach { event ->
-                println("with User Info Event")
+                //println("with User Info Event")
                 val receivedImage: ByteArray = DataMapItem.fromDataItem(event.dataItem).dataMap.getByteArray("profileImage")
                 username.value = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("username")
                 userImage.value = BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
@@ -178,7 +178,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         dataEvents
             .filter {it.dataItem.uri.path == "/command" }
             .forEach { event ->
-                print(" with command event : ")
+                println(" Light change command event : ")
                 val receivedCommand: String = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("command")
 
                 when (receivedCommand) {
@@ -194,16 +194,16 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         dataEvents
             .filter {it.dataItem.uri.path == "/state" }
             .forEach { event ->
-                print(" with Heart beat received :")
+                //print(" with Heart beat received :")
                 val receivedStatemachine: String? = DataMapItem.fromDataItem(event.dataItem).dataMap.getString("state")
                 // To handle null case -> should never happen btw
                 if(receivedStatemachine != null){
-                    print("received state :")
-                    print(receivedStatemachine)
-                    print(", While actual state is :")
-                    print(stateMachine.value)
-                    print(", User name is :")
-                    println(username.value)
+                    //print("received state :")
+                    //print(receivedStatemachine)
+                    //print(", While actual state is :")
+                    //print(stateMachine.value)
+                    //print(", User name is :")
+                    //println(username.value)
 
                     // to avoid call the observer each time the value is reasigned
                     if(stateMachine.value != receivedStatemachine){
@@ -360,7 +360,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     // Send GPS coordonate to mobile
     fun sendGPSToMobile(position : Location) {
-        println("We are in send GPS to Mobile")
+        //println("We are in send GPS to Mobile")
         // Add a timestamp to the message, so its truly different each time !
         val tsLong = System.currentTimeMillis() / 1000
         val timestamp = tsLong.toString()
@@ -377,7 +377,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
-            println("Great Succes! : Command sent to wear")
+            //println("Great Succes! : Command sent to wear")
         }.addOnFailureListener {
             println("Oupsi... On a pas envoyé les données GPS")
         }
@@ -386,7 +386,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     // request  userInfo to mobile to mobile
     fun sendUserInfoRequestToMobile() {
-        println("We are in send requestInfo to Mobile")
+        //println("We are in send requestInfo to Mobile")
         // Add a timestamp to the message, so its truly different each time !
         val tsLong = System.currentTimeMillis() / 1000
         val timestamp = tsLong.toString()
@@ -399,7 +399,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
-            println("Great Succes! : Command request user info sent to wear")
+            //println("Great Succes! : Command request user info sent to wear")
             shouldSendInfoRequest.value=false
         }.addOnFailureListener {
             println("Oupsi... On a pas envoyé les données request user info")
@@ -483,7 +483,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         // start timer to send GPS position and update elapse time
         raceTimer = Timer()
         raceTimer!!.schedule(timerTask {
-            println("race Timer timeout")
+            //println("race Timer timeout")
             getGPSPositionAndCallSendGPSToMobile()
             mHandler.post( Runnable() {
                 runOnUiThread() {
