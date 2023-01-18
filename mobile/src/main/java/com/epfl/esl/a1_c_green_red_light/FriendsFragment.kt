@@ -53,7 +53,6 @@ class FriendsFragment : Fragment() {
         // add an observer to the shouldSendUserInfoRequest Image
         viewModelShared.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
             // Send data to wear
-            println("We observed should send request !!!")
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
             viewModelShared.sendUserNameAndImageToWear(dataClient)
         })

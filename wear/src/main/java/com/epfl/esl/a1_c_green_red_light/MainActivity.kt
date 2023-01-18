@@ -38,6 +38,7 @@ import android.content.Context as Context1
 class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedListener,
     LifecycleOwner {
 
+    // Late init
     private lateinit var binding: ActivityMainBinding
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private lateinit var dataClient: DataClient
@@ -50,20 +51,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private var light = MutableLiveData<String>()
     private var shouldSendInfoRequest = MutableLiveData<Boolean>()
 
-    // Init Live data variable
-    init {
-        stateMachine.value = "unlogged"
-        username.value = null
-        userImage.value = null
-        light.value = "green"
-        shouldSendInfoRequest.value = false
-    }
-
-    // Constants
-    private val SHAKE_THRESHOLD = 1.1f                         // reference value : 1.1f
-    private val SHAKE_WAIT_TIME_MS = 250
-    private val LOCATION_REQUEST_CODE = 101
-
     // Variables
     private var mSensorManager: SensorManager? = null
     private var mSensor: Sensor? = null
@@ -74,6 +61,20 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private var startTime: Long = 0
     private var mHandler: Handler = object : Handler() {}
     private var cheating: Boolean = false
+
+    // Constants
+    private val SHAKE_THRESHOLD = 1.1f                         // reference value : 1.1f
+    private val SHAKE_WAIT_TIME_MS = 250
+    private val LOCATION_REQUEST_CODE = 101
+
+    // Init Live data variable
+    init {
+        stateMachine.value = "unlogged"
+        username.value = null
+        userImage.value = null
+        light.value = "green"
+        shouldSendInfoRequest.value = false
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -120,7 +121,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             binding.userImage.setImageBitmap(image)
         }
 
-
         // Add observer on shouldSendInfoRequest
         shouldSendInfoRequest.observe(this) { request ->
             if (request) {
@@ -129,7 +129,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         }
 
         light.observe(this) { color ->
-            if ((stateMachine.value == "racing") && (cheating == false)) {
+            if ((stateMachine.value == "racing") && !cheating) {
 
                 vibrateWear(this)
 
@@ -162,27 +162,20 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     // receive Message from mobile
     override fun onDataChanged(dataEvents: DataEventBuffer) {
-        //print(" User name : ")
-        //println(username.value)
-        //print(" On Data Changed Called : ")
-
         dataEvents
             .filter { it.dataItem.uri.path == "/userInfo" }
             .forEach { event ->
-                //println("with User Info Event")
                 val receivedImage: ByteArray =
                     DataMapItem.fromDataItem(event.dataItem).dataMap.getByteArray("profileImage")
                 username.value =
                     DataMapItem.fromDataItem(event.dataItem).dataMap.getString("username")
                 userImage.value =
                     BitmapFactory.decodeByteArray(receivedImage, 0, receivedImage.size)
-                //screen = "waiting"
             }
 
         dataEvents
             .filter { it.dataItem.uri.path == "/command" }
             .forEach { event ->
-                println(" Light change command event : ")
                 val receivedCommand: String =
                     DataMapItem.fromDataItem(event.dataItem).dataMap.getString("command")
 
@@ -199,27 +192,17 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         dataEvents
             .filter { it.dataItem.uri.path == "/state" }
             .forEach { event ->
-                //print(" with Heart beat received :")
                 val receivedStatemachine: String? =
                     DataMapItem.fromDataItem(event.dataItem).dataMap.getString("state")
                 // To handle null case -> should never happen btw
                 if (receivedStatemachine != null) {
-                    //print("received state :")
-                    //print(receivedStatemachine)
-                    //print(", While actual state is :")
-                    //print(stateMachine.value)
-                    //print(", User name is :")
-                    //println(username.value)
-
                     // to avoid call the observer each time the value is reasigned
                     if (stateMachine.value != receivedStatemachine) {
                         stateMachine.value = receivedStatemachine!!
                     }
-
                     if (stateMachine.value == "logged" && username.value == null) {
                         shouldSendInfoRequest.value = true
                     }
-
                     // Re-start watchdog timer
                     startWatchDogTimer()
                 }
@@ -228,9 +211,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
 
     private fun updateState() {
-        print("We update the state machine with state :")
-        println(stateMachine.value)
-
         // clearing everything on the screen
         binding.waitingView.visibility = View.GONE
         binding.loggedView.visibility = View.GONE
@@ -284,6 +264,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         }
     }
 
+
     // Call detect shake
     override fun onSensorChanged(event: SensorEvent) {
         detectShake(event)
@@ -291,23 +272,18 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-        println("I am in onAccuracyChanged")
     }
 
 
     // Detect with accelerometer if the user moves
     private fun detectShake(event: SensorEvent) {
-        // References:
-        //  - http://jasonmcreynolds.com/?p=388
-        //  - http://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
 
-        // Return if we are not in racing or if we already cheating
+        // Return if we are not in racing or if we are already cheating
         if (stateMachine.value != "racing" || cheating) {
             return
         }
 
         val now = System.currentTimeMillis()
-        //println("I am in detectShake")
         if (now - mShakeTime > SHAKE_WAIT_TIME_MS) {
             mShakeTime = now
             val gX = event.values[0] / SensorManager.GRAVITY_EARTH
@@ -328,17 +304,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                     cheating = true
                     sendCheatingCommandToMobile()
                 }
-                /*else{
-                    binding.cheatingView.visibility = View.GONE
-                    binding.startView.visibility = View.VISIBLE
-                    if (light.value == "green"){
-                        binding.container.setBackgroundColor(
-                            ContextCompat.getColor(applicationContext, R.color.green))}
-                    else{
-                        binding.container.setBackgroundColor(
-                            ContextCompat.getColor(applicationContext, R.color.red))
-                    }
-                }*/
             }
         }
     }
@@ -346,7 +311,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     // Get GPS position from wear and all sendGPSToMobile func if success
     private fun getGPSPositionAndCallSendGPSToMobile() {
-        //println("We are getGPSPositionAndCallSendGPSToMobile")
 
         val permission: Boolean = ActivityCompat.checkSelfPermission(
             this,
@@ -358,8 +322,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         if (permission) {
             mFusedLocationClient.getCurrentLocation(PRIORITY_HIGH_ACCURACY, null)
                 .addOnSuccessListener { position ->
-                    //print("We find the position : ")
-                    //println(position)
                     sendGPSToMobile(position)
                 }
         } else {
@@ -373,33 +335,30 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
     // Send GPS coordonate to mobile
     fun sendGPSToMobile(position: Location) {
-        //println("We are in send GPS to Mobile")
+
         // Add a timestamp to the message, so its truly different each time !
         val tsLong = System.currentTimeMillis() / 1000
         val timestamp = tsLong.toString()
 
         val request: PutDataRequest = PutDataMapRequest.create("/GPS_data").run {
             dataMap.putString("timeStamp", timestamp)
-            var LocationLat = position.latitude
-            var LocationLong = position.longitude
+            val LocationLat = position.latitude
+            val LocationLong = position.longitude
             dataMap.putDouble("latitude", LocationLat)
             dataMap.putDouble("longitude", LocationLong)
             asPutDataRequest()
         }
-
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
-            //println("Great Succes! : Command sent to wear")
         }.addOnFailureListener {
-            println("Oupsi... On a pas envoyé les données GPS")
         }
     }
 
 
     // request  userInfo to mobile to mobile
     fun sendUserInfoRequestToMobile() {
-        //println("We are in send requestInfo to Mobile")
+
         // Add a timestamp to the message, so its truly different each time !
         val tsLong = System.currentTimeMillis() / 1000
         val timestamp = tsLong.toString()
@@ -408,20 +367,18 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             dataMap.putString("timeStamp", timestamp)
             asPutDataRequest()
         }
-
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
-            //println("Great Succes! : Command request user info sent to wear")
             shouldSendInfoRequest.value = false
         }.addOnFailureListener {
-            println("Oupsi... On a pas envoyé les données request user info")
         }
     }
 
+
     // request  userInfo to mobile to mobile
     fun sendCheatingCommandToMobile() {
-        println("We are in send sendCheatingCommandToMobile")
+
         // Add a timestamp to the message, so its truly different each time !
         val tsLong = System.currentTimeMillis() / 1000
         val timestamp = tsLong.toString()
@@ -430,14 +387,11 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
             dataMap.putString("timeStamp", timestamp)
             asPutDataRequest()
         }
-
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
-            println("Great Succes! : cheating request successfuly send to mobile")
             cheating = false
         }.addOnFailureListener {
-            println("Oupsi... On a pas envoyé la cheatimg request...")
         }
     }
 
@@ -456,8 +410,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                         "Unable to show location - permission required",
                         Toast.LENGTH_LONG
                     ).show()
-                } else {
-                    println("Wow, we have permission now")
                 }
             }
         }
@@ -486,7 +438,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     // update lifecycle -> needed for the observer
     public override fun onStart() {
         super.onStart()
-        println("Application started")
         lifecycleRegistry.markState(Lifecycle.State.STARTED)
     }
 
@@ -503,7 +454,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         // start timer to send GPS position and update elapse time
         raceTimer = Timer()
         raceTimer!!.schedule(timerTask {
-            //println("race Timer timeout")
             getGPSPositionAndCallSendGPSToMobile()
             mHandler.post(Runnable() {
                 runOnUiThread() {
@@ -537,7 +487,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         // Launch watch dog timer 10s
         watchdogTimer = Timer()
         watchdogTimer!!.schedule(timerTask {
-            println("Watch Dog Timer")
             mHandler.post(Runnable() {
                 runOnUiThread() {
                     stateMachine.value = "unlogged"
@@ -561,10 +510,8 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     // instantiate data client
     override fun onResume() {
         super.onResume()
-        println("App resumed")
         Wearable.getDataClient(this).addListener(this)
         mSensorManager!!.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL)
-
         startWatchDogTimer()
     }
 
@@ -572,7 +519,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     // remove data client
     override fun onPause() {
         super.onPause()
-        println("App paused")
         Wearable.getDataClient(this).removeListener(this)
         mSensorManager!!.unregisterListener(this)
 
@@ -592,15 +538,11 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     // update lifecycle -> needed for the observer
     public override fun onStop() {
         super.onStop()
-        println("Application Stopped")
-        //lifecycleRegistry.markState(Lifecycle.State.DESTROYED)
-
     }
 
 
     public override fun onDestroy() {
         super.onDestroy()
-        println("Application Destroyed")
 
         stateMachine.value = "unlogged"
         username.value = null

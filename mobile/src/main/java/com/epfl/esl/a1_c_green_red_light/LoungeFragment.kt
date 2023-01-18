@@ -30,11 +30,10 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
 
     private lateinit var binding: FragmentLoungeBinding
     private lateinit var viewModel: SharedViewModel
-
     private lateinit var markerGoal: Marker
+    private lateinit var mMap: GoogleMap
 
     private val LOCATION_REQUEST_CODE = 101
-    private lateinit var mMap: GoogleMap
 
     private var permission = MutableLiveData<Boolean>()
 
@@ -65,7 +64,6 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
             if (viewModel.playWithFriends == friendsResponse) {
                 // Save the position of the goal and the position of the player
                 viewModel.goalPosition = markerGoal.position
-                println(markerGoal.position)
 
                 // Navigate to race fragment
                 Navigation.findNavController(requireView())
@@ -116,7 +114,6 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
         // add an observer to the shouldSendUserInfoRequest Image
         viewModel.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
             // Send data to wear
-            println("We observed should send request !!!")
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
             viewModel.sendUserNameAndImageToWear(dataClient)
         })
@@ -156,7 +153,6 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
                 } else {
                     // Save the position of the goal and the position of the player
                     viewModel.goalPosition = markerGoal.position
-                    println(markerGoal.position)
 
                     // Navigate to race fragment
                     Navigation.findNavController(view)
@@ -201,8 +197,6 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        //var goal = LatLng(46.520444, 6.567717)
-
         permission.value = ActivityCompat.checkSelfPermission(
             this.requireActivity(),
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -219,7 +213,6 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE
             )
         }
-
         mMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
     }
 
@@ -244,7 +237,6 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
                         childFragmentManager.findFragmentById(R.id.map) as
                                 SupportMapFragment
                     mapFragment.getMapAsync(this)
-
                     permission.value = true
                 }
             }
@@ -306,7 +298,6 @@ class LoungeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerDragLis
     override fun onMarkerDragEnd(p0: Marker) {
         viewModel.goalPosition = p0.position
     }
-
 }
 
 

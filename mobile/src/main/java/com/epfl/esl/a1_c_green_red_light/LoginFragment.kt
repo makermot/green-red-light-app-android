@@ -27,7 +27,6 @@ class LoginFragment : Fragment() {
     private lateinit var viewModel: SharedViewModel
     private lateinit var binding: FragmentLoginBinding
 
-    // TEST
     var imageUri: Uri? = null
     var username: String = ""
 
@@ -110,37 +109,44 @@ class LoginFragment : Fragment() {
         }
 
         viewModel.authentification.observe(viewLifecycleOwner, Observer { code ->
+            when (code) {
+                "Invalid login" -> {
+                    Toast.makeText(context, "Incorrect password/username", Toast.LENGTH_LONG).show()
+                    viewModel.resetUserData()
+                }
+                "Valid login" -> {
+                    // Send data to wear
+                    val dataClient: DataClient =
+                        Wearable.getDataClient(activity as AppCompatActivity)
+                    viewModel.sendUserNameAndImageToWear(dataClient)
 
-            if (code == "Invalid login") {
-                Toast.makeText(context, "Incorrect password/username", Toast.LENGTH_LONG).show()
-                viewModel.resetUserData()
-            } else if (code == "Valid login") {
-                // Send data to wear
-                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-                viewModel.sendUserNameAndImageToWear(dataClient)
+                    // Navigate to my space
+                    Navigation.findNavController(binding.root)
+                        .navigate(R.id.action_loginFragment_to_mySpaceFragment)
+                }
+                "Profile already existing" -> {
+                    Toast.makeText(context, "Profile already existing", Toast.LENGTH_LONG).show()
+                    viewModel.resetUserData()
+                }
+                "Ready to create profile" -> {
+                    viewModel.createProfile(activity?.applicationContext)
+                }
+                "Profile created" -> {
+                    // Send data to wear
+                    val dataClient: DataClient =
+                        Wearable.getDataClient(activity as AppCompatActivity)
+                    viewModel.sendUserNameAndImageToWear(dataClient)
 
-                // Navigate to my space
-                Navigation.findNavController(binding.root)
-                    .navigate(R.id.action_loginFragment_to_mySpaceFragment)
-            } else if (code == "Profile already existing") {
-                Toast.makeText(context, "Profile already existing", Toast.LENGTH_LONG).show()
-                viewModel.resetUserData()
-            } else if (code == "Ready to create profile") {
-                viewModel.createProfile(activity?.applicationContext)
-            } else if (code == "Profile created") {
-                // Send data to wear
-                val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-                viewModel.sendUserNameAndImageToWear(dataClient)
-
-                // Navigate to my space
-                Navigation.findNavController(binding.root)
-                    .navigate(R.id.action_loginFragment_to_mySpaceFragment)
-            } else if (code == "Exception") {
-                Toast.makeText(context, "Oupsi, something went wrong", Toast.LENGTH_LONG).show()
-                viewModel.resetUserData()
+                    // Navigate to my space
+                    Navigation.findNavController(binding.root)
+                        .navigate(R.id.action_loginFragment_to_mySpaceFragment)
+                }
+                "Exception" -> {
+                    Toast.makeText(context, "Oupsi, something went wrong", Toast.LENGTH_LONG).show()
+                    viewModel.resetUserData()
+                }
             }
         })
-
         return binding.root
     }
 
@@ -169,8 +175,8 @@ class LoginFragment : Fragment() {
         viewModel.stopHeartBeatTimer()
     }
 
-    private fun checkForInternet(context: Context?): Boolean {
 
+    private fun checkForInternet(context: Context?): Boolean {
         // register activity with the connectivity manager service
         val connectivityManager =
             context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

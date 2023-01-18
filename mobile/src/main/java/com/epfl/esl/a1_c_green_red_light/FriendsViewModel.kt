@@ -12,13 +12,14 @@ import com.google.firebase.storage.FirebaseStorage
 
 class FriendsViewModel : ViewModel() {
 
-    // FIREBASE
     var storageRef = FirebaseStorage.getInstance().reference
-    val database: FirebaseDatabase = FirebaseDatabase.getInstance()
-    val profileRef: DatabaseReference = database.getReference("Profiles")
-
     var numberFriends: Int = 0
     var itemAdapterFriends: ItemAdapterFriends? = null
+    var friendsList: ArrayList<String> = ArrayList<String>()
+    var imagesList: ArrayList<Bitmap> = ArrayList<Bitmap>()
+
+    val database: FirebaseDatabase = FirebaseDatabase.getInstance()
+    val profileRef: DatabaseReference = database.getReference("Profiles")
 
     private val _friendsUpdate = MutableLiveData<Boolean?>()
     val friendsUpdate: LiveData<Boolean?>
@@ -28,20 +29,15 @@ class FriendsViewModel : ViewModel() {
     val nbFriends: LiveData<Int?>
         get() = _nbFriends
 
-    var friendsList: ArrayList<String> = ArrayList<String>()
-    var imagesList: ArrayList<Bitmap> = ArrayList<Bitmap>()
-
     init {
         _friendsUpdate.value = false
     }
+
 
     fun listenForFriends(context: Context?, username: String?) {
         _nbFriends.value = 0
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                print("user :")
-                println(username)
-
                 if (dataSnapshot.hasChild(username!!)) {
 
                     friendsList.clear()
@@ -56,7 +52,6 @@ class FriendsViewModel : ViewModel() {
                     for (friend in dataSnapshot.child("/" + username).child("/friend").children) {
                         val friendsDatabase = friend
                             .getValue(String::class.java)!!
-                        println(friendsDatabase)
                         val imageFriend =
                             storageRef.child("ProfileImages/" + friendsDatabase + ".jpg")
                         val ONE_MEGABYTE: Long = 1024 * 1024
@@ -71,21 +66,15 @@ class FriendsViewModel : ViewModel() {
                             )
                             friendsList.add(friendsDatabase)
                             counter = counter.plus(1)
-                            //print("counter is: ")
-                            //println(counter)
-                            print("Getting image of: ")
-                            println(friendsDatabase)
                             _nbFriends.value = counter
                         }
                     }
-                } else {
-                    println("I can't recover the current username in FriendsViewModel")
                 }
             }
-
             override fun onCancelled(databaseError: DatabaseError) {}
         })
     }
+
 
     fun sendToItemAdapter(context: Context?) {
         // Adapter class is initialized and list is passed in the param.
@@ -98,6 +87,7 @@ class FriendsViewModel : ViewModel() {
         }
         _friendsUpdate.value = true
     }
+
 
     fun resetUpdate() {
         _friendsUpdate.value = false
