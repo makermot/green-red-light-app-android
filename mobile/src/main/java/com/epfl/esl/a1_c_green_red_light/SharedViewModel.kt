@@ -397,6 +397,11 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         _authentification.value = null
     }
 
+    fun resetGameOwnerAndWinner(){
+        _winner.value = "winner"
+        _gameOwner.value = null
+    }
+
 
     fun resetAddFriendStatus() {
         _addFriendStatus.value = null

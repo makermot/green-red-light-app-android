@@ -136,10 +136,11 @@ class MultPlayerFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        viewModel.resetGameOwnerAndWinner()
         stopHeartBeatTimer()
         stopTimerCeption()
         racing = false
-        if (viewModel.winner.value == "winner" && racing == true) {
+        if (viewModel.winner.value == "winner" && racing) {
             Toast.makeText(context, "Oh no !! It seems you're cheating !", Toast.LENGTH_SHORT)
                 .show()
         }

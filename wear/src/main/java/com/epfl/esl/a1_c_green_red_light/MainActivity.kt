@@ -337,8 +337,8 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
 
         val request: PutDataRequest = PutDataMapRequest.create("/GPS_data").run {
             dataMap.putString("timeStamp", timestamp)
-            val LocationLat = position.latitude
-            val LocationLong = position.longitude
+            var LocationLat = position.latitude
+            var LocationLong = position.longitude
             dataMap.putDouble("latitude", LocationLat)
             dataMap.putDouble("longitude", LocationLong)
             asPutDataRequest()
