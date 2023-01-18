@@ -35,7 +35,6 @@ class StatFragment : Fragment() {
             getString(R.string.name_app) + " : My statistics"
 
         // Set the LayoutManager that this RecyclerView will use.
-        //binding.recyclerViewItems.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewItems.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
@@ -49,7 +48,7 @@ class StatFragment : Fragment() {
             viewModelShared.sendStateMachineToWear(dataClient, "logged")
         })
 
-        // add an observer to the shouldSendUserInfoRequest Image
+        // Add an observer to the shouldSendUserInfoRequest Image
         viewModelShared.shouldSendUserInfoToWear.observe(viewLifecycleOwner, Observer { request ->
             // Send data to wear
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)

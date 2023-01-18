@@ -146,6 +146,7 @@ class MultPlayerFragment : Fragment() {
         Wearable.getDataClient(activity as MainActivity).removeListener(viewModel)
     }
 
+
     // Start HeartBeatTime
     override fun onStart() {
         super.onStart()
@@ -162,6 +163,7 @@ class MultPlayerFragment : Fragment() {
             viewModel.stopHeartBeatTimer()
         }
     }
+
 
     // Start thread to update heart beat
     fun startHeartBeatTimer() {

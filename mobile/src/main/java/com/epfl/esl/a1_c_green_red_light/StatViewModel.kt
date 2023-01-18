@@ -44,7 +44,6 @@ class StatViewModel : ViewModel() {
                         val dateDatabase = race
                             .child("date")
                             .getValue(String::class.java)!!
-                        println(dateDatabase)
                         dateTimeList.add(dateDatabase)
 
                         val coordinatesStartDatabase = race
@@ -93,13 +92,13 @@ class StatViewModel : ViewModel() {
                     }
                     _statUpdate.value = true
                 } else {
-                    println("I can't recover the current username in StatViewModel")
                 }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
         })
     }
+
 
     fun resetUpdate() {
         _statUpdate.value = false

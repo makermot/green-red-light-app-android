@@ -175,7 +175,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
                     if (username == usernameDatabase) {
                         //Username is already taken -> abort profile creation
-                        println("Existing Profile found")
                         _authentification.value = "Profile already existing"
                         return
                     }
@@ -184,7 +183,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
-                println("An error in create profile -> on datachanged occured")
             }
         })
     }
@@ -307,7 +305,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
-            println("Great Succes! : Image and user name sent to wear")
         }
     }
 
@@ -327,7 +324,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
-            println("Great Succes! : Command sent to wear")
         }
 
     }
@@ -348,30 +344,17 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         request.setUrgent()
         val putTask: Task<DataItem> = dataClient.putDataItem(request)
         putTask.addOnSuccessListener {
-            //println("Great Succes! : Heart beat sent to wear")
         }.addOnFailureListener {
-            println("Fuck! : drop the Heart beat")
         }.addOnCanceledListener {
-            println("Wtf... we canceled the heart beat")
         }
-
-        /*
-        if(shouldSendUserInfoToWear){
-            shouldSendUserInfoToWear = false
-            println("we call send user name and image to wear from send State machine")
-            sendUserNameAndImageToWear(dataClient)
-        }*/
     }
 
 
     // Function that receive GPS command from wear
     override fun onDataChanged(dataEvents: DataEventBuffer) {
-        //print("We received data from wear :")
-
         dataEvents
             .filter { it.dataItem.uri.path == "/GPS_data" }
             .forEach { event ->
-                //print("We received location from wear :")
 
                 val latitude =
                     DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("latitude")
@@ -379,13 +362,11 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                     DataMapItem.fromDataItem(event.dataItem).dataMap.getDouble("longitude")
 
                 _receivedPosition.value = LatLng(latitude, longitude)
-                //println(_receivedPosition.value)
             }
 
         dataEvents
             .filter { it.dataItem.uri.path == "/request_user_info" }
             .forEach { event ->
-                println("We received info request from wear :")
                 val timestamp =
                     DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
 
@@ -395,7 +376,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         dataEvents
             .filter { it.dataItem.uri.path == "/cheating" }
             .forEach { event ->
-                println("We received cheating command from wear")
                 val timestamp =
                     DataMapItem.fromDataItem(event.dataItem).dataMap.getString("timeStamp")
                 cheating = true
@@ -439,7 +419,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
         heartBeatTimer = Timer()
         heartBeatTimer?.schedule(timerTask {
-            //println("Heart Beat")
             mHandler.post(Runnable() {
                 run {
                     _heartBeat.value = _heartBeat.value?.plus(1)
@@ -474,15 +453,12 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                     return
                 }
                 if (dataSnapshot.hasChild(friendUserName)) {
-                    println("Friend's profile Found")
                     if (dataSnapshot.child(friendUserName).child("play request").hasChildren() &&
                         username == dataSnapshot.child(friendUserName).child("play request")
                             .child("request").getValue(String::class.java)!!
                     ) {
-                        println("Oh no... You're already asked him to play with you")
                         _playWithFriendStatus.value = "send request already sent"
                     } else {
-                        println("Let's send play request to your friend")
                         profileRef.child(username).child("accepted request").child(friendUserName)
                             .setValue("no")
                         profileRef.child(friendUserName).child("play request").child("request")
@@ -492,7 +468,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                         _playWithFriendStatus.value = "send play request successfully added"
                     }
                 } else {
-                    println("Oh no... friend's profile not found")
                     _playWithFriendStatus.value = "Friend profile don't exist"
                 }
             }
@@ -504,26 +479,19 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // Get the number of friends whom accepted the play request
     fun getFriendsResponse() {
-        println("Get friends response")
         // Profile ref -> branche profile de la realtime database
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                println("On dataChange")
                 if (dataSnapshot.hasChild(username)) {
-                    println("Found user")
                     if (dataSnapshot.child(username).child("accepted request").hasChildren()) {
-                        println("Request has children")
                         var count: Int = 0
                         for (playerReady in dataSnapshot.child(username)
                             .child("accepted request").children) {
                             val playerName: String? = playerReady.getKey()
-                            print("Player name : ")
-                            println(playerName)
                             if (friendsWePlayWith.contains(playerName) && playerReady.getValue(
                                     String::class.java
                                 ) == "yes"
                             ) {
-                                println("sucessfully increment counter")
                                 count += 1
                             }
                         }
@@ -533,7 +501,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                     }
                 }
             }
-
             override fun onCancelled(databaseError: DatabaseError) {}
         })
     }
@@ -568,8 +535,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
                         }
                     }
                     if (dataSnapshot.child(username).hasChild("currentRacePosition")) {
-                        // TODO UNCOMMENT FOR FINAL EVALUATION
-                        //profileRef.child(username).child("currentRacePosition").setValue(null)
+                        profileRef.child(username).child("currentRacePosition").setValue(null)
                     }
                 }
             }
@@ -618,9 +584,9 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         })
     }
 
+
     // Write winning condition in multiplayer game has request a game with you
     fun setWinnerAndTimeMultiPlayer(winner: String) {
-        //val elapse_ = stopTime?.minus(startTime!!)
         val elapse = cleanElapse()
         profileRef.child(username).child("currentRacePosition").child("elapse").setValue(elapse)
         profileRef.child(username).child("currentRacePosition").child("winner").setValue(winner)
@@ -644,7 +610,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
     fun getFriendUpdatePosition() {
         profileRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                println(" We have friend updated position call !!!!")
                 if (dataSnapshot.child(username).hasChild("currentRacePosition") &&
                     dataSnapshot.child(username).child("currentRacePosition").hasChildren()
                 ) {
@@ -692,7 +657,6 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
 
     // Get cleaner elapsed time
     fun cleanElapse(): String {
-        //val elapsed_time = System.currentTimeMillis() / 1000 - startTime
         val elapsed_time_fun = stopTime?.minus(startTime!!)
         val seconds = (elapsed_time_fun?.rem(60))?.toInt()
         val minutes = (elapsed_time_fun?.div(60))?.toInt()

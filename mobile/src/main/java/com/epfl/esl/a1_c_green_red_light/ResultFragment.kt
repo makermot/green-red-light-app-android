@@ -62,6 +62,7 @@ class ResultFragment : Fragment() {
         return binding.root
     }
 
+
     // Start HeartBeatTime
     override fun onStart() {
         super.onStart()
