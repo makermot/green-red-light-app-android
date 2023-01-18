@@ -48,7 +48,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private var userImage = MutableLiveData<Bitmap?>()
     private var light = MutableLiveData<String>()
     private var shouldSendInfoRequest = MutableLiveData<Boolean>()
-    private var winner = MutableLiveData<String?>()
     // Init Live data variable
     init {
         stateMachine.value = "unlogged"
@@ -263,6 +262,9 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                 startRaceTimer()
             }
             "result" -> {
+                binding.container.setBackgroundColor(
+                    ContextCompat.getColor(applicationContext, R.color.blue)
+                )
                 binding.resultView.visibility = View.VISIBLE
             }
             else -> {

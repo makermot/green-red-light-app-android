@@ -57,6 +57,7 @@ class LoginFragment : Fragment() {
         viewModel.startHeartBeatTimer()
 
         binding.SignUp.setOnClickListener { view: View ->
+            // Check internet connection
             if (!checkForInternet(context)) {
                 Toast.makeText(context, "Internet connection is off, please connect your device", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -82,6 +83,7 @@ class LoginFragment : Fragment() {
         }
 
         binding.SignIn.setOnClickListener { view : View ->
+            // Check internet connection
             if (!checkForInternet(context)) {
                 Toast.makeText(context, "Internet connection is off, please connect your device", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
