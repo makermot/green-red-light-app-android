@@ -130,9 +130,9 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         profileRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (user in dataSnapshot.children) {
-                    val usernameDatabase = user.child("username").getValue(String::class.java)!!
+                    val usernameDatabase = user.child("username").getValue(String::class.java)
                     if (username == usernameDatabase) {
-                        val passwordDatabase = user.child("password").getValue(String::class.java)!!
+                        val passwordDatabase = user.child("password").getValue(String::class.java)
                         if (password == passwordDatabase) {
                             // User is authentified
                             key = user.key.toString()
