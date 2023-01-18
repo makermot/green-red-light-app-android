@@ -58,6 +58,12 @@ class LoginFragment : Fragment() {
 
         binding.SignUp.setOnClickListener { view: View ->
 
+            if (checkForInternet(context)) {
+                Toast.makeText(context, "Internet connection is on", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Internet connection is off, please connect your device", Toast.LENGTH_SHORT).show()
+            }
+
             if (binding.Username.text.toString() == "") {
                 Toast.makeText(context,"Enter username", Toast.LENGTH_SHORT).show()
             }
@@ -75,21 +81,15 @@ class LoginFragment : Fragment() {
                 viewModel.checkProfile()
                 println("checkprofile End")
             }
-
-            if (checkForInternet(context)) {
-                Toast.makeText(context, "Connected", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(context, "Disconnected", Toast.LENGTH_SHORT).show()
-            }
         }
 
         binding.SignIn.setOnClickListener { view : View ->
             if (checkForInternet(context)) {
-                Toast.makeText(context, "Connected", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Internet connection is on", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(context, "Disconnected", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Internet connection is off, please connect your device", Toast.LENGTH_SHORT).show()
             }
-            
+
             if (binding.Username.text.toString() == "") {
                 Toast.makeText(context,"Enter username", Toast.LENGTH_SHORT).show()
             }
