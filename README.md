@@ -76,14 +76,4 @@ Android application for playing the 1-2-3 soleil game
     <img width="30%" src=/image/MyFriends.png> 
 </p>
 
-## Wear
-
-### WaitingFragment
-
-### StartFragment
-
-### RaceFragment
-
-### EndFragment
-
 
