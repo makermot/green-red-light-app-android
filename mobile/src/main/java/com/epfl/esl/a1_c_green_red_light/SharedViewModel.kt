@@ -582,7 +582,7 @@ class SharedViewModel : ViewModel(), DataClient.OnDataChangedListener {
         })
     }
 
-    // write winning condition in multiplayer game has request a game with you
+    // Write winning condition in multiplayer game has request a game with you
     fun setWinnerAndTimeMultiPlayer(winner : String){
         //val elapse_ = stopTime?.minus(startTime!!)
         val elapse = cleanElapse()
