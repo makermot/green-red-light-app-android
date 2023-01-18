@@ -263,7 +263,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                 startRaceTimer()
             }
             "result" -> {
-
+                binding.resultView.visibility = View.VISIBLE
             }
             else -> {
                 println("0h oh... wrong state machine")

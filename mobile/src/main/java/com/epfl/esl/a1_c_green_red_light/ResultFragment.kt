@@ -39,7 +39,7 @@ class ResultFragment : Fragment() {
         // Initialise heart beat observer to keep sync with wear
         viewModel.heartBeat.observe(viewLifecycleOwner, Observer { time ->
             val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
-            viewModel.sendStateMachineToWear(dataClient, "logged")
+            viewModel.sendStateMachineToWear(dataClient, "result")
         })
 
         binding.ReturnHome.setOnClickListener { view: View ->
