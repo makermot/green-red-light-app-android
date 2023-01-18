@@ -48,6 +48,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
     private var userImage = MutableLiveData<Bitmap?>()
     private var light = MutableLiveData<String>()
     private var shouldSendInfoRequest = MutableLiveData<Boolean>()
+    private var winner = MutableLiveData<String?>()
     // Init Live data variable
     init {
         stateMachine.value = "unlogged"
@@ -117,6 +118,7 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
         userImage.observe(this) { image ->
             binding.userImage.setImageBitmap(image)
         }
+
 
         // Add observer on shouldSendInfoRequest
         shouldSendInfoRequest.observe(this) { request ->
