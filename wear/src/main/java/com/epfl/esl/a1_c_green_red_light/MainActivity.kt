@@ -143,7 +143,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                         binding.startView.setBackgroundColor(
                             ContextCompat.getColor(applicationContext, R.color.green)
                         )
-                        println("change light to green")
                     }
                     "red" -> {
                         binding.container.setBackgroundColor(
@@ -152,7 +151,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                         binding.startView.setBackgroundColor(
                             ContextCompat.getColor(applicationContext, R.color.red)
                         )
-                        println("change light to red")
                     }
                 }
             }
@@ -257,9 +255,6 @@ class MainActivity : Activity(), SensorEventListener, DataClient.OnDataChangedLi
                     ContextCompat.getColor(applicationContext, R.color.blue)
                 )
                 binding.resultView.visibility = View.VISIBLE
-            }
-            else -> {
-                println("0h oh... wrong state machine")
             }
         }
     }
