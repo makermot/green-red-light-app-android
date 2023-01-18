@@ -135,7 +135,11 @@ class MySpaceFragment : Fragment() {
                     val maxFrequency: String = binding.changeFrequencyMax.text.toString()
                     val minFrequencyInt: Int = minFrequency.toInt()
                     val maxFrequencyInt: Int = maxFrequency.toInt()
-                    if (minFrequency <= maxFrequency){
+                    print("max frequency is: ")
+                    println(maxFrequencyInt)
+                    print("min frequency is :")
+                    println(minFrequencyInt)
+                    if (minFrequencyInt <= maxFrequencyInt){
                         viewModel.changeFrequency(minFrequencyInt, maxFrequencyInt)
                         Toast.makeText(context,"Frequency changed", Toast.LENGTH_SHORT).show()
                     }

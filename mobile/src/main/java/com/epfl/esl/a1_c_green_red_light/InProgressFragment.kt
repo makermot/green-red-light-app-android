@@ -174,15 +174,13 @@ class InProgressFragment : Fragment(), OnMapReadyCallback {
 
         // find random period
         rand = findRand(minFrequency, maxFrequency)
-        //print("je print le rand : ")
-        //println(rand)
 
         // Launch timer with random period
         timerRace = Timer()
         timerRace!!.schedule(timerTask {
             //println("Timer Race")
 
-            if(viewModel.cheating == false){
+            if(!viewModel.cheating){
                 lightColor = if (lightColor == "red"){"green"} else {"red"}
                 val dataClient: DataClient = Wearable.getDataClient(activity as AppCompatActivity)
                 viewModel.sendCommandToWear(dataClient, lightColor)
