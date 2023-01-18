@@ -20,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:textSize="24sp"
-            android:hint="Friend's usernme"
+            android:hint="Friend's username"
             android:gravity="center"
             android:inputType="textPersonName" />
 
