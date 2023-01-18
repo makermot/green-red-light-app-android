@@ -124,14 +124,26 @@ class MySpaceFragment : Fragment() {
                 if(binding.changeFrequencyMin.text.toString() != "Min" &&
                     binding.changeFrequencyMax.text.toString() != "Max" &&
                     binding.changeFrequencyMin.text.toString() != "" &&
-                    binding.changeFrequencyMin.text.toString() != ""){
-                    viewModel.changeFrequency(binding.changeFrequencyMin.text.toString(),
-                        binding.changeFrequencyMax.text.toString())
-                    Toast.makeText(context,"Frequency changed", Toast.LENGTH_SHORT).show()
+                    binding.changeFrequencyMax.text.toString() != "" &&
+                    binding.changeFrequencyMin.text.toString() != null &&
+                    binding.changeFrequencyMax.text.toString() != null){
+                    val minFrequency: String = binding.changeFrequencyMin.text.toString()
+                    val maxFrequency: String = binding.changeFrequencyMax.text.toString()
+                    val minFrequencyInt: Int = minFrequency.toInt()
+                    val maxFrequencyInt: Int = maxFrequency.toInt()
+                    if (minFrequency <= maxFrequency){
+                        viewModel.changeFrequency(minFrequencyInt, maxFrequencyInt)
+                        Toast.makeText(context,"Frequency changed", Toast.LENGTH_SHORT).show()
+                        println("User is alright")
+                    }
+                    else{
+                        Toast.makeText(context,"Are you stupid? I'm genuinely concerned", Toast.LENGTH_SHORT).show()
+                        println("User is stupid")
+                    }
                 }
                 else{
-                    println("no number entered for min and max")
-                    Toast.makeText(context,"Enter min and max", Toast.LENGTH_SHORT).show()
+                    println("Missing value for min and/or max")
+                    Toast.makeText(context,"Missing value for min and/or max", Toast.LENGTH_SHORT).show()
                 }
             }
         }

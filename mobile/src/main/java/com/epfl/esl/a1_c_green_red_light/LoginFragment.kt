@@ -59,8 +59,6 @@ class LoginFragment : Fragment() {
         binding.SignUp.setOnClickListener { view: View ->
 
             if (checkForInternet(context)) {
-                Toast.makeText(context, "Internet connection is on", Toast.LENGTH_SHORT).show()
-            } else {
                 Toast.makeText(context, "Internet connection is off, please connect your device", Toast.LENGTH_SHORT).show()
             }
 
